@@ -1,10 +1,30 @@
 "use client";
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { signInWithGoogle } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithGoogle();
+      router.push('/dashboard'); // Redirect to dashboard after successful login
+    } catch (error) {
+      console.error('Login error:', error);
+      // You can add toast notification here
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Login Form */}
@@ -33,13 +53,18 @@ const Login = () => {
               <Input 
                 type="email"
                 placeholder="Email or username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 bg-gray-50 border-gray-200 rounded-lg px-4 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
             {/* Continue Button */}
-            <Button className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200">
-              Continue
+            <Button 
+              className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200"
+              disabled={!email || loading}
+            >
+              {loading ? 'Processing...' : 'Continue'}
             </Button>
 
             {/* OR Divider */}
@@ -55,9 +80,16 @@ const Login = () => {
             {/* Social Login Buttons */}
             <div className="space-y-3">
               {/* Google */}
-              <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
+              <Button 
+                variant="outline" 
+                className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
                 <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold">G</div>
-                <span className="text-gray-700 font-medium text-base">Continue with Google</span>
+                <span className="text-gray-700 font-medium text-base">
+                  {loading ? 'Signing in...' : 'Continue with Google'}
+                </span>
               </Button>
 
               {/* Apple 

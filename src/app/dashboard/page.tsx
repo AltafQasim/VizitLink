@@ -1,10 +1,13 @@
 import ProtectedRoute from '@/components/ProtectedRoute';
-import DashboardContent from '@/components/DashboardContent';
+import { DashboardProvider } from '@/context/DashboardContext';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <DashboardContent />
+      <DashboardProvider>
+        <DashboardLayout />
+      </DashboardProvider>
     </ProtectedRoute>
   );
 }

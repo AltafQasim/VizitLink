@@ -3,8 +3,32 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const Login = () => {
+  const { user, signInWithGoogle, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && !loading) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  const handleGoogleSignIn = async () => {
+    await signInWithGoogle();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Login Form */}
@@ -55,7 +79,11 @@ const Login = () => {
             {/* Social Login Buttons */}
             <div className="space-y-3">
               {/* Google */}
-              <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
+              <Button 
+                onClick={handleGoogleSignIn}
+                variant="outline" 
+                className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200"
+              >
                 <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold">G</div>
                 <span className="text-gray-700 font-medium text-base">Continue with Google</span>
               </Button>

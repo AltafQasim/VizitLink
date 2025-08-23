@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
 const StickyNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,16 +75,36 @@ const StickyNavbar = () => {
 
             {/* Auth Buttons */}
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
-                  Log in
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6" style={{ fontSize: '16px' }}>
-                  Sign up
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button 
+                    onClick={signOut}
+                    variant="ghost" 
+                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" 
+                    style={{ fontSize: '16px' }}
+                  >
+                    Log out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
+                      Log in
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6" style={{ fontSize: '16px' }}>
+                      Sign up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -50,6 +50,41 @@ const socialIconsMap = {
   default: FaGlobe,
 };
 
+const socialColorsMap = {
+  instagram: '#E4405F',
+  youtube: '#FF0000',
+  twitter: '#1DA1F2',
+  facebook: '#1877F2',
+  linkedin: '#0A66C2',
+  threads: '#000000',
+  tiktok: '#000000',
+  whatsapp: '#25D366',
+  snapchat: '#FFFC00',
+  pinterest: '#E60023',
+  reddit: '#FF4500',
+  github: '#181717',
+  dribbble: '#EA4C89',
+  behance: '#0057FF',
+  medium: '#000000',
+  spotify: '#1DB954',
+  soundcloud: '#FF8800',
+  twitch: '#9146FF',
+  discord: '#5865F2',
+  telegram: '#2CA5E0',
+  email: '#EA4335',
+  onlyfans: '#00B0FF',
+  substack: '#FF6719',
+  buymeacoffee: '#FFDD00',
+  patreon: '#FF424D',
+  etsy: '#F16521',
+  amazon: '#FF9900',
+  shopify: '#7AB55C',
+  gumroad: '#FF9000',
+  linktree: '#00DA00',
+  website: '#4A5568',
+  default: '#4A5568',
+};
+
 export default function LivePreview() {
   const { data } = useDashboard();
 
@@ -113,7 +148,10 @@ export default function LivePreview() {
                     >
                       <div className="flex items-center space-x-3">
                         {IconComponent ? (
-                          <IconComponent className="w-5 h-5" />
+                          <IconComponent 
+                            className="w-5 h-5" 
+                            style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                          />
                         ) : (
                           <span className="text-lg">{link.icon}</span>
                         )}
@@ -132,19 +170,38 @@ export default function LivePreview() {
                   <h3 className="font-semibold text-gray-900">Shop</h3>
                   <button className="text-sm text-purple-600">View all</button>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
-                      <span className="text-lg">🛍️</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">See Full Shop</p>
-                      <p className="text-sm text-gray-500">
-                        {data.products.filter(p => p.active).length} Product
-                        {data.products.filter(p => p.active).length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                  </div>
+                <div className="space-y-3">
+                  {data.products
+                    .filter(p => p.active)
+                    .slice(0, 3)
+                    .map((product) => (
+                      <motion.a
+                        key={product.id}
+                        href={product.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block bg-purple-50 rounded-lg p-3 hover:bg-purple-100 transition-colors"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">{product.title}</p>
+                            <p className="text-sm text-gray-500">{product.brand}</p>
+                            <p className="text-sm font-semibold text-purple-600">
+                              ${product.price?.toFixed(2) || '0.00'}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.a>
+                    ))}
                 </div>
               </div>
             )}
@@ -164,7 +221,10 @@ export default function LivePreview() {
                     rel="noopener noreferrer"
                     className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
                   >
-                    <IconComponent className="w-5 h-5" />
+                    <IconComponent 
+                      className="w-5 h-5" 
+                      style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                    />
                   </Link>
                 )})}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { saveToBackend, loadFromBackend } from '../lib/dashboardStorage';
 
 const DashboardContext = createContext(undefined);
@@ -27,13 +27,13 @@ export function DashboardProvider({ children }) {
     loadData();
   }, []);
 
-  const updateData = (updates) => {
+  const updateData = useCallback((updates) => {
     if (data) {
       setData({ ...data, ...updates });
     }
-  };
+  }, [data]);
 
-  const saveChanges = async () => {
+  const saveChanges = useCallback(async () => {
     if (data) {
       try {
         await saveToBackend(data);
@@ -42,13 +42,13 @@ export function DashboardProvider({ children }) {
         console.error('Error saving data:', error);
       }
     }
-  };
+  }, [data]);
 
-  const resetChanges = () => {
+  const resetChanges = useCallback(() => {
     if (originalData) {
       setData(originalData);
     }
-  };
+  }, [originalData]);
 
   const hasUnsavedChanges = data && originalData && JSON.stringify(data) !== JSON.stringify(originalData);
 

@@ -6,6 +6,16 @@ import { FiMoreHorizontal } from "react-icons/fi";
 import { BsShop } from "react-icons/bs";
 import { MdOutlineAdd } from "react-icons/md";
 
+const socialColorsMap = {
+  instagram: '#E4405F',
+  facebook: '#1877F2',
+  email: '#EA4335',
+  whatsapp: '#25D366',
+  tiktok: '#000000',
+  linkedin: '#0A66C2',
+  snapchat: '#FFFC00',
+};
+
 export default function DashboardContent() {
   const { user } = useAuth();
 
@@ -82,11 +92,31 @@ export default function DashboardContent() {
               <span className="text-gray-500 text-sm">Add bio</span>
               {/* Socials */}
               <div className="flex items-center gap-3 mt-3">
-                <FaInstagram className="text-gray-600 hover:text-purple-600 cursor-pointer" size={20} />
-                <FaFacebook className="text-gray-600 hover:text-blue-600 cursor-pointer" size={20} />
-                <FaEnvelope className="text-gray-600 hover:text-red-500 cursor-pointer" size={20} />
-                <FaWhatsapp className="text-gray-600 hover:text-green-500 cursor-pointer" size={20} />
-                <FaTiktok className="text-gray-600 hover:text-black cursor-pointer" size={20} />
+                <FaInstagram 
+                  className="hover:scale-110 cursor-pointer transition-transform" 
+                  size={20} 
+                  style={{ color: socialColorsMap.instagram }}
+                />
+                <FaFacebook 
+                  className="hover:scale-110 cursor-pointer transition-transform" 
+                  size={20} 
+                  style={{ color: socialColorsMap.facebook }}
+                />
+                <FaEnvelope 
+                  className="hover:scale-110 cursor-pointer transition-transform" 
+                  size={20} 
+                  style={{ color: socialColorsMap.email }}
+                />
+                <FaWhatsapp 
+                  className="hover:scale-110 cursor-pointer transition-transform" 
+                  size={20} 
+                  style={{ color: socialColorsMap.whatsapp }}
+                />
+                <FaTiktok 
+                  className="hover:scale-110 cursor-pointer transition-transform" 
+                  size={20} 
+                  style={{ color: socialColorsMap.tiktok }}
+                />
                 <button className="flex items-center text-gray-600 hover:text-gray-900 px-2">
                   <FiMoreHorizontal size={20} />
                   <span className="ml-1 text-xs">3 more</span>
@@ -158,13 +188,41 @@ export default function DashboardContent() {
                 </div>
                 {/* Socials */}
                 <div className="flex flex-wrap justify-center gap-2 mt-2">
-                  <FaInstagram className="text-white hover:text-purple-400 cursor-pointer" size={18} />
-                  <FaFacebook className="text-white hover:text-blue-400 cursor-pointer" size={18} />
-                  <FaTiktok className="text-white hover:text-gray-400 cursor-pointer" size={18} />
-                  <FaWhatsapp className="text-white hover:text-green-400 cursor-pointer" size={18} />
-                  <FaLinkedin className="text-white hover:text-blue-400 cursor-pointer" size={18} />
-                  <FaEnvelope className="text-white hover:text-red-400 cursor-pointer" size={18} />
-                  <FaSnapchatGhost className="text-white hover:text-yellow-400 cursor-pointer" size={18} />
+                  <FaInstagram 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.instagram }}
+                  />
+                  <FaFacebook 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.facebook }}
+                  />
+                  <FaTiktok 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.tiktok }}
+                  />
+                  <FaWhatsapp 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.whatsapp }}
+                  />
+                  <FaLinkedin 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.linkedin }}
+                  />
+                  <FaEnvelope 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.email }}
+                  />
+                  <FaSnapchatGhost 
+                    className="hover:scale-110 cursor-pointer transition-transform" 
+                    size={18} 
+                    style={{ color: socialColorsMap.snapchat }}
+                  />
                 </div>
               </div>
               {/* Hide logo */}

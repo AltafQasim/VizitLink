@@ -75,6 +75,41 @@ const socialIconsMap = {
   default: FaGlobe,
 };
 
+const socialColorsMap = {
+  instagram: '#E4405F',
+  youtube: '#FF0000',
+  twitter: '#1DA1F2',
+  facebook: '#1877F2',
+  linkedin: '#0A66C2',
+  threads: '#000000',
+  tiktok: '#000000',
+  whatsapp: '#25D366',
+  snapchat: '#FFFC00',
+  pinterest: '#E60023',
+  reddit: '#FF4500',
+  github: '#181717',
+  dribbble: '#EA4C89',
+  behance: '#0057FF',
+  medium: '#000000',
+  spotify: '#1DB954',
+  soundcloud: '#FF8800',
+  twitch: '#9146FF',
+  discord: '#5865F2',
+  telegram: '#2CA5E0',
+  email: '#EA4335',
+  onlyfans: '#00B0FF',
+  substack: '#FF6719',
+  buymeacoffee: '#FFDD00',
+  patreon: '#FF424D',
+  etsy: '#F16521',
+  amazon: '#FF9900',
+  shopify: '#7AB55C',
+  gumroad: '#FF9000',
+  linktree: '#00DA00',
+  website: '#4A5568',
+  default: '#4A5568',
+};
+
 // Sortable Link Item Component
 function SortableLinkItem({ 
   link, 
@@ -120,7 +155,10 @@ function SortableLinkItem({
           </div>
           
           <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-            <IconComponent className="w-5 h-5 text-gray-600" />
+            <IconComponent 
+              className="w-5 h-5" 
+              style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+            />
           </div>
           
           <div>

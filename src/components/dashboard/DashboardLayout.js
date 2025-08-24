@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import LivePreview from './LivePreview';
 import MobilePreview from './MobilePreview';
 import LinksTab from './tabs/LinksTab';
+import ProductsTab from './tabs/ProductsTab';
 import { useDashboard } from '../../context/DashboardContext';
 
 export default function DashboardLayout() {
@@ -17,17 +18,7 @@ export default function DashboardLayout() {
       case 'links':
         return <LinksTab />;
       case 'shop':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Shop</h2>
-              <p className="text-gray-600">Manage your products and store</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-gray-500">Shop management coming soon...</p>
-            </div>
-          </div>
-        );
+        return <ProductsTab />;
       case 'design':
         return (
           <div className="space-y-6">

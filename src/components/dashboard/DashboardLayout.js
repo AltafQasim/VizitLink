@@ -10,6 +10,7 @@ import LinksTab from './tabs/LinksTab';
 import ProductsTab from './tabs/ProductsTab';
 import { useDashboard } from '../../context/DashboardContext';
 import { useEffect, useState } from 'react';
+import DesignTab from './tabs/DesignTab';
 
 export default function DashboardLayout() {
   const { activeTab, setActiveTab } = useDashboard();
@@ -51,17 +52,7 @@ export default function DashboardLayout() {
       case 'shop':
         return <ProductsTab />;
       case 'design':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Design</h2>
-              <p className="text-gray-600">Customize your VizitLink appearance</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-gray-500">Design customization coming soon...</p>
-            </div>
-          </div>
-        );
+        return <DesignTab />;
       case 'audience':
         return (
           <div className="space-y-6">
@@ -133,10 +124,11 @@ export default function DashboardLayout() {
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={false}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="p-4 lg:p-8"
             >
               {renderTabContent()}
             </motion.div>

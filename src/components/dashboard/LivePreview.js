@@ -95,7 +95,7 @@ export default function LivePreview() {
     <motion.div 
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex w-96 bg-gray-50 border-l border-gray-200 p-6 flex-col"
+      className="hidden lg:flex w-[420px] bg-gray-50 border-l border-gray-200 p-6 flex-col"
     >
       <div className="mb-6">
         <h3 className="font-semibold text-gray-900 mb-2">Live Preview</h3>

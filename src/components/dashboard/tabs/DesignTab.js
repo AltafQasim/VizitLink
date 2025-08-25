@@ -1,0 +1,651 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap } from "lucide-react";
+import { Button } from "../../ui/button";
+import { Switch } from "../../ui/switch";
+import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
+import { Card } from "../../ui/card";
+
+const DesignTab = () => {
+    const [activeTab, setActiveTab] = useState("Customizable");
+    const [hideLinktreeFooter, setHideLinktreeFooter] = useState(false);
+    const [selectedTheme, setSelectedTheme] = useState("Blocks");
+    const [selectedWallpaper, setSelectedWallpaper] = useState("Hero");
+    const [selectedStyle, setSelectedStyle] = useState("Minimal");
+    const [activeStyleTab, setActiveStyleTab] = useState("Presets");
+    const [selectedFont, setSelectedFont] = useState("Inter");
+
+    const themes = [
+        { name: "Air", preview: "bg-gray-100", textColor: "text-black", selected: selectedTheme === "Air", type: "gradient" },
+        { name: "Blocks", preview: "bg-gradient-to-br from-purple-500 to-pink-500", textColor: "text-white", selected: selectedTheme === "Blocks", type: "gradient" },
+        { name: "Bloom", preview: "bg-gradient-to-br from-red-500 to-blue-600", textColor: "text-white", selected: selectedTheme === "Bloom", isPro: true, type: "gradient" },
+        { name: "Breeze", preview: "bg-gradient-to-br from-purple-400 to-pink-400", textColor: "text-white", selected: selectedTheme === "Breeze", isPro: true, type: "gradient" },
+        { name: "Lake", preview: "bg-slate-800", textColor: "text-white", selected: selectedTheme === "Lake", type: "solid" },
+        { name: "Mineral", preview: "bg-orange-100", textColor: "text-black", selected: selectedTheme === "Mineral", type: "solid" },
+        { name: "Ocean", preview: "bg-blue-100", textColor: "text-black", selected: selectedTheme === "Ocean", type: "solid" },
+        { name: "Sunset", preview: "bg-gradient-to-br from-yellow-500 to-red-500", textColor: "text-white", selected: selectedTheme === "Sunset", type: "gradient" },
+        { name: "Winter", preview: "bg-gradient-to-br from-blue-200 to-blue-400", textColor: "text-black", selected: selectedTheme === "Winter", type: "gradient" },
+        { name: "Spring", preview: "bg-gradient-to-br from-green-200 to-green-400", textColor: "text-black", selected: selectedTheme === "Spring", type: "gradient" },
+        { name: "Summer", preview: "bg-gradient-to-br from-yellow-200 to-yellow-400", textColor: "text-black", selected: selectedTheme === "Summer", type: "gradient" },
+        { name: "Autumn", preview: "bg-gradient-to-br from-orange-200 to-orange-400", textColor: "text-black", selected: selectedTheme === "Autumn", type: "gradient" },
+    ];
+
+    const curatedThemes = [
+        { name: "Midnight", preview: "bg-gradient-to-br from-gray-900 to-black", textColor: "text-white", selected: selectedTheme === "Midnight", type: "gradient" },
+        { name: "Aurora", preview: "bg-gradient-to-br from-green-400 to-blue-500", textColor: "text-white", selected: selectedTheme === "Aurora", isPro: true, type: "gradient" },
+        { name: "Coral", preview: "bg-gradient-to-br from-pink-400 to-orange-400", textColor: "text-white", selected: selectedTheme === "Coral", type: "gradient" },
+        { name: "Forest", preview: "bg-gradient-to-br from-green-600 to-green-800", textColor: "text-white", selected: selectedTheme === "Forest", type: "gradient" },
+        { name: "Lavender", preview: "bg-gradient-to-br from-purple-300 to-pink-300", textColor: "text-black", selected: selectedTheme === "Lavender", type: "gradient" },
+        { name: "Sage", preview: "bg-gradient-to-br from-green-200 to-blue-200", textColor: "text-black", selected: selectedTheme === "Sage", type: "gradient" },
+        { name: "Rose", preview: "bg-gradient-to-br from-rose-400 to-pink-500", textColor: "text-white", selected: selectedTheme === "Rose", isPro: true, type: "gradient" },
+        { name: "Sky", preview: "bg-gradient-to-br from-blue-300 to-cyan-400", textColor: "text-black", selected: selectedTheme === "Sky", type: "gradient" },
+        { name: "Amber", preview: "bg-gradient-to-br from-amber-400 to-orange-500", textColor: "text-white", selected: selectedTheme === "Amber", type: "gradient" },
+        { name: "Indigo", preview: "bg-gradient-to-br from-indigo-500 to-purple-600", textColor: "text-white", selected: selectedTheme === "Indigo", type: "gradient" },
+        { name: "Teal", preview: "bg-gradient-to-br from-teal-400 to-cyan-500", textColor: "text-white", selected: selectedTheme === "Teal", type: "gradient" },
+        { name: "Ruby", preview: "bg-gradient-to-br from-red-500 to-pink-600", textColor: "text-white", selected: selectedTheme === "Ruby", isPro: true, type: "gradient" },
+    ];
+
+    const wallpapers = [
+        { name: "Hero", preview: "bg-gradient-to-br from-blue-900 to-teal-400", icon: true, type: "gradient" },
+        { name: "Fill", preview: "bg-gray-100", icon: true, type: "solid" },
+        { name: "Gradient", preview: "bg-gradient-to-br from-gray-400 to-gray-600", icon: true, type: "gradient" },
+        { name: "Blur", preview: "bg-gradient-to-br from-blue-200 to-purple-200", icon: true, type: "blur" },
+        { name: "Pattern", preview: "bg-gradient-to-br from-blue-200 to-gray-300", icon: true, type: "pattern" },
+        { name: "Image", preview: "bg-gradient-to-br from-orange-500 via-red-500 to-black", icon: true, type: "image" },
+        { name: "Video", preview: "bg-gradient-to-br from-gray-600 to-gray-800", icon: true, isPro: true, type: "video" },
+    ];
+
+    const colorOptions = [
+        "bg-teal-500", "bg-blue-600", "bg-cyan-500", "bg-gray-100", "bg-black"
+    ];
+
+    const buttonStyles = [
+        { name: "Minimal", style: "border border-gray-400 bg-transparent text-black rounded-lg" },
+        { name: "Classic", style: "bg-gray-100 text-black rounded-lg shadow-sm" },
+        { name: "Unique", style: "bg-blue-50 text-gray-700 rounded-lg border border-blue-200" },
+        { name: "Zen", style: "bg-white text-black rounded-full shadow-sm" },
+        { name: "Simple", style: "bg-gray-50 text-black rounded-lg" },
+        { name: "Precise", style: "bg-transparent text-black rounded border border-gray-400" },
+        { name: "Retro", style: "bg-black text-white rounded-full border-2 border-black" },
+        { name: "Modern", style: "bg-gray-100 text-black rounded-lg" },
+        { name: "Industrial", style: "bg-transparent text-black rounded border border-gray-600" },
+    ];
+
+    const fonts = [
+        { name: "Inter", family: "Inter", weight: "400", selected: selectedFont === "Inter" },
+        { name: "Roboto", family: "Roboto", weight: "400", selected: selectedFont === "Roboto" },
+        { name: "Open Sans", family: "Open Sans", weight: "400", selected: selectedFont === "Open Sans" },
+        { name: "Lato", family: "Lato", weight: "400", selected: selectedFont === "Lato" },
+        { name: "Poppins", family: "Poppins", weight: "500", selected: selectedFont === "Poppins" },
+        { name: "Montserrat", family: "Montserrat", weight: "500", selected: selectedFont === "Montserrat" },
+        { name: "Raleway", family: "Raleway", weight: "400", selected: selectedFont === "Raleway" },
+        { name: "Nunito", family: "Nunito", weight: "400", selected: selectedFont === "Nunito" },
+        { name: "Ubuntu", family: "Ubuntu", weight: "400", selected: selectedFont === "Ubuntu" },
+        { name: "Playfair Display", family: "Playfair Display", weight: "400", selected: selectedFont === "Playfair Display" },
+        { name: "Merriweather", family: "Merriweather", weight: "400", selected: selectedFont === "Merriweather" },
+        { name: "Source Sans Pro", family: "Source Sans Pro", weight: "400", selected: selectedFont === "Source Sans Pro" },
+    ];
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="max-w-4xl mx-auto space-y-12">
+
+                {/* Profile Section */}
+                <section>
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Profile</h1>
+                        <p className="text-gray-600">Customize your profile appearance</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+                            <Avatar className="h-20 w-20">
+                                <AvatarImage src="/lovable-uploads/bcf6d711-ef47-406e-893f-23ca9cb81b9a.png" />
+                                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-600 text-white text-2xl font-bold">
+                                    A
+                                </AvatarFallback>
+                            </Avatar>
+                            <Button variant="outline" size="sm" className="gap-2">
+                                <Edit className="h-4 w-4" />
+                                Edit
+                            </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                    <Star className="h-4 w-4 text-gray-500" />
+                                    <span className="text-sm text-gray-700">Hide Linktree footer</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Zap className="h-3 w-3 text-gray-400" />
+                                    <Switch
+                                        checked={hideLinktreeFooter}
+                                        onCheckedChange={setHideLinktreeFooter}
+                                    />
+                                </div>
+                            </div>
+
+                            <button className="flex items-center justify-between w-full py-3 px-4 bg-gray-50 rounded-lg text-left hover:bg-gray-100 transition-colors">
+                                <div className="flex items-center gap-2">
+                                    <Share className="h-4 w-4 text-gray-500" />
+                                    <span className="text-sm text-gray-700">Sharing preview</span>
+                                </div>
+                                <ChevronRight className="h-4 w-4 text-gray-400" />
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Theme Section */}
+                <section>
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Theme</h2>
+                        <p className="text-gray-600">Choose your theme and color scheme</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex gap-4 border-b border-gray-200 mb-6">
+                            {["Customizable", "Curated"].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`pb-3 px-1 font-medium transition-colors relative ${activeTab === tab
+                                            ? "text-gray-900 border-b-2 border-gray-900"
+                                            : "text-gray-500 hover:text-gray-700"
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {activeTab === "Customizable" && (
+                                <>
+                                    {themes.map((theme) => (
+                                        <Card
+                                            key={theme.name}
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                                theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                            }`}
+                                            onClick={() => setSelectedTheme(theme.name)}
+                                        >
+                                            <div className="aspect-[3/4] p-4">
+                                                {/* Main Preview Area */}
+                                                <div className={`w-full h-24 rounded-xl mb-3 flex items-center justify-center text-2xl font-bold ${theme.preview} ${theme.textColor} relative overflow-hidden`}>
+                                                    {/* Content Type Indicator */}
+                                                    {theme.type === "gradient" && (
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
+                                                    )}
+                                                    {theme.type === "solid" && (
+                                                        <div className="absolute inset-0 bg-white/10 rounded-xl"></div>
+                                                    )}
+                                                    
+                                                    {/* Theme-specific Icons */}
+                                                    {theme.name === "Air" && <span className="text-4xl">💨</span>}
+                                                    {theme.name === "Blocks" && <span className="text-4xl">🧱</span>}
+                                                    {theme.name === "Bloom" && <span className="text-4xl">🌸</span>}
+                                                    {theme.name === "Breeze" && <span className="text-4xl">🌬️</span>}
+                                                    {theme.name === "Lake" && <span className="text-4xl">🏞️</span>}
+                                                    {theme.name === "Mineral" && <span className="text-4xl">💎</span>}
+                                                    {theme.name === "Ocean" && <span className="text-4xl">🌊</span>}
+                                                    {theme.name === "Sunset" && <span className="text-4xl">🌅</span>}
+                                                    {theme.name === "Winter" && <span className="text-4xl">❄️</span>}
+                                                    {theme.name === "Spring" && <span className="text-4xl">🌱</span>}
+                                                    {theme.name === "Summer" && <span className="text-4xl">☀️</span>}
+                                                    {theme.name === "Autumn" && <span className="text-4xl">🍂</span>}
+                                                </div>
+                                                
+                                                {/* Secondary Preview */}
+                                                <div className={`w-full h-8 rounded-lg ${theme.preview} mb-3 relative overflow-hidden`}>
+                                                    {theme.type === "gradient" && (
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5"></div>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Theme Name */}
+                                                <p className="text-sm font-semibold text-center text-gray-800">{theme.name}</p>
+                                                
+                                                {/* Type Badge */}
+                                                <div className="mt-2 flex justify-center">
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                                        theme.type === "gradient" ? "bg-purple-100 text-purple-700" :
+                                                        theme.type === "solid" ? "bg-gray-100 text-gray-700" :
+                                                        "bg-blue-100 text-blue-700"
+                                                    }`}>
+                                                        {theme.type}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Pro Badge */}
+                                            {theme.isPro && (
+                                                <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                                                    <Zap className="h-3 w-3" />
+                                                    Pro
+                                                </div>
+                                            )}
+                                            
+                                            {/* Selected Indicator */}
+                                            {theme.selected && (
+                                                <div className="absolute top-2 right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </Card>
+                                    ))}
+                                </>
+                            )}
+                            {activeTab === "Curated" && (
+                                <>
+                                    {curatedThemes.map((theme) => (
+                                        <Card
+                                            key={theme.name}
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                                theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                            }`}
+                                            onClick={() => setSelectedTheme(theme.name)}
+                                        >
+                                            <div className="aspect-[3/4] p-4">
+                                                {/* Main Preview Area */}
+                                                <div className={`w-full h-24 rounded-xl mb-3 flex items-center justify-center text-2xl font-bold ${theme.preview} ${theme.textColor} relative overflow-hidden`}>
+                                                    {/* Content Type Indicator */}
+                                                    {theme.type === "gradient" && (
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
+                                                    )}
+                                                    {theme.type === "solid" && (
+                                                        <div className="absolute inset-0 bg-white/10 rounded-xl"></div>
+                                                    )}
+                                                    
+                                                    {/* Theme-specific Icons */}
+                                                    {theme.name === "Midnight" && <span className="text-4xl">🌙</span>}
+                                                    {theme.name === "Aurora" && <span className="text-4xl">🌌</span>}
+                                                    {theme.name === "Coral" && <span className="text-4xl">🐟</span>}
+                                                    {theme.name === "Forest" && <span className="text-4xl">🌲</span>}
+                                                    {theme.name === "Lavender" && <span className="text-4xl">💐</span>}
+                                                    {theme.name === "Sage" && <span className="text-4xl">🌿</span>}
+                                                    {theme.name === "Rose" && <span className="text-4xl">🌹</span>}
+                                                    {theme.name === "Sky" && <span className="text-4xl">🌤️</span>}
+                                                    {theme.name === "Amber" && <span className="text-4xl">🔆</span>}
+                                                    {theme.name === "Indigo" && <span className="text-4xl">💙</span>}
+                                                    {theme.name === "Teal" && <span className="text-4xl">💧</span>}
+                                                    {theme.name === "Ruby" && <span className="text-4xl">💎</span>}
+                                                </div>
+                                                
+                                                {/* Secondary Preview */}
+                                                <div className={`w-full h-8 rounded-lg ${theme.preview} mb-3 relative overflow-hidden`}>
+                                                    {theme.type === "gradient" && (
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5"></div>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Theme Name */}
+                                                <p className="text-sm font-semibold text-center text-gray-800">{theme.name}</p>
+                                                
+                                                {/* Type Badge */}
+                                                <div className="mt-2 flex justify-center">
+                                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                                        theme.type === "gradient" ? "bg-purple-100 text-purple-700" :
+                                                        theme.type === "solid" ? "bg-gray-100 text-gray-700" :
+                                                        "bg-blue-100 text-blue-700"
+                                                    }`}>
+                                                        {theme.type}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Pro Badge */}
+                                            {theme.isPro && (
+                                                <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                                                    <Zap className="h-3 w-3" />
+                                                    Pro
+                                                </div>
+                                            )}
+                                            
+                                            {/* Selected Indicator */}
+                                            {theme.selected && (
+                                                <div className="absolute top-2 right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                        </Card>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Wallpaper Section */}
+                <section>
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Wallpaper</h2>
+                        <p className="text-gray-600">Set your background and colors</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                            {wallpapers.map((wallpaper) => (
+                                <Card
+                                    key={wallpaper.name}
+                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                        selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                    }`}
+                                    onClick={() => setSelectedWallpaper(wallpaper.name)}
+                                >
+                                    <div className="aspect-[3/4] p-3">
+                                        {/* Main Preview Area */}
+                                        <div className={`w-full h-20 rounded-xl mb-2 flex items-center justify-center relative overflow-hidden ${wallpaper.preview}`}>
+                                            {/* Content Type Overlay */}
+                                            {wallpaper.type === "gradient" && (
+                                                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
+                                            )}
+                                            {wallpaper.type === "blur" && (
+                                                <div className="absolute inset-0 backdrop-blur-sm bg-white/20"></div>
+                                            )}
+                                            {wallpaper.type === "pattern" && (
+                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+                                            )}
+                                            
+                                            {/* Content-specific Icons */}
+                                            {wallpaper.type === "image" && (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                                        <span className="text-white text-lg">📷</span>
+                                                    </div>
+                                                    <span className="text-white text-sm font-medium">Image</span>
+                                                </div>
+                                            )}
+                                            {wallpaper.type === "video" && (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                                        <span className="text-white text-lg">🎥</span>
+                                                    </div>
+                                                    <span className="text-white text-sm font-medium">Video</span>
+                                                </div>
+                                            )}
+                                            {wallpaper.type === "gradient" && (
+                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                    <div className="w-3 h-3 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                            {wallpaper.type === "solid" && (
+                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                    <div className="w-3 h-3 bg-white rounded-full"></div>
+                                                </div>
+                                            )}
+                                            {wallpaper.type === "blur" && (
+                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">✨</span>
+                                                </div>
+                                            )}
+                                            {wallpaper.type === "pattern" && (
+                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">🔲</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Wallpaper Name */}
+                                        <p className="text-xs font-semibold text-center text-gray-800 mb-2">{wallpaper.name}</p>
+                                        
+                                        {/* Type Badge */}
+                                        <div className="flex justify-center">
+                                            <span className={`text-xs px-2 py-1 rounded-full ${
+                                                wallpaper.type === "image" ? "bg-blue-100 text-blue-700" :
+                                                wallpaper.type === "video" ? "bg-red-100 text-red-700" :
+                                                wallpaper.type === "gradient" ? "bg-purple-100 text-purple-700" :
+                                                wallpaper.type === "solid" ? "bg-gray-100 text-gray-700" :
+                                                wallpaper.type === "blur" ? "bg-indigo-100 text-indigo-700" :
+                                                "bg-orange-100 text-orange-700"
+                                            }`}>
+                                                {wallpaper.type}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Pro Badge */}
+                                    {wallpaper.isPro && (
+                                        <div className="absolute top-1 right-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full shadow-lg">
+                                            Pro
+                                        </div>
+                                    )}
+                                    
+                                    {/* Selected Indicator */}
+                                    {selectedWallpaper === wallpaper.name && (
+                                        <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                        </div>
+                                    )}
+                                </Card>
+                            ))}
+                        </div>
+
+                        <div>
+                            <h3 className="text-lg font-semibold mb-4">Color</h3>
+                            <div className="flex gap-3 mb-4">
+                                <div className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center cursor-pointer">
+                                    <div className="w-6 h-6 bg-gradient-to-br from-gray-300 to-gray-400 rounded"></div>
+                                </div>
+                                {colorOptions.map((color, index) => (
+                                    <div
+                                        key={index}
+                                        className={`w-10 h-10 ${color} rounded-lg cursor-pointer border border-gray-200`}
+                                    ></div>
+                                ))}
+                            </div>
+                            <p className="text-sm text-gray-500">Suggested colors are based on your profile image</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Style Section */}
+                <section>
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Style</h2>
+                        <p className="text-gray-600">Customize buttons and typography</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex gap-6 border-b border-gray-200 mb-6">
+                            {["Presets", "Text", "Buttons"].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveStyleTab(tab)}
+                                    className={`pb-3 px-1 font-medium transition-colors relative ${activeStyleTab === tab
+                                            ? "text-gray-900 border-b-2 border-gray-900"
+                                            : "text-gray-500 hover:text-gray-700"
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+
+                        {activeStyleTab === "Presets" && (
+                            <div>
+                                <h3 className="text-lg font-semibold mb-4">Button and font</h3>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {buttonStyles.map((style) => (
+                                        <Card
+                                            key={style.name}
+                                            className={`cursor-pointer transition-all hover:scale-105 ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
+                                                }`}
+                                            onClick={() => setSelectedStyle(style.name)}
+                                        >
+                                            <div className="p-4 flex flex-col items-center gap-3">
+                                                <div className={`px-4 py-2 text-sm ${style.style}`}>
+                                                    Button
+                                                </div>
+                                                <p className="text-sm font-medium text-center">{style.name}</p>
+                                            </div>
+                                            {(style.name === "Retro" || style.name === "Modern") && (
+                                                <div className="absolute top-2 right-2 w-5 h-5 bg-gray-400 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">?</span>
+                                                </div>
+                                            )}
+                                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeStyleTab === "Text" && (
+                            <div className="space-y-8">
+                                {/* Font Selection */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Font Family</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        {fonts.map((font) => (
+                                            <Card
+                                                key={font.name}
+                                                className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                                    selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                                }`}
+                                                onClick={() => setSelectedFont(font.name)}
+                                            >
+                                                <div className="p-4 flex flex-col items-center gap-3">
+                                                    {/* Font Preview */}
+                                                    <div className="w-full h-16 bg-gray-50 rounded-lg flex items-center justify-center p-2">
+                                                        <span 
+                                                            className="text-lg font-medium text-gray-800"
+                                                            style={{ 
+                                                                fontFamily: font.family,
+                                                                fontWeight: font.weight 
+                                                            }}
+                                                        >
+                                                            Aa
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    {/* Font Name */}
+                                                    <p className="text-sm font-medium text-center text-gray-800">{font.name}</p>
+                                                    
+                                                    {/* Font Weight */}
+                                                    <span className="text-xs text-gray-500">{font.weight}</span>
+                                                </div>
+                                                
+                                                {/* Selected Indicator */}
+                                                {selectedFont === font.name && (
+                                                    <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                                                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                                    </div>
+                                                )}
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Font Weight Options */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Font Weight</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        {[
+                                            { weight: "300", name: "Light" },
+                                            { weight: "400", name: "Regular" },
+                                            { weight: "500", name: "Medium" },
+                                            { weight: "600", name: "Semi Bold" },
+                                            { weight: "700", name: "Bold" },
+                                            { weight: "800", name: "Extra Bold" },
+                                        ].map((weight) => (
+                                            <Card
+                                                key={weight.weight}
+                                                className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+                                            >
+                                                <div className="p-3 flex flex-col items-center gap-2">
+                                                    <span 
+                                                        className="text-lg text-gray-800"
+                                                        style={{ 
+                                                            fontFamily: selectedFont,
+                                                            fontWeight: weight.weight 
+                                                        }}
+                                                    >
+                                                        Aa
+                                                    </span>
+                                                    <p className="text-xs font-medium text-gray-600">{weight.name}</p>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Font Size Options */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Font Size</h3>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        {[
+                                            { size: "12px", name: "Small" },
+                                            { size: "14px", name: "Regular" },
+                                            { size: "16px", name: "Medium" },
+                                            { size: "18px", name: "Large" },
+                                            { size: "20px", name: "XL" },
+                                            { size: "24px", name: "XXL" },
+                                        ].map((size) => (
+                                            <Card
+                                                key={size.size}
+                                                className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+                                            >
+                                                <div className="p-3 flex flex-col items-center gap-2">
+                                                    <span 
+                                                        className="text-gray-800"
+                                                        style={{ 
+                                                            fontFamily: selectedFont,
+                                                            fontSize: size.size 
+                                                        }}
+                                                    >
+                                                        Aa
+                                                    </span>
+                                                    <p className="text-xs font-medium text-gray-600">{size.name}</p>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Live Preview */}
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Preview</h3>
+                                    <Card className="p-6 bg-gray-50">
+                                        <div className="space-y-4">
+                                            <h2 
+                                                className="text-2xl font-bold text-gray-900"
+                                                style={{ fontFamily: selectedFont }}
+                                            >
+                                                Your Profile Title
+                                            </h2>
+                                            <p 
+                                                className="text-gray-600"
+                                                style={{ fontFamily: selectedFont }}
+                                            >
+                                                This is how your profile text will look with the selected font. You can see the difference in typography and readability.
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <span 
+                                                    className="text-sm text-gray-500"
+                                                    style={{ fontFamily: selectedFont }}
+                                                >
+                                                    Bio text example
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeStyleTab === "Buttons" && (
+                            <div>
+                                <p className="text-gray-500">Button customization options coming soon...</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    );
+};
+
+export default DesignTab;

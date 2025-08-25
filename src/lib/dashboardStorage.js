@@ -34,10 +34,14 @@ const defaultData = {
   products: [
     {
       id: '1',
-      title: 'My Product',
-      description: 'Product description',
+      title: 'Sample Product',
+      brand: 'Your Brand',
       price: 29.99,
-      imageUrl: '',
+      currency: 'USD',
+      url: '#',
+      image: '/placeholder.svg',
+      clicks: 0,
+      ctr: 0.0,
       active: true,
       createdAt: new Date().toISOString(),
     },
@@ -71,7 +75,24 @@ export const loadFromBackend = async () => {
   const stored = localStorage.getItem(STORAGE_KEY);
   
   if (stored) {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    // Normalize legacy product shape to the new schema
+    if (Array.isArray(parsed?.products)) {
+      parsed.products = parsed.products.map((p) => ({
+        id: p.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        title: p.title || 'Untitled Product',
+        brand: p.brand || p.vendor || 'Unknown',
+        price: typeof p.price === 'number' ? p.price : Number(p.price) || 0,
+        currency: p.currency || 'USD',
+        url: p.url || p.link || '#',
+        image: p.image || p.imageUrl || '/placeholder.svg',
+        clicks: typeof p.clicks === 'number' ? p.clicks : 0,
+        ctr: typeof p.ctr === 'number' ? p.ctr : 0.0,
+        active: typeof p.active === 'boolean' ? p.active : true,
+        createdAt: p.createdAt || new Date().toISOString(),
+      }));
+    }
+    return parsed;
   }
   
   // Return default data if nothing stored

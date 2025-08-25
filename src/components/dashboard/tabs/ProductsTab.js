@@ -62,7 +62,7 @@ const mockProducts = [
 ];
 
 export default function ProductsTab() {
-  const { data, updateData } = useDashboard();
+  const { data, updateData, saveChanges } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -72,23 +72,21 @@ export default function ProductsTab() {
   useEffect(() => {
     if (isInitialized) return;
     
-    const storedProducts = localStorage.getItem('vizitlink_products');
-    if (!storedProducts) {
-      localStorage.setItem('vizitlink_products', JSON.stringify(mockProducts));
+    // If products are missing in context, seed with defaults once
+    if (!data?.products || !Array.isArray(data.products)) {
       updateData({ products: mockProducts });
-    } else {
-      const products = JSON.parse(storedProducts);
-      updateData({ products });
+      // Persist into the main dashboard storage so preview reads the same source
+      setTimeout(() => saveChanges(), 0);
     }
     setIsInitialized(true);
-  }, [isInitialized, updateData]);
+  }, [isInitialized, data, updateData, saveChanges]);
 
   const handleToggleActive = (id) => {
     const updatedProducts = data.products.map(product =>
       product.id === id ? { ...product, active: !product.active } : product
     );
     updateData({ products: updatedProducts });
-    localStorage.setItem('vizitlink_products', JSON.stringify(updatedProducts));
+    saveChanges();
   };
 
   const handleEdit = (product) => {
@@ -100,7 +98,7 @@ export default function ProductsTab() {
     if (window.confirm('Are you sure you want to delete this product?')) {
       const updatedProducts = data.products.filter(product => product.id !== id);
       updateData({ products: updatedProducts });
-      localStorage.setItem('vizitlink_products', JSON.stringify(updatedProducts));
+      saveChanges();
     }
   };
 
@@ -132,7 +130,7 @@ export default function ProductsTab() {
     const normalized = items.map(normalizeProduct);
     const updatedProducts = [...data.products, ...normalized];
     updateData({ products: updatedProducts });
-    localStorage.setItem('vizitlink_products', JSON.stringify(updatedProducts));
+    saveChanges();
     setShowAddModal(false);
   };
 
@@ -141,7 +139,7 @@ export default function ProductsTab() {
       product.id === updatedProduct.id ? updatedProduct : product
     );
     updateData({ products: updatedProducts });
-    localStorage.setItem('vizitlink_products', JSON.stringify(updatedProducts));
+    saveChanges();
     setShowEditModal(false);
     setEditingProduct(null);
   };

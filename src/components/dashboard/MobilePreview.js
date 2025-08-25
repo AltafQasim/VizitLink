@@ -181,14 +181,14 @@ export default function MobilePreview() {
                 </div>
 
                 {/* Shop section */}
-                {data.products.filter(p => p.active).length > 0 && (
+                {(data.products || []).filter(p => p.active).length > 0 && (
                   <div className="mt-6">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-gray-900">Shop</h3>
                       <button className="text-sm text-purple-600">View all</button>
                     </div>
                     <div className="space-y-3">
-                      {data.products
+                      {(data.products || [])
                         .filter(p => p.active)
                         .slice(0, 2)
                         .map((product) => (
@@ -203,18 +203,20 @@ export default function MobilePreview() {
                           >
                             <div className="flex items-center space-x-3">
                               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                                <img
-                                  src={product.image}
-                                  alt={product.title}
-                                  className="w-full h-full object-cover"
-                                />
+                                {product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.title || 'Product'}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gray-100" />
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-gray-900 text-xs truncate">{product.title}</p>
-                                <p className="text-xs text-gray-500">{product.brand}</p>
-                                <p className="text-xs font-semibold text-purple-600">
-                                  ${product.price?.toFixed(2) || '0.00'}
-                                </p>
+                                <p className="text-xs text-gray-500">{product.brand || 'Unknown'}</p>
+                                <p className="text-xs font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
                               </div>
                             </div>
                           </motion.a>

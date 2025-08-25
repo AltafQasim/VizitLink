@@ -89,6 +89,8 @@ const socialColorsMap = {
 export default function LivePreview() {
   const { data } = useDashboard();
 
+  console.log({data})
+
   return (
     <motion.div 
       initial={{ x: 20, opacity: 0 }}
@@ -165,16 +167,15 @@ export default function LivePreview() {
             </div>
 
             {/* Shop section */}
-            {data.products.filter(p => p.active).length > 0 && (
+            {(data.products || []).filter(p => p.active).length > 0 && (
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-gray-900">Shop</h3>
                   <button className="text-sm text-purple-600">View all</button>
                 </div>
                 <div className="space-y-3">
-                  {data.products
+                  {(data.products || [])
                     .filter(p => p.active)
-                    .slice(0, 3)
                     .map((product) => (
                       <motion.a
                         key={product.id}
@@ -187,20 +188,22 @@ export default function LivePreview() {
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
-                            <Image
-                              src={product.image || '/placeholder.svg'}
-                              alt={product.title}
-                              fill
-                              className="object-cover"
-                              sizes="48px"
-                            />
+                            {product.image ? (
+                              <Image
+                                src={product.image}
+                                alt={product.title || 'Product'}
+                                fill
+                                className="object-cover"
+                                sizes="48px"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-100" />
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 text-sm truncate">{product.title}</p>
-                            <p className="text-sm text-gray-500">{product.brand}</p>
-                            <p className="text-sm font-semibold text-purple-600">
-                              ${product.price?.toFixed(2) || '0.00'}
-                            </p>
+                            <p className="text-sm text-gray-500">{product.brand || 'Unknown'}</p>
+                            <p className="text-sm font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
                           </div>
                         </div>
                       </motion.a>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { Button } from '../../ui/button';
 import { useDashboard } from '../../../context/DashboardContext';
 import { 
@@ -110,17 +111,26 @@ export default function ProductsTab() {
     alert('Product URL copied to clipboard!');
   };
 
-  const handleAddProduct = (newProduct) => {
-    const productWithId = {
-      ...newProduct,
-      id: Date.now().toString(),
-      clicks: 0,
-      ctr: 0.0,
-      active: true,
-      createdAt: new Date().toISOString(),
-    };
-    
-    const updatedProducts = [...data.products, productWithId];
+  const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+
+  const normalizeProduct = (p) => ({
+    id: generateId(),
+    title: p.title || 'Untitled Product',
+    brand: p.brand || 'Unknown',
+    price: Number(p.price) || 0,
+    currency: p.currency || 'USD',
+    url: p.url || '#',
+    image: p.image || '/placeholder.svg',
+    clicks: 0,
+    ctr: 0.0,
+    active: true,
+    createdAt: new Date().toISOString(),
+  });
+
+  const handleAddProduct = (newProductOrArray) => {
+    const items = Array.isArray(newProductOrArray) ? newProductOrArray : [newProductOrArray];
+    const normalized = items.map(normalizeProduct);
+    const updatedProducts = [...data.products, ...normalized];
     updateData({ products: updatedProducts });
     localStorage.setItem('vizitlink_products', JSON.stringify(updatedProducts));
     setShowAddModal(false);
@@ -148,9 +158,9 @@ export default function ProductsTab() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 lg:p-8 pt-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="py-4 flex items-center justify-between sticky top-0 bg-gray-50 z-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">My Shop</h2>
           <p className="text-gray-600 mt-1">
@@ -204,11 +214,16 @@ export default function ProductsTab() {
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
                     <div className="relative">
-                      <img
-                        src={product.image}
-                        alt={product.title}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
+                      <div className="w-16 h-16 rounded-lg overflow-hidden">
+                        <Image
+                          src={product.image || '/placeholder.svg'}
+                          alt={product.title}
+                          width={64}
+                          height={64}
+                          className="object-cover w-full h-full"
+                          sizes="64px"
+                        />
+                      </div>
                       <button className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg transition-all duration-200 flex items-center justify-center">
                         <MoreVertical className="w-4 h-4 text-white opacity-0 group-hover:opacity-100" />
                       </button>

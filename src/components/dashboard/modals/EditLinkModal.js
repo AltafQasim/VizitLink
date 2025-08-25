@@ -420,8 +420,8 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-auto h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <DialogTitle className="text-xl font-semibold">
             Edit Link
           </DialogTitle>
@@ -430,7 +430,7 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6 max-h-[calc(100dvh-120px)] sm:max-h-none overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

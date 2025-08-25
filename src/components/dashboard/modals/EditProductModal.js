@@ -85,24 +85,16 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="p-0 overflow-hidden max-w-2xl">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-auto h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold">
               Edit product
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetModal}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6 max-h-[calc(100dvh-120px)] sm:max-h-none overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

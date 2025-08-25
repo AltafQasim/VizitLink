@@ -278,9 +278,9 @@ export default function LinksTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 lg:p-8 pt-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="py-4 flex items-center justify-between sticky top-0 bg-gray-50 z-10">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">My VizitLink</h2>
           <p className="text-gray-600 mt-1">

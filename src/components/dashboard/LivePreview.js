@@ -8,6 +8,7 @@ import {
   Lock,
   ExternalLink
 } from 'lucide-react';
+import Image from 'next/image';
 import { 
   FaInstagram, FaYoutube, FaTwitter, FaFacebook, FaLinkedin, FaSnapchatGhost, FaPinterest, FaTiktok, FaReddit, FaGithub, FaDribbble, FaBehance, FaMedium, FaSpotify, FaSoundcloud, FaTwitch, FaDiscord, FaWhatsapp, FaTelegram, FaGlobe
 } from 'react-icons/fa';
@@ -100,7 +101,7 @@ export default function LivePreview() {
       </div>
 
       {/* Mobile mockup */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="bg-black rounded-3xl shadow-2xl p-4 w-full max-w-xs">
           {/* Status bar */}
           <div className="flex justify-between items-center mb-4 text-white text-xs">
@@ -185,11 +186,13 @@ export default function LivePreview() {
                         whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                            <img
-                              src={product.image}
+                          <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
+                            <Image
+                              src={product.image || '/placeholder.svg'}
                               alt={product.title}
-                              className="w-full h-full object-cover"
+                              fill
+                              className="object-cover"
+                              sizes="48px"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

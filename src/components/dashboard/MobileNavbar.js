@@ -130,6 +130,12 @@ export default function MobileNavbar() {
                     key={item.id}
                     onClick={() => {
                       setActiveTab(item.id);
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.pathname = `/dashboard/${item.id}`;
+                        url.searchParams.delete('tab');
+                        window.history.pushState({}, '', url.toString());
+                      }
                       setShowMenu(false);
                     }}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${

@@ -432,8 +432,8 @@ export default function AddSocialLinkModal({ isOpen, onClose, onSave }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel} >
-      <DialogContent className="p-0 overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-5xl w-[100vw] sm:w-auto h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
+        <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <DialogTitle className="text-xl font-semibold">
             {step === 'selectIcon' ? 'Choose Platform' : 'Enter URL'}
           </DialogTitle>
@@ -445,7 +445,7 @@ export default function AddSocialLinkModal({ isOpen, onClose, onSave }) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6 max-h-[calc(100dvh-120px)] sm:max-h-none overflow-y-auto">
           <AnimatePresence mode="wait">
             {step === 'selectIcon' ? (
               <motion.div

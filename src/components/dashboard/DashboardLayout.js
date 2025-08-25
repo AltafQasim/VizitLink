@@ -9,9 +9,40 @@ import MobilePreview from './MobilePreview';
 import LinksTab from './tabs/LinksTab';
 import ProductsTab from './tabs/ProductsTab';
 import { useDashboard } from '../../context/DashboardContext';
+import { useEffect, useState } from 'react';
 
 export default function DashboardLayout() {
-  const { activeTab } = useDashboard();
+  const { activeTab, setActiveTab } = useDashboard();
+  const [isFading, setIsFading] = useState(false);
+
+  // Read initial tab from path (/dashboard/links) or query (?tab=links)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    const pathParts = url.pathname.split('/');
+    const pathTab = pathParts[2]; // /dashboard/{tab}
+    const queryTab = url.searchParams.get('tab');
+    const nextTab = pathTab || queryTab;
+    if (nextTab) setActiveTab(nextTab);
+
+    const handlePop = () => {
+      const u = new URL(window.location.href);
+      const parts = u.pathname.split('/');
+      const pTab = parts[2];
+      const qTab = u.searchParams.get('tab');
+      const nTab = pTab || qTab || 'links';
+      setActiveTab(nTab);
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, [setActiveTab]);
+
+  // Trigger a smooth fade only for the center content
+  useEffect(() => {
+    setIsFading(true);
+    const t = setTimeout(() => setIsFading(false), 180);
+    return () => clearTimeout(t);
+  }, [activeTab]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -98,14 +129,14 @@ export default function DashboardLayout() {
         <Sidebar />
         
         {/* Main Panel */}
-        <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto max-h-[calc(100dvh-100px)] relative scroll-elegant scrollbar-accent">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              initial={false}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
             >
               {renderTabContent()}
             </motion.div>

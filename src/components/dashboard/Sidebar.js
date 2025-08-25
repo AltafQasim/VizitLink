@@ -55,7 +55,16 @@ export default function Sidebar() {
             return (
               <motion.li key={item.id} whileHover={{ x: 4 }} whileTap={{ scale: 0.98 }}>
                 <button
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (typeof window !== 'undefined') {
+                      const url = new URL(window.location.href);
+                      // Prefer path style: /dashboard/{tab}
+                      url.pathname = `/dashboard/${item.id}`;
+                      url.searchParams.delete('tab');
+                      window.history.pushState({}, '', url.toString());
+                    }
+                  }}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                     isActive 
                       ? 'bg-purple-100 text-purple-700 font-medium' 

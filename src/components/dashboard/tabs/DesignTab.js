@@ -84,20 +84,42 @@ const DesignTab = () => {
     }, [canUndo, canRedo, hasUnsavedChanges, undo, redo, saveChanges]);
 
     // Get current design settings from context
-    const selectedTheme = data?.design?.theme || "Blocks";
-    const selectedWallpaper = data?.design?.wallpaper || "Hero";
+    const selectedTheme = data?.design?.theme || "";
+    const selectedWallpaper = data?.design?.wallpaper || "";
     const selectedStyle = data?.design?.buttonStyle || "Minimal";
     const selectedFont = data?.design?.fontFamily || "Inter";
     const hideLinktreeFooter = data?.design?.hideLinktreeFooter || false;
 
     // Enhanced design change handlers with visual feedback
     const handleThemeChange = (themeName) => {
-        updateDesignData({ theme: themeName });
+        // When theme is selected, remove wallpaper selection
+        console.log('Before theme change:', { theme: data?.design?.theme, wallpaper: data?.design?.wallpaper });
+        
+        updateData({
+            design: {
+                ...data.design,
+                theme: themeName,
+                wallpaper: "" // Clear wallpaper selection
+            }
+        });
+        
+        console.log('After theme change:', { theme: themeName, wallpaper: "" });
         toast.success(`Theme changed to ${themeName}`);
     };
 
     const handleWallpaperChange = (wallpaperName) => {
-        updateDesignData({ wallpaper: wallpaperName });
+        // When wallpaper is selected, remove theme selection
+        console.log('Before wallpaper change:', { theme: data?.design?.theme, wallpaper: data?.design?.wallpaper });
+        
+        updateData({
+            design: {
+                ...data.design,
+                wallpaper: wallpaperName,
+                theme: "" // Clear theme selection
+            }
+        });
+        
+        console.log('After wallpaper change:', { theme: "", wallpaper: wallpaperName });
         toast.success(`Wallpaper changed to ${wallpaperName}`);
     };
 
@@ -378,6 +400,7 @@ const DesignTab = () => {
                     <div className="mb-6">
                         <h2 className="text-2xl font-semibold text-gray-900 mb-2">Theme</h2>
                         <p className="text-gray-600">Choose your theme and color scheme</p>
+
                     </div>
 
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -558,6 +581,7 @@ const DesignTab = () => {
                     <div className="mb-6">
                         <h2 className="text-2xl font-semibold text-gray-900 mb-2">Wallpaper</h2>
                         <p className="text-gray-600">Set your background and colors</p>
+
                     </div>
 
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -647,6 +671,8 @@ const DesignTab = () => {
                                             Pro
                                         </div>
                                     )}
+                                    
+
                                     
                                     {/* Selected Indicator */}
                                     {selectedWallpaper === wallpaper.name && (

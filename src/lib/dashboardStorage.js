@@ -47,8 +47,8 @@ const defaultData = {
     },
   ],
   design: {
-    theme: 'Blocks',
-    wallpaper: 'Hero',
+    theme: '', // Start with no theme selected
+    wallpaper: '', // Start with no wallpaper selected
     backgroundColor: '#ffffff',
     textColor: '#000000',
     buttonStyle: 'Minimal',

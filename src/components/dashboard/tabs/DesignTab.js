@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap, Upload, X, Undo2, Redo2, Save } from "lucide-react";
+import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap, Upload, X, Undo2, Redo2, Save, ArrowRight, Sun, Moon } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
 import { Input } from "../../ui/input";
@@ -14,7 +14,7 @@ import toast, { Toaster } from 'react-hot-toast';
 const DesignTab = () => {
     const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveChanges } = useDashboard();
     const fileInputRef = useRef(null);
-    
+
     const [activeTab, setActiveTab] = useState("Customizable");
     const [activeStyleTab, setActiveStyleTab] = useState("Presets");
     const [isSaving, setIsSaving] = useState(false);
@@ -261,27 +261,27 @@ const DesignTab = () => {
     // Simple Unsplash placeholders (50 images). In future, can be replaced by API.
     const getUnsplashPlaceholders = (q = "") => {
         const topics = [
-            "nature","city","tech","abstract","ocean","forest","mountain","desert","sunset","night",
-            "neon","pastel","pattern","gradient","texture","sky","clouds","space","water","fire",
-            "flowers","leaves","rocks","metal","wood","glass","bokeh","minimal","architecture","street",
-            "snow","rain","autumn","spring","summer","winter","beach","lake","river","valley",
-            "studio","portrait","aesthetic","background","landscape","macro","vintage","modern","dark","light"
+            "nature", "city", "tech", "abstract", "ocean", "forest", "mountain", "desert", "sunset", "night",
+            "neon", "pastel", "pattern", "gradient", "texture", "sky", "clouds", "space", "water", "fire",
+            "flowers", "leaves", "rocks", "metal", "wood", "glass", "bokeh", "minimal", "architecture", "street",
+            "snow", "rain", "autumn", "spring", "summer", "winter", "beach", "lake", "river", "valley",
+            "studio", "portrait", "aesthetic", "background", "landscape", "macro", "vintage", "modern", "dark", "light"
         ];
         const base = `https://images.unsplash.com/photo-`;
         const ids = [
-            "1500530855697-b586d89ba3ee","1501785888041-af3ef285b470","1500534314209-a25ddb2bd429","1501594907352-04cda38ebc29",
-            "1500534314209-a25ddb2bd429","1517812983140-6f53a42c9c56","1496307042754-b4aa456c4a2d","1493247035880-8f8b81a407f6",
-            "1500534314209-a25ddb2bd429","1500534314209-a25ddb2bd429","1520975916090-3105956dac38","1520974735194-54a56612ee37",
-            "1520975916090-3105956dac38","1519681393784-d120267933ba","1482192596544-9eb780fc7f66","1472214103451-9374bd1c798e",
-            "1469474968028-56623f02e42e","1469474968028-56623f02e42e","1449157291145-7efd050a4d0e","1491972690050-ba117db4dc09",
-            "1470770903676-69b98201ea1c","1469474968028-56623f02e42e","1520974735194-54a56612ee37","1519681393784-d120267933ba",
-            "1469474968028-56623f02e42e","1500534314209-a25ddb2bd429","1520975916090-3105956dac38","1500534314209-a25ddb2bd429",
-            "1496307042754-b4aa456c4a2d","1493247035880-8f8b81a407f6","1501785888041-af3ef285b470","1501594907352-04cda38ebc29",
-            "1500530855697-b586d89ba3ee","1517812983140-6f53a42c9c56","1491972690050-ba117db4dc09","1482192596544-9eb780fc7f66",
-            "1472214103451-9374bd1c798e","1520974735194-54a56612ee37","1520975916090-3105956dac38","1519681393784-d120267933ba",
-            "1469474968028-56623f02e42e","1500534314209-a25ddb2bd429","1493247035880-8f8b81a407f6","1496307042754-b4aa456c4a2d",
-            "1501594907352-04cda38ebc29","1501785888041-af3ef285b470","1500530855697-b586d89ba3ee","1491972690050-ba117db4dc09",
-            "1517812983140-6f53a42c9c56","1482192596544-9eb780fc7f66"
+            "1500530855697-b586d89ba3ee", "1501785888041-af3ef285b470", "1500534314209-a25ddb2bd429", "1501594907352-04cda38ebc29",
+            "1500534314209-a25ddb2bd429", "1517812983140-6f53a42c9c56", "1496307042754-b4aa456c4a2d", "1493247035880-8f8b81a407f6",
+            "1500534314209-a25ddb2bd429", "1500534314209-a25ddb2bd429", "1520975916090-3105956dac38", "1520974735194-54a56612ee37",
+            "1520975916090-3105956dac38", "1519681393784-d120267933ba", "1482192596544-9eb780fc7f66", "1472214103451-9374bd1c798e",
+            "1469474968028-56623f02e42e", "1469474968028-56623f02e42e", "1449157291145-7efd050a4d0e", "1491972690050-ba117db4dc09",
+            "1470770903676-69b98201ea1c", "1469474968028-56623f02e42e", "1520974735194-54a56612ee37", "1519681393784-d120267933ba",
+            "1469474968028-56623f02e42e", "1500534314209-a25ddb2bd429", "1520975916090-3105956dac38", "1500534314209-a25ddb2bd429",
+            "1496307042754-b4aa456c4a2d", "1493247035880-8f8b81a407f6", "1501785888041-af3ef285b470", "1501594907352-04cda38ebc29",
+            "1500530855697-b586d89ba3ee", "1517812983140-6f53a42c9c56", "1491972690050-ba117db4dc09", "1482192596544-9eb780fc7f66",
+            "1472214103451-9374bd1c798e", "1520974735194-54a56612ee37", "1520975916090-3105956dac38", "1519681393784-d120267933ba",
+            "1469474968028-56623f02e42e", "1500534314209-a25ddb2bd429", "1493247035880-8f8b81a407f6", "1496307042754-b4aa456c4a2d",
+            "1501594907352-04cda38ebc29", "1501785888041-af3ef285b470", "1500530855697-b586d89ba3ee", "1491972690050-ba117db4dc09",
+            "1517812983140-6f53a42c9c56", "1482192596544-9eb780fc7f66"
         ];
         const filtered = topics.filter(t => t.includes(q.toLowerCase())).slice(0, 10);
         const urls = ids.slice(0, 50).map((id, i) => {
@@ -319,6 +319,10 @@ const DesignTab = () => {
     // Defaults for Image/Video wallpaper cards
     const defaultWallpaperImage = getUnsplashPlaceholders()[0];
     const defaultWallpaperVideo = getCoverrSamples()[0];
+
+    // Tint controls
+    const [isTintModalOpen, setIsTintModalOpen] = useState(false);
+    const [tintValue, setTintValue] = useState(Number(data?.design?.wallpaperTint || 20));
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -374,7 +378,7 @@ const DesignTab = () => {
                                     <span className="hidden sm:inline">Redo</span>
                                 </Button>
                             </div>
-                            
+
                             {/* Status indicator */}
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
                                 <div className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
@@ -383,7 +387,7 @@ const DesignTab = () => {
                                 </span>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-3">
                             {hasUnsavedChanges && (
                                 <Button
@@ -401,7 +405,7 @@ const DesignTab = () => {
                                     </span>
                                 </Button>
                             )}
-                            
+
 
                         </div>
                     </div>
@@ -436,9 +440,9 @@ const DesignTab = () => {
                                 )}
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
+                                <Button
+                                    variant="outline"
+                                    size="sm"
                                     className="gap-2"
                                     onClick={() => fileInputRef.current?.click()}
                                 >
@@ -496,8 +500,8 @@ const DesignTab = () => {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`pb-3 px-1 font-medium transition-colors relative ${activeTab === tab
-                                            ? "text-gray-900 border-b-2 border-gray-900"
-                                            : "text-gray-500 hover:text-gray-700"
+                                        ? "text-gray-900 border-b-2 border-gray-900"
+                                        : "text-gray-500 hover:text-gray-700"
                                         }`}
                                 >
                                     {tab}
@@ -511,9 +515,8 @@ const DesignTab = () => {
                                     {themes.map((theme) => (
                                         <Card
                                             key={theme.name}
-                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
-                                                theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
-                                            }`}
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                                }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
                                             <div className={`aspect-[3/4] relative ${theme.preview} ${theme.textColor}`}>
@@ -539,7 +542,7 @@ const DesignTab = () => {
                                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Pro Badge */}
                                             {theme.isPro && (
                                                 <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
@@ -547,7 +550,7 @@ const DesignTab = () => {
                                                     Pro
                                                 </div>
                                             )}
-                                            
+
                                             {/* Selected Indicator */}
                                             {theme.selected && (
                                                 <div className="absolute top-2 right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
@@ -563,9 +566,8 @@ const DesignTab = () => {
                                     {curatedThemes.map((theme) => (
                                         <Card
                                             key={theme.name}
-                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
-                                                theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
-                                            }`}
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                                }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
                                             <div className={`aspect-[3/4] relative ${theme.preview} ${theme.textColor}`}>
@@ -590,7 +592,7 @@ const DesignTab = () => {
                                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
                                             </div>
-                                            
+
                                             {/* Pro Badge */}
                                             {theme.isPro && (
                                                 <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
@@ -598,7 +600,7 @@ const DesignTab = () => {
                                                     Pro
                                                 </div>
                                             )}
-                                            
+
                                             {/* Selected Indicator */}
                                             {theme.selected && (
                                                 <div className="absolute top-2 right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
@@ -626,9 +628,8 @@ const DesignTab = () => {
                             {wallpapers.map((wallpaper) => (
                                 <Card
                                     key={wallpaper.name}
-                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
-                                        selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
-                                    }`}
+                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                        }`}
                                     onClick={() => handleWallpaperChange(wallpaper.name)}
                                 >
                                     <div className={`aspect-[3/4] relative ${wallpaper.type !== 'image' && !wallpaper.style ? wallpaper.preview : ''}`} style={wallpaper.style || undefined}>
@@ -667,21 +668,24 @@ const DesignTab = () => {
                                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
                                         )}
 
+                                        {(wallpaper.type === 'image' || wallpaper.type === 'video') && (
+                                            <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(data?.design?.wallpaperTint || 0)) / 100})` }} />
+                                        )}
                                         {/* Bottom labels */}
                                         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
                                             <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{wallpaper.name}</span>
                                         </div>
                                     </div>
-                                    
+
                                     {/* Pro Badge */}
                                     {wallpaper.isPro && (
                                         <div className="absolute top-1 right-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full shadow-lg">
                                             Pro
                                         </div>
                                     )}
-                                    
 
-                                    
+
+
                                     {/* Selected Indicator */}
                                     {selectedWallpaper === wallpaper.name && (
                                         <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
@@ -694,228 +698,293 @@ const DesignTab = () => {
 
                         {/* Wallpaper Image Modal */}
                         <Dialog open={isWallpaperModalOpen} onOpenChange={setIsWallpaperModalOpen}>
-                          <DialogContent className="max-w-xl">
-                            <DialogHeader>
-                              <DialogTitle>Choose an image</DialogTitle>
-                              <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
-                            </DialogHeader>
+                            <DialogContent className="max-w-xl">
+                                <DialogHeader>
+                                    <DialogTitle>Choose an image</DialogTitle>
+                                    <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
+                                </DialogHeader>
 
-                            {wallpaperModalStep === 'menu' && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                                <Card onClick={() => setWallpaperModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
-                                  <div className="flex items-center gap-3">
-                                    <Upload className="w-5 h-5" />
-                                    <div>
-                                      <p className="font-medium">Upload your own</p>
-                                      <p className="text-xs text-gray-500">Use an image from your device</p>
+                                {wallpaperModalStep === 'menu' && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                        <Card onClick={() => setWallpaperModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                            <div className="flex items-center gap-3">
+                                                <Upload className="w-5 h-5" />
+                                                <div>
+                                                    <p className="font-medium">Upload your own</p>
+                                                    <p className="text-xs text-gray-500">Use an image from your device</p>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                        <Card onClick={() => setWallpaperModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                            <div className="flex items-center gap-3">
+                                                <Image className="w-5 h-5" />
+                                                <div>
+                                                    <p className="font-medium">Select royalty-free image</p>
+                                                    <p className="text-xs text-gray-500">Browse curated Unsplash images</p>
+                                                </div>
+                                            </div>
+                                        </Card>
                                     </div>
-                                  </div>
-                                </Card>
-                                <Card onClick={() => setWallpaperModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
-                                  <div className="flex items-center gap-3">
-                                    <Image className="w-5 h-5" />
-                                    <div>
-                                      <p className="font-medium">Select royalty-free image</p>
-                                      <p className="text-xs text-gray-500">Browse curated Unsplash images</p>
+                                )}
+
+                                {wallpaperModalStep === 'upload' && (
+                                    <div className="mt-4">
+                                        <p className="text-sm font-medium mb-2">Upload Image</p>
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                            <p className="text-sm text-gray-700">Select file to upload,</p>
+                                            <p className="text-sm text-gray-500">or drag-and-drop file</p>
+                                            <p className="text-xs text-gray-400 mt-2">Allowed file types: JPEG, PNG, WebP, GIF, AVIF, BMP, HEIC, HEIF</p>
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+                                                    const reader = new FileReader();
+                                                    reader.onload = (ev) => {
+                                                        const imageData = ev.target?.result;
+                                                        if (!imageData) return;
+                                                        updateData({
+                                                            design: {
+                                                                ...data.design,
+                                                                wallpaper: 'Image',
+                                                                theme: '',
+                                                                wallpaperImage: imageData,
+                                                            }
+                                                        });
+                                                        toast.success('Image set as wallpaper');
+                                                        setIsWallpaperModalOpen(false);
+                                                    };
+                                                    reader.readAsDataURL(file);
+                                                }}
+                                                className="mt-4"
+                                            />
+                                        </div>
                                     </div>
-                                  </div>
-                                </Card>
-                              </div>
-                            )}
+                                )}
 
-                            {wallpaperModalStep === 'upload' && (
-                              <div className="mt-4">
-                                <p className="text-sm font-medium mb-2">Upload Image</p>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                  <p className="text-sm text-gray-700">Select file to upload,</p>
-                                  <p className="text-sm text-gray-500">or drag-and-drop file</p>
-                                  <p className="text-xs text-gray-400 mt-2">Allowed file types: JPEG, PNG, WebP, GIF, AVIF, BMP, HEIC, HEIF</p>
-                                  <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-                                      const reader = new FileReader();
-                                      reader.onload = (ev) => {
-                                        const imageData = ev.target?.result;
-                                        if (!imageData) return;
-                                        updateData({
-                                          design: {
-                                            ...data.design,
-                                            wallpaper: 'Image',
-                                            theme: '',
-                                            wallpaperImage: imageData,
-                                          }
-                                        });
-                                        toast.success('Image set as wallpaper');
-                                        setIsWallpaperModalOpen(false);
-                                      };
-                                      reader.readAsDataURL(file);
-                                    }}
-                                    className="mt-4"
-                                  />
-                                </div>
-                              </div>
-                            )}
+                                {wallpaperModalStep === 'gallery' && (
+                                    <div className="mt-4">
+                                        <Input
+                                            placeholder="Search images (e.g., nature, city, abstract)"
+                                            value={galleryQuery}
+                                            onChange={(e) => setGalleryQuery(e.target.value)}
+                                            className="mb-3"
+                                        />
+                                        <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
+                                            {getUnsplashPlaceholders(galleryQuery).map((src, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    className="relative group rounded overflow-hidden"
+                                                    onClick={() => {
+                                                        updateData({
+                                                            design: {
+                                                                ...data.design,
+                                                                wallpaper: 'Image',
+                                                                theme: '',
+                                                                wallpaperImage: src,
+                                                            }
+                                                        });
+                                                        toast.success('Image set as wallpaper');
+                                                        setIsWallpaperModalOpen(false);
+                                                    }}
+                                                >
+                                                    <img src={src} alt="Unsplash" className="w-full h-24 object-cover" />
+                                                    <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                            {wallpaperModalStep === 'gallery' && (
-                              <div className="mt-4">
-                                <Input
-                                  placeholder="Search images (e.g., nature, city, abstract)"
-                                  value={galleryQuery}
-                                  onChange={(e) => setGalleryQuery(e.target.value)}
-                                  className="mb-3"
-                                />
-                                <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
-                                  {getUnsplashPlaceholders(galleryQuery).map((src, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      className="relative group rounded overflow-hidden"
-                                      onClick={() => {
-                                        updateData({
-                                          design: {
-                                            ...data.design,
-                                            wallpaper: 'Image',
-                                            theme: '',
-                                            wallpaperImage: src,
-                                          }
-                                        });
-                                        toast.success('Image set as wallpaper');
-                                        setIsWallpaperModalOpen(false);
-                                      }}
-                                    >
-                                      <img src={src} alt="Unsplash" className="w-full h-24 object-cover" />
-                                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          </DialogContent>
+                            </DialogContent>
                         </Dialog>
 
                         {/* Wallpaper Video Modal */}
                         <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
-                          <DialogContent className="max-w-xl">
-                            <DialogHeader>
-                              <DialogTitle>Choose a video</DialogTitle>
-                              <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
-                            </DialogHeader>
+                            <DialogContent className="max-w-xl">
+                                <DialogHeader>
+                                    <DialogTitle>Choose a video</DialogTitle>
+                                    <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
+                                </DialogHeader>
 
-                            {videoModalStep === 'menu' && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                                <Card onClick={() => setVideoModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
-                                  <div className="flex items-center gap-3">
-                                    <Upload className="w-5 h-5" />
-                                    <div>
-                                      <p className="font-medium">Upload your own</p>
-                                      <p className="text-xs text-gray-500">Use a video from your device</p>
+                                {videoModalStep === 'menu' && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                        <Card onClick={() => setVideoModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                            <div className="flex items-center gap-3">
+                                                <Upload className="w-5 h-5" />
+                                                <div>
+                                                    <p className="font-medium">Upload your own</p>
+                                                    <p className="text-xs text-gray-500">Use a video from your device</p>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                        <Card onClick={() => setVideoModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                            <div className="flex items-center gap-3">
+                                                <Image className="w-5 h-5" />
+                                                <div>
+                                                    <p className="font-medium">Select royalty-free video</p>
+                                                    <p className="text-xs text-gray-500">Browse curated Coverr videos</p>
+                                                </div>
+                                            </div>
+                                        </Card>
                                     </div>
-                                  </div>
-                                </Card>
-                                <Card onClick={() => setVideoModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
-                                  <div className="flex items-center gap-3">
-                                    <Image className="w-5 h-5" />
-                                    <div>
-                                      <p className="font-medium">Select royalty-free video</p>
-                                      <p className="text-xs text-gray-500">Browse curated Coverr videos</p>
+                                )}
+
+                                {videoModalStep === 'upload' && (
+                                    <div className="mt-4">
+                                        <p className="text-sm font-medium mb-2">Upload Video</p>
+                                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                            <p className="text-sm text-gray-700">Select file to upload,</p>
+                                            <p className="text-sm text-gray-500">or drag-and-drop file</p>
+                                            <p className="text-xs text-gray-400 mt-2">Allowed file types: MP4, WebM, Ogg</p>
+                                            <input
+                                                type="file"
+                                                accept="video/mp4,video/webm,video/ogg"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+                                                    const reader = new FileReader();
+                                                    reader.onload = (ev) => {
+                                                        const videoData = ev.target?.result;
+                                                        if (!videoData) return;
+                                                        updateData({
+                                                            design: {
+                                                                ...data.design,
+                                                                wallpaper: 'Video',
+                                                                theme: '',
+                                                                wallpaperVideo: videoData,
+                                                            }
+                                                        });
+                                                        toast.success('Video set as wallpaper');
+                                                        setIsVideoModalOpen(false);
+                                                    };
+                                                    reader.readAsDataURL(file);
+                                                }}
+                                                className="mt-4"
+                                            />
+                                        </div>
                                     </div>
-                                  </div>
-                                </Card>
-                              </div>
-                            )}
+                                )}
 
-                            {videoModalStep === 'upload' && (
-                              <div className="mt-4">
-                                <p className="text-sm font-medium mb-2">Upload Video</p>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                                  <p className="text-sm text-gray-700">Select file to upload,</p>
-                                  <p className="text-sm text-gray-500">or drag-and-drop file</p>
-                                  <p className="text-xs text-gray-400 mt-2">Allowed file types: MP4, WebM, Ogg</p>
-                                  <input
-                                    type="file"
-                                    accept="video/mp4,video/webm,video/ogg"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-                                      const reader = new FileReader();
-                                      reader.onload = (ev) => {
-                                        const videoData = ev.target?.result;
-                                        if (!videoData) return;
-                                        updateData({
-                                          design: {
-                                            ...data.design,
-                                            wallpaper: 'Video',
-                                            theme: '',
-                                            wallpaperVideo: videoData,
-                                          }
-                                        });
-                                        toast.success('Video set as wallpaper');
-                                        setIsVideoModalOpen(false);
-                                      };
-                                      reader.readAsDataURL(file);
-                                    }}
-                                    className="mt-4"
-                                  />
+                                {videoModalStep === 'gallery' && (
+                                    <div className="mt-4">
+                                        <Input
+                                            placeholder="Search videos (e.g., nature, city, abstract)"
+                                            value={videoGalleryQuery}
+                                            onChange={(e) => setVideoGalleryQuery(e.target.value)}
+                                            className="mb-3"
+                                        />
+                                        <div className="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto">
+                                            {getCoverrSamples(videoGalleryQuery).map((src, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    className="relative group rounded overflow-hidden"
+                                                    onClick={() => {
+                                                        updateData({
+                                                            design: {
+                                                                ...data.design,
+                                                                wallpaper: 'Video',
+                                                                theme: '',
+                                                                wallpaperVideo: src,
+                                                            }
+                                                        });
+                                                        toast.success('Video set as wallpaper');
+                                                        setIsVideoModalOpen(false);
+                                                    }}
+                                                >
+                                                    <video src={src} className="w-full h-28 object-cover" muted playsInline />
+                                                    <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Tint Modal */}
+                        <Dialog open={isTintModalOpen} onOpenChange={setIsTintModalOpen}>
+                            <DialogContent className="max-w-xl">
+                                <DialogHeader>
+                                    <DialogTitle>Adjust tint</DialogTitle>
+                                    <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
+                                </DialogHeader>
+
+                                <div className="mt-4">
+                                    <div className="aspect-[3/2] relative rounded-lg overflow-hidden bg-gray-100">
+                                        {(selectedWallpaper === 'Image') && (
+                                            <img src={data?.design?.wallpaperImage || defaultWallpaperImage} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                                        )}
+                                        {(selectedWallpaper === 'Video') && (
+                                            <video src={data?.design?.wallpaperVideo || defaultWallpaperVideo} className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline />
+                                        )}
+                                        <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(tintValue || 0) / 100})` }} />
+                                    </div>
+                                    <p className={`mt-2 text-sm ${tintValue < 20 ? 'text-red-600' : 'text-gray-600'}`}>
+                                        {tintValue < 20
+                                            ? "This amount of tint may make your content hard to read and less accessible."
+                                            : "This amount of tint improves text visibility and helps make your content more accessible."}
+                                    </p>
+
+                                    <div className="mt-4">
+                                        <input
+                                            type="range"
+                                            min={-20}
+                                            max={80}
+                                            value={tintValue}
+                                            onChange={(e) => setTintValue(Number(e.target.value))}
+                                            className="w-full"
+                                        />
+                                        <div className="flex items-center justify-between w-full mt-2">
+                                            <Sun className="w-4 h-4" />
+                                            <Moon className="w-4 h-4" />
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex justify-end gap-2">
+                                        <Button variant="outline" onClick={() => setIsTintModalOpen(false)}>Cancel</Button>
+                                        <Button onClick={() => {
+                                            updateData({
+                                                design: {
+                                                    ...data.design,
+                                                    wallpaperTint: tintValue,
+                                                }
+                                            });
+                                            toast.success('Tint applied');
+                                            setIsTintModalOpen(false);
+                                        }}>Apply</Button>
+                                    </div>
                                 </div>
-                              </div>
-                            )}
-
-                            {videoModalStep === 'gallery' && (
-                              <div className="mt-4">
-                                <Input
-                                  placeholder="Search videos (e.g., nature, city, abstract)"
-                                  value={videoGalleryQuery}
-                                  onChange={(e) => setVideoGalleryQuery(e.target.value)}
-                                  className="mb-3"
-                                />
-                                <div className="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto">
-                                  {getCoverrSamples(videoGalleryQuery).map((src, idx) => (
-                                    <button
-                                      key={idx}
-                                      type="button"
-                                      className="relative group rounded overflow-hidden"
-                                      onClick={() => {
-                                        updateData({
-                                          design: {
-                                            ...data.design,
-                                            wallpaper: 'Video',
-                                            theme: '',
-                                            wallpaperVideo: src,
-                                          }
-                                        });
-                                        toast.success('Video set as wallpaper');
-                                        setIsVideoModalOpen(false);
-                                      }}
-                                    >
-                                      <video src={src} className="w-full h-28 object-cover" muted playsInline />
-                                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          </DialogContent>
+                            </DialogContent>
                         </Dialog>
 
                         <div>
-                            <h3 className="text-lg font-semibold mb-4">Color</h3>
-                            <div className="flex gap-3 mb-4">
-                                <div className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center cursor-pointer">
-                                    <div className="w-6 h-6 bg-gradient-to-br from-gray-300 to-gray-400 rounded"></div>
-                                </div>
-                                {colorOptions.map((color, index) => (
-                                    <div
-                                        key={index}
-                                        className={`w-10 h-10 ${color} rounded-lg cursor-pointer border border-gray-200`}
-                                    ></div>
-                                ))}
-                            </div>
-                            <p className="text-sm text-gray-500">Suggested colors are based on your profile image</p>
+                            {(selectedWallpaper === 'Image' || selectedWallpaper === 'Video') ? (
+                                <Button size="sm" variant="outline" onClick={() => setIsTintModalOpen(true)} className="flex items-center justify-between w-full rounded-full border border-blue-200 p-5 my-4">
+                                    <h3 className="text-lg font-semibold">Tint</h3>
+                                    <ArrowRight className="w-4 h-4" />
+                                </Button>
+                            ) : (
+                                <>
+                                    <h3 className="text-lg font-semibold mb-4">Color</h3>
+                                    <div className="flex gap-3 mb-4">
+                                        <div className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center cursor-pointer">
+                                            <div className="w-6 h-6 bg-gradient-to-br from-gray-300 to-gray-400 rounded"></div>
+                                        </div>
+                                        {colorOptions.map((color, index) => (
+                                            <div
+                                                key={index}
+                                                className={`w-10 h-10 ${color} rounded-lg cursor-pointer border border-gray-200`}
+                                            ></div>
+                                        ))}
+                                    </div>
+                                    <p className="text-sm text-gray-500">Suggested colors are based on your profile image</p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -934,8 +1003,8 @@ const DesignTab = () => {
                                     key={tab}
                                     onClick={() => setActiveStyleTab(tab)}
                                     className={`pb-3 px-1 font-medium transition-colors relative ${activeStyleTab === tab
-                                            ? "text-gray-900 border-b-2 border-gray-900"
-                                            : "text-gray-500 hover:text-gray-700"
+                                        ? "text-gray-900 border-b-2 border-gray-900"
+                                        : "text-gray-500 hover:text-gray-700"
                                         }`}
                                 >
                                     {tab}
@@ -980,32 +1049,31 @@ const DesignTab = () => {
                                         {fonts.map((font) => (
                                             <Card
                                                 key={font.name}
-                                                className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
-                                                    selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
-                                                }`}
+                                                className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                                    }`}
                                                 onClick={() => handleFontChange(font.name)}
                                             >
                                                 <div className="p-4 flex flex-col items-center gap-3">
                                                     {/* Font Preview */}
                                                     <div className="w-full h-16 bg-gray-50 rounded-lg flex items-center justify-center p-2">
-                                                        <span 
+                                                        <span
                                                             className="text-lg font-medium text-gray-800"
-                                                            style={{ 
+                                                            style={{
                                                                 fontFamily: font.family,
-                                                                fontWeight: font.weight 
+                                                                fontWeight: font.weight
                                                             }}
                                                         >
                                                             Aa
                                                         </span>
                                                     </div>
-                                                    
+
                                                     {/* Font Name */}
                                                     <p className="text-sm font-medium text-center text-gray-800">{font.name}</p>
-                                                    
+
                                                     {/* Font Weight */}
                                                     <span className="text-xs text-gray-500">{font.weight}</span>
                                                 </div>
-                                                
+
                                                 {/* Selected Indicator */}
                                                 {selectedFont === font.name && (
                                                     <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
@@ -1034,11 +1102,11 @@ const DesignTab = () => {
                                                 className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
                                             >
                                                 <div className="p-3 flex flex-col items-center gap-2">
-                                                    <span 
+                                                    <span
                                                         className="text-lg text-gray-800"
-                                                        style={{ 
+                                                        style={{
                                                             fontFamily: selectedFont,
-                                                            fontWeight: weight.weight 
+                                                            fontWeight: weight.weight
                                                         }}
                                                     >
                                                         Aa
@@ -1067,11 +1135,11 @@ const DesignTab = () => {
                                                 className="cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
                                             >
                                                 <div className="p-3 flex flex-col items-center gap-2">
-                                                    <span 
+                                                    <span
                                                         className="text-gray-800"
-                                                        style={{ 
+                                                        style={{
                                                             fontFamily: selectedFont,
-                                                            fontSize: size.size 
+                                                            fontSize: size.size
                                                         }}
                                                     >
                                                         Aa
@@ -1088,20 +1156,20 @@ const DesignTab = () => {
                                     <h3 className="text-lg font-semibold mb-4">Preview</h3>
                                     <Card className="p-6 bg-gray-50">
                                         <div className="space-y-4">
-                                            <h2 
+                                            <h2
                                                 className="text-2xl font-bold text-gray-900"
                                                 style={{ fontFamily: selectedFont }}
                                             >
                                                 Your Profile Title
                                             </h2>
-                                            <p 
+                                            <p
                                                 className="text-gray-600"
                                                 style={{ fontFamily: selectedFont }}
                                             >
                                                 This is how your profile text will look with the selected font. You can see the difference in typography and readability.
                                             </p>
                                             <div className="flex gap-2">
-                                                <span 
+                                                <span
                                                     className="text-sm text-gray-500"
                                                     style={{ fontFamily: selectedFont }}
                                                 >

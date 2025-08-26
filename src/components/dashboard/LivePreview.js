@@ -224,6 +224,9 @@ export default function LivePreview() {
                 )}
               </>
             )}
+            {(wallpaper === 'Image' || wallpaper === 'Video') && (
+              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint||0))/100})` }} />
+            )}
             <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
               {/* Profile */}
               <div className="text-center mb-6">

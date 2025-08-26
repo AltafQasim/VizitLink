@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap, Upload, X, Undo2, Redo2, Save } from "lucide-react";
 import { Button } from "../../ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
+import { Input } from "../../ui/input";
 import { Switch } from "../../ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Card } from "../../ui/card";
@@ -16,6 +18,11 @@ const DesignTab = () => {
     const [activeTab, setActiveTab] = useState("Customizable");
     const [activeStyleTab, setActiveStyleTab] = useState("Presets");
     const [isSaving, setIsSaving] = useState(false);
+
+    // Wallpaper Image modal state
+    const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
+    const [wallpaperModalStep, setWallpaperModalStep] = useState("menu"); // menu | upload | gallery
+    const [galleryQuery, setGalleryQuery] = useState("");
 
 
 
@@ -93,8 +100,6 @@ const DesignTab = () => {
     // Enhanced design change handlers with visual feedback
     const handleThemeChange = (themeName) => {
         // When theme is selected, remove wallpaper selection
-        console.log('Before theme change:', { theme: data?.design?.theme, wallpaper: data?.design?.wallpaper });
-        
         updateData({
             design: {
                 ...data.design,
@@ -102,15 +107,16 @@ const DesignTab = () => {
                 wallpaper: "" // Clear wallpaper selection
             }
         });
-        
-        console.log('After theme change:', { theme: themeName, wallpaper: "" });
         toast.success(`Theme changed to ${themeName}`);
     };
 
     const handleWallpaperChange = (wallpaperName) => {
+        if (wallpaperName === "Image") {
+            setIsWallpaperModalOpen(true);
+            setWallpaperModalStep("menu");
+            return;
+        }
         // When wallpaper is selected, remove theme selection
-        console.log('Before wallpaper change:', { theme: data?.design?.theme, wallpaper: data?.design?.wallpaper });
-        
         updateData({
             design: {
                 ...data.design,
@@ -118,8 +124,6 @@ const DesignTab = () => {
                 theme: "" // Clear theme selection
             }
         });
-        
-        console.log('After wallpaper change:', { theme: "", wallpaper: wallpaperName });
         toast.success(`Wallpaper changed to ${wallpaperName}`);
     };
 
@@ -199,7 +203,7 @@ const DesignTab = () => {
         { name: "Gradient", preview: "bg-gradient-to-br from-gray-400 to-gray-600", icon: true, type: "gradient" },
         { name: "Blur", preview: "bg-gradient-to-br from-blue-200 to-purple-200", icon: true, type: "blur" },
         { name: "Pattern", preview: "bg-gradient-to-br from-blue-200 to-gray-300", icon: true, type: "pattern" },
-        { name: "Image", preview: "bg-gradient-to-br from-orange-500 via-red-500 to-black", icon: true, type: "image" },
+        { name: "Image", preview: selectedWallpaper === "Image" && data?.design?.wallpaperImage ? "" : "bg-gradient-to-br from-orange-500 via-red-500 to-black", icon: true, type: "image" },
         { name: "Video", preview: "bg-gradient-to-br from-gray-600 to-gray-800", icon: true, isPro: true, type: "video" },
     ];
 
@@ -233,6 +237,40 @@ const DesignTab = () => {
         { name: "Merriweather", family: "Merriweather", weight: "400", selected: selectedFont === "Merriweather" },
         { name: "Source Sans Pro", family: "Source Sans Pro", weight: "400", selected: selectedFont === "Source Sans Pro" },
     ];
+
+    // Simple Unsplash placeholders (50 images). In future, can be replaced by API.
+    const getUnsplashPlaceholders = (q = "") => {
+        const topics = [
+            "nature","city","tech","abstract","ocean","forest","mountain","desert","sunset","night",
+            "neon","pastel","pattern","gradient","texture","sky","clouds","space","water","fire",
+            "flowers","leaves","rocks","metal","wood","glass","bokeh","minimal","architecture","street",
+            "snow","rain","autumn","spring","summer","winter","beach","lake","river","valley",
+            "studio","portrait","aesthetic","background","landscape","macro","vintage","modern","dark","light"
+        ];
+        const base = `https://images.unsplash.com/photo-`;
+        const ids = [
+            "1500530855697-b586d89ba3ee","1501785888041-af3ef285b470","1500534314209-a25ddb2bd429","1501594907352-04cda38ebc29",
+            "1500534314209-a25ddb2bd429","1517812983140-6f53a42c9c56","1496307042754-b4aa456c4a2d","1493247035880-8f8b81a407f6",
+            "1500534314209-a25ddb2bd429","1500534314209-a25ddb2bd429","1520975916090-3105956dac38","1520974735194-54a56612ee37",
+            "1520975916090-3105956dac38","1519681393784-d120267933ba","1482192596544-9eb780fc7f66","1472214103451-9374bd1c798e",
+            "1469474968028-56623f02e42e","1469474968028-56623f02e42e","1449157291145-7efd050a4d0e","1491972690050-ba117db4dc09",
+            "1470770903676-69b98201ea1c","1469474968028-56623f02e42e","1520974735194-54a56612ee37","1519681393784-d120267933ba",
+            "1469474968028-56623f02e42e","1500534314209-a25ddb2bd429","1520975916090-3105956dac38","1500534314209-a25ddb2bd429",
+            "1496307042754-b4aa456c4a2d","1493247035880-8f8b81a407f6","1501785888041-af3ef285b470","1501594907352-04cda38ebc29",
+            "1500530855697-b586d89ba3ee","1517812983140-6f53a42c9c56","1491972690050-ba117db4dc09","1482192596544-9eb780fc7f66",
+            "1472214103451-9374bd1c798e","1520974735194-54a56612ee37","1520975916090-3105956dac38","1519681393784-d120267933ba",
+            "1469474968028-56623f02e42e","1500534314209-a25ddb2bd429","1493247035880-8f8b81a407f6","1496307042754-b4aa456c4a2d",
+            "1501594907352-04cda38ebc29","1501785888041-af3ef285b470","1500530855697-b586d89ba3ee","1491972690050-ba117db4dc09",
+            "1517812983140-6f53a42c9c56","1482192596544-9eb780fc7f66"
+        ];
+        const filtered = topics.filter(t => t.includes(q.toLowerCase())).slice(0, 10);
+        const urls = ids.slice(0, 50).map((id, i) => {
+            const fit = "&fit=crop&w=600&q=80";
+            return `${base}${id}?auto=format${fit}`;
+        });
+        // For now ignore query for images, keep it simple; query can be used later with API
+        return urls;
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -596,7 +634,10 @@ const DesignTab = () => {
                                 >
                                     <div className="aspect-[3/4] p-3">
                                         {/* Main Preview Area */}
-                                        <div className={`w-full h-20 rounded-xl mb-2 flex items-center justify-center relative overflow-hidden ${wallpaper.preview}`}>
+                                        <div className={`w-full h-20 rounded-xl mb-2 flex items-center justify-center relative overflow-hidden ${wallpaper.type !== 'image' ? wallpaper.preview : ''}`}>
+                                            {wallpaper.type === 'image' && selectedWallpaper === 'Image' && data?.design?.wallpaperImage && (
+                                                <img src={data.design.wallpaperImage} alt="Selected wallpaper" className="absolute inset-0 w-full h-full object-cover" />
+                                            )}
                                             {/* Content Type Overlay */}
                                             {wallpaper.type === "gradient" && (
                                                 <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
@@ -683,6 +724,111 @@ const DesignTab = () => {
                                 </Card>
                             ))}
                         </div>
+
+                        {/* Wallpaper Image Modal */}
+                        <Dialog open={isWallpaperModalOpen} onOpenChange={setIsWallpaperModalOpen}>
+                          <DialogContent className="max-w-xl">
+                            <DialogHeader>
+                              <DialogTitle>Choose an image</DialogTitle>
+                              <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
+                            </DialogHeader>
+
+                            {wallpaperModalStep === 'menu' && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                <Card onClick={() => setWallpaperModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                  <div className="flex items-center gap-3">
+                                    <Upload className="w-5 h-5" />
+                                    <div>
+                                      <p className="font-medium">Upload your own</p>
+                                      <p className="text-xs text-gray-500">Use an image from your device</p>
+                                    </div>
+                                  </div>
+                                </Card>
+                                <Card onClick={() => setWallpaperModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                  <div className="flex items-center gap-3">
+                                    <Image className="w-5 h-5" />
+                                    <div>
+                                      <p className="font-medium">Select royalty-free image</p>
+                                      <p className="text-xs text-gray-500">Browse curated Unsplash images</p>
+                                    </div>
+                                  </div>
+                                </Card>
+                              </div>
+                            )}
+
+                            {wallpaperModalStep === 'upload' && (
+                              <div className="mt-4">
+                                <p className="text-sm font-medium mb-2">Upload Image</p>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                  <p className="text-sm text-gray-700">Select file to upload,</p>
+                                  <p className="text-sm text-gray-500">or drag-and-drop file</p>
+                                  <p className="text-xs text-gray-400 mt-2">Allowed file types: JPEG, PNG, WebP, GIF, AVIF, BMP, HEIC, HEIF</p>
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const reader = new FileReader();
+                                      reader.onload = (ev) => {
+                                        const imageData = ev.target?.result;
+                                        if (!imageData) return;
+                                        updateData({
+                                          design: {
+                                            ...data.design,
+                                            wallpaper: 'Image',
+                                            theme: '',
+                                            wallpaperImage: imageData,
+                                          }
+                                        });
+                                        toast.success('Image set as wallpaper');
+                                        setIsWallpaperModalOpen(false);
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }}
+                                    className="mt-4"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {wallpaperModalStep === 'gallery' && (
+                              <div className="mt-4">
+                                <Input
+                                  placeholder="Search images (e.g., nature, city, abstract)"
+                                  value={galleryQuery}
+                                  onChange={(e) => setGalleryQuery(e.target.value)}
+                                  className="mb-3"
+                                />
+                                <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
+                                  {getUnsplashPlaceholders(galleryQuery).map((src, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      className="relative group rounded overflow-hidden"
+                                      onClick={() => {
+                                        updateData({
+                                          design: {
+                                            ...data.design,
+                                            wallpaper: 'Image',
+                                            theme: '',
+                                            wallpaperImage: src,
+                                          }
+                                        });
+                                        toast.success('Image set as wallpaper');
+                                        setIsWallpaperModalOpen(false);
+                                      }}
+                                    >
+                                      <img src={src} alt="Unsplash" className="w-full h-24 object-cover" />
+                                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                          </DialogContent>
+                        </Dialog>
 
                         <div>
                             <h3 className="text-lg font-semibold mb-4">Color</h3>

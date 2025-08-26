@@ -2,14 +2,14 @@
 
 import { motion } from 'framer-motion';
 import { useDashboard } from '../../context/DashboardContext';
-import { 
-  Eye, 
-  EyeOff, 
+import {
+  Eye,
+  EyeOff,
   Lock,
   ExternalLink
 } from 'lucide-react';
 import Image from 'next/image';
-import { 
+import {
   FaInstagram, FaYoutube, FaTwitter, FaFacebook, FaLinkedin, FaSnapchatGhost, FaPinterest, FaTiktok, FaReddit, FaGithub, FaDribbble, FaBehance, FaMedium, FaSpotify, FaSoundcloud, FaTwitch, FaDiscord, FaWhatsapp, FaTelegram, FaGlobe
 } from 'react-icons/fa';
 import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad, SiLinktree } from 'react-icons/si';
@@ -91,8 +91,8 @@ export default function LivePreview() {
 
   // Get design settings
   const design = data?.design || {};
-  const theme = design.theme || 'Blocks';
-  const wallpaper = design.wallpaper || 'Hero';
+  const theme = design.theme || '';
+  const wallpaper = design.wallpaper || '';
   const buttonStyle = design.buttonStyle || 'Minimal';
   const fontFamily = design.fontFamily || 'Inter';
   const hideLinktreeFooter = design.hideLinktreeFooter || false;
@@ -125,6 +125,17 @@ export default function LivePreview() {
     'Ruby': { background: 'bg-gradient-to-br from-red-500 to-pink-600', textColor: 'text-white' },
   };
 
+  // Wallpaper styles mapping
+  const wallpaperStyles = {
+    'Hero': { background: 'bg-gradient-to-br from-blue-900 to-teal-400', textColor: 'text-white' },
+    'Fill': { background: 'bg-gray-100', textColor: 'text-black' },
+    'Gradient': { background: 'bg-gradient-to-br from-gray-400 to-gray-600', textColor: 'text-white' },
+    'Blur': { background: 'bg-gradient-to-br from-blue-200 to-purple-200', textColor: 'text-black' },
+    'Pattern': { background: 'bg-gradient-to-br from-blue-200 to-gray-300', textColor: 'text-black' },
+    'Image': { background: 'bg-gradient-to-br from-orange-500 via-red-500 to-black', textColor: 'text-white' },
+    'Video': { background: 'bg-gradient-to-br from-gray-600 to-gray-800', textColor: 'text-white' },
+  };
+
   // Button styles mapping
   const buttonStyles = {
     'Minimal': 'border border-gray-400 bg-transparent text-black rounded-lg',
@@ -138,14 +149,29 @@ export default function LivePreview() {
     'Industrial': 'bg-transparent text-black rounded border border-gray-600',
   };
 
-  const currentTheme = themeStyles[theme] || themeStyles['Blocks'];
+  // Determine which styling to use (wallpaper takes priority over theme)
+  let currentBackground, currentTextColor;
+
+  if (wallpaper === 'Image' && design.wallpaperImage) {
+    currentBackground = '';
+    currentTextColor = 'text-white';
+  } else if (theme && themeStyles[theme]) {
+    // Use theme styling if no wallpaper selected
+    currentBackground = themeStyles[theme].background;
+    currentTextColor = themeStyles[theme].textColor;
+  } else {
+    // Default fallback
+    currentBackground = 'bg-gray-100';
+    currentTextColor = 'text-black';
+  }
+
   const currentButtonStyle = buttonStyles[buttonStyle] || buttonStyles['Minimal'];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex w-[420px] bg-gray-50 border-l border-gray-200 p-6 flex-col"
+      className="hidden lg:flex w-[420px] bg-gray-50 border-l border-gray-200 py-6 px-4 flex-col"
     >
       <div className="mb-6">
         <h3 className="font-semibold text-gray-900 mb-2">Live Preview</h3>
@@ -154,162 +180,160 @@ export default function LivePreview() {
 
       {/* Mobile mockup */}
       <div className="flex items-center justify-center">
-        <div className="bg-black rounded-3xl shadow-2xl p-4 w-full max-w-xs">
-          {/* Status bar */}
-          <div className="flex justify-between items-center mb-4 text-white text-xs">
-            <span>9:41</span>
-            <div className="flex items-center space-x-1">
-              <div className="w-4 h-2 bg-white rounded-sm"></div>
-              <div className="w-1 h-1 bg-white rounded-full"></div>
-            </div>
-          </div>
+        <div className="bg-black rounded-3xl shadow-2xl p-1 w-full h-full max-w-sm">
 
           {/* Content */}
-          <div className={`rounded-2xl p-6 min-h-[400px] max-h-[500px] overflow-y-auto ${currentTheme.background}`}>
-            {/* Profile */}
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
-                {data?.profile?.avatar ? (
-                  <img 
-                    src={data.profile.avatar} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl font-bold text-white">
-                    {data?.profile?.displayName?.charAt(0).toUpperCase() || 'A'}
-                  </span>
-                )}
-              </div>
-              <h2 
-                className={`text-lg font-bold mb-1 ${currentTheme.textColor}`}
-                style={{ fontFamily: fontFamily }}
-              >
-                {data?.profile?.displayName}
-              </h2>
-              <p 
-                className={`text-sm mb-3 ${currentTheme.textColor === 'text-white' ? 'text-white/80' : 'text-gray-600'}`}
-                style={{ fontFamily: fontFamily }}
-              >
-                {data?.profile?.bio}
-              </p>
-            </div>
-
-            {/* Links */}
-            <div className="space-y-3">
-              {data?.links
-                ?.filter(link => link.active)
-                .sort((a, b) => a.order - b.order)
-                .map((link) => {
-                  const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
-                  
-                  return (
-                    <motion.a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`block w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <div className="flex items-center space-x-3">
-                        {IconComponent ? (
-                          <IconComponent 
-                            className="w-5 h-5" 
-                            style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
-                          />
-                        ) : (
-                          <span className="text-lg">{link.icon}</span>
-                        )}
-                        <span className="font-medium" style={{ fontFamily: fontFamily }}>{link.title}</span>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-gray-400" />
-                    </motion.a>
-                  );
-                })}
-            </div>
-
-            {/* Shop section */}
-            {(data?.products || []).filter(p => p.active).length > 0 && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className={`font-semibold ${currentTheme.textColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
-                  <button className={`text-sm ${currentTheme.textColor === 'text-white' ? 'text-white/80' : 'text-purple-600'}`}>View all</button>
+          <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
+            {wallpaper === 'Image' && design.wallpaperImage && (
+              <img src={design.wallpaperImage} alt="Wallpaper" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+            <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
+              {/* Profile */}
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                  {data?.profile?.avatar ? (
+                    <img
+                      src={data.profile.avatar}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-bold text-white">
+                      {data?.profile?.displayName?.charAt(0).toUpperCase() || 'A'}
+                    </span>
+                  )}
                 </div>
-                <div className="space-y-3">
-                  {(data.products || [])
-                    .filter(p => p.active)
-                    .map((product) => (
+                <h2
+                  className={`text-lg font-bold mb-1 ${currentTextColor}`}
+                  style={{ fontFamily: fontFamily }}
+                >
+                  {data?.profile?.displayName}
+                </h2>
+                <p
+                  className={`text-sm mb-3 ${currentTextColor === 'text-white' ? 'text-white/80' : 'text-gray-600'}`}
+                  style={{ fontFamily: fontFamily }}
+                >
+                  {data?.profile?.bio}
+                </p>
+              </div>
+
+              {/* Links */}
+              <div className="space-y-3">
+                {data?.links
+                  ?.filter(link => link.active)
+                  .sort((a, b) => a.order - b.order)
+                  .map((link) => {
+                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+
+                    return (
                       <motion.a
-                        key={product.id}
-                        href={product.url}
+                        key={link.id}
+                        href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`block rounded-lg p-3 hover:opacity-80 transition-colors ${currentTheme.textColor === 'text-white' ? 'bg-white/10' : 'bg-purple-50'}`}
+                        className={`block w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
-                            {product.image ? (
-                              <Image
-                                src={product.image}
-                                alt={product.title || 'Product'}
-                                fill
-                                className="object-cover"
-                                sizes="48px"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-100" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={`font-medium text-sm truncate ${currentTheme.textColor}`} style={{ fontFamily: fontFamily }}>{product.title}</p>
-                            <p className={`text-sm ${currentTheme.textColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>{product.brand || 'Unknown'}</p>
-                            <p className="text-sm font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
-                          </div>
+                          {IconComponent ? (
+                            <IconComponent
+                              className="w-5 h-5"
+                              style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                            />
+                          ) : (
+                            <span className="text-lg">{link.icon}</span>
+                          )}
+                          <span className="font-medium" style={{ fontFamily: fontFamily }}>{link.title}</span>
                         </div>
+                        <ExternalLink className="w-4 h-4 text-gray-400" />
                       </motion.a>
-                    ))}
+                    );
+                  })}
+              </div>
+
+              {/* Shop section */}
+              {(data?.products || []).filter(p => p.active).length > 0 && (
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className={`font-semibold ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
+                    <button className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/80' : 'text-purple-600'}`}>View all</button>
+                  </div>
+                  <div className="space-y-3">
+                    {(data.products || [])
+                      .filter(p => p.active)
+                      .map((product) => (
+                        <motion.a
+                          key={product.id}
+                          href={product.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`block rounded-lg p-3 hover:opacity-80 transition-colors ${currentTextColor === 'text-white' ? 'bg-white/10' : 'bg-purple-50'}`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
+                              {product.image ? (
+                                <Image
+                                  src={product.image}
+                                  alt={product.title || 'Product'}
+                                  fill
+                                  className="object-cover"
+                                  sizes="48px"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gray-100" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-medium text-sm truncate ${currentTextColor}`} style={{ fontFamily: fontFamily }}>{product.title}</p>
+                              <p className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>{product.brand || 'Unknown'}</p>
+                              <p className="text-sm font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
+                            </div>
+                          </div>
+                        </motion.a>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Social icons */}
+              <div className="mt-6 flex justify-center space-x-4">
+                {data?.links
+                  ?.filter(link => link.active)
+                  .slice(0, 5)
+                  .map((link) => {
+                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+                    return (
+                      <Link
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${currentTextColor === 'text-white' ? 'bg-white/20' : 'bg-gray-200'}`}
+                      >
+                        <IconComponent
+                          className="w-5 h-5"
+                          style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                        />
+                      </Link>
+                    )
+                  })}
+              </div>
+            </div>
+
+            {/* Hide logo notice */}
+            {!hideLinktreeFooter && (
+              <div className="mt-4 text-center">
+                <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
+                  <Lock className="w-3 h-3" />
+                  <span>Hide VizitLink logo</span>
+                  <span className="text-purple-600">🔒</span>
                 </div>
               </div>
             )}
-
-            {/* Social icons */}
-            <div className="mt-6 flex justify-center space-x-4">
-              {data?.links
-                ?.filter(link => link.active)
-                .slice(0, 5)
-                .map((link) => {
-                  const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
-                  return(
-                  <Link
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${currentTheme.textColor === 'text-white' ? 'bg-white/20' : 'bg-gray-200'}`}
-                  >
-                    <IconComponent 
-                      className="w-5 h-5" 
-                      style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
-                    />
-                  </Link>
-                )})}
-            </div>
           </div>
-
-          {/* Hide logo notice */}
-          {!hideLinktreeFooter && (
-            <div className="mt-4 text-center">
-              <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
-                <Lock className="w-3 h-3" />
-                <span>Hide VizitLink logo</span>
-                <span className="text-purple-600">🔒</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
 import {
   Eye,
@@ -88,6 +89,7 @@ const socialColorsMap = {
 
 export default function LivePreview() {
   const { data } = useDashboard();
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   // Get design settings
   const design = data?.design || {};
@@ -96,6 +98,14 @@ export default function LivePreview() {
   const buttonStyle = design.buttonStyle || 'Minimal';
   const fontFamily = design.fontFamily || 'Inter';
   const hideLinktreeFooter = design.hideLinktreeFooter || false;
+  
+  useEffect(() => {
+    if (wallpaper === 'Video' && design.wallpaperVideo) {
+      setIsVideoLoading(true);
+    } else {
+      setIsVideoLoading(false);
+    }
+  }, [wallpaper, design.wallpaperVideo]);
 
   // Theme styles mapping
   const themeStyles = {
@@ -155,6 +165,12 @@ export default function LivePreview() {
   if (wallpaper === 'Image' && design.wallpaperImage) {
     currentBackground = '';
     currentTextColor = 'text-white';
+  } else if (wallpaper === 'Video' && design.wallpaperVideo) {
+    currentBackground = '';
+    currentTextColor = 'text-white';
+  } else if (wallpaper && wallpaperStyles[wallpaper]) {
+    currentBackground = wallpaperStyles[wallpaper].background;
+    currentTextColor = wallpaperStyles[wallpaper].textColor;
   } else if (theme && themeStyles[theme]) {
     // Use theme styling if no wallpaper selected
     currentBackground = themeStyles[theme].background;
@@ -186,6 +202,27 @@ export default function LivePreview() {
           <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
             {wallpaper === 'Image' && design.wallpaperImage && (
               <img src={design.wallpaperImage} alt="Wallpaper" className="absolute inset-0 w-full h-full object-cover" />
+            )}
+            {wallpaper === 'Video' && design.wallpaperVideo && (
+              <>
+                <video
+                  src={design.wallpaperVideo}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  onLoadedData={() => setIsVideoLoading(false)}
+                  onCanPlay={() => setIsVideoLoading(false)}
+                />
+                {isVideoLoading && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <div className="w-full h-full">
+                      <div className="h-full rounded-lg bg-white/10 animate-pulse" />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
               {/* Profile */}

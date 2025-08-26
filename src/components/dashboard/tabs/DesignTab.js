@@ -23,6 +23,21 @@ const DesignTab = () => {
     const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
     const [wallpaperModalStep, setWallpaperModalStep] = useState("menu"); // menu | upload | gallery
     const [galleryQuery, setGalleryQuery] = useState("");
+    const [isWallpaperVideoLoading, setIsWallpaperVideoLoading] = useState(false);
+
+    // Wallpaper Video modal state
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [videoModalStep, setVideoModalStep] = useState("menu"); // menu | upload | gallery
+    const [videoGalleryQuery, setVideoGalleryQuery] = useState("");
+    const [videoThumbLoading, setVideoThumbLoading] = useState({});
+
+    useEffect(() => {
+        if (data?.design?.wallpaper === 'Video' && data?.design?.wallpaperVideo) {
+            setIsWallpaperVideoLoading(true);
+        } else {
+            setIsWallpaperVideoLoading(false);
+        }
+    }, [data?.design?.wallpaper, data?.design?.wallpaperVideo]);
 
 
 
@@ -114,6 +129,11 @@ const DesignTab = () => {
         if (wallpaperName === "Image") {
             setIsWallpaperModalOpen(true);
             setWallpaperModalStep("menu");
+            return;
+        }
+        if (wallpaperName === "Video") {
+            setIsVideoModalOpen(true);
+            setVideoModalStep("menu");
             return;
         }
         // When wallpaper is selected, remove theme selection
@@ -271,6 +291,34 @@ const DesignTab = () => {
         // For now ignore query for images, keep it simple; query can be used later with API
         return urls;
     };
+
+    // Sample royalty-free videos from robust public sources (no API key required)
+    const getCoverrSamples = (q = "") => {
+        const urls = [
+            // W3Schools Big Buck Bunny (short)
+            "https://www.w3schools.com/html/mov_bbb.mp4",
+            // Sample-Videos
+            "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_5mb.mp4",
+            // Filesamples
+            "https://filesamples.com/samples/video/mp4/sample_960x400_ocean_with_audio.mp4",
+            "https://filesamples.com/samples/video/mp4/sample_640x360.mp4",
+            // Test-videos.co.uk
+            "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4",
+            "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4",
+            // Akamai (Sintel)
+            "https://media.w3.org/2010/05/sintel/trailer.mp4",
+            // More samples
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+        ];
+        return urls;
+    };
+
+    // Defaults for Image/Video wallpaper cards
+    const defaultWallpaperImage = getUnsplashPlaceholders()[0];
+    const defaultWallpaperVideo = getCoverrSamples()[0];
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -463,56 +511,32 @@ const DesignTab = () => {
                                     {themes.map((theme) => (
                                         <Card
                                             key={theme.name}
-                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
                                                 theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
                                             }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
-                                            <div className="aspect-[3/4] p-4">
-                                                {/* Main Preview Area */}
-                                                <div className={`w-full h-24 rounded-xl mb-3 flex items-center justify-center text-2xl font-bold ${theme.preview} ${theme.textColor} relative overflow-hidden`}>
-                                                    {/* Content Type Indicator */}
-                                                    {theme.type === "gradient" && (
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
-                                                    )}
-                                                    {theme.type === "solid" && (
-                                                        <div className="absolute inset-0 bg-white/10 rounded-xl"></div>
-                                                    )}
-                                                    
-                                                    {/* Theme-specific Icons */}
-                                                    {theme.name === "Air" && <span className="text-4xl">💨</span>}
-                                                    {theme.name === "Blocks" && <span className="text-4xl">🧱</span>}
-                                                    {theme.name === "Bloom" && <span className="text-4xl">🌸</span>}
-                                                    {theme.name === "Breeze" && <span className="text-4xl">🌬️</span>}
-                                                    {theme.name === "Lake" && <span className="text-4xl">🏞️</span>}
-                                                    {theme.name === "Mineral" && <span className="text-4xl">💎</span>}
-                                                    {theme.name === "Ocean" && <span className="text-4xl">🌊</span>}
-                                                    {theme.name === "Sunset" && <span className="text-4xl">🌅</span>}
-                                                    {theme.name === "Winter" && <span className="text-4xl">❄️</span>}
-                                                    {theme.name === "Spring" && <span className="text-4xl">🌱</span>}
-                                                    {theme.name === "Summer" && <span className="text-4xl">☀️</span>}
-                                                    {theme.name === "Autumn" && <span className="text-4xl">🍂</span>}
+                                            <div className={`aspect-[3/4] relative ${theme.preview} ${theme.textColor}`}>
+                                                {/* Overlay for readability */}
+                                                {theme.type === "gradient" && (
+                                                    <div className="absolute inset-0 bg-black/10" />
+                                                )}
+                                                <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                                                    {theme.name === "Air" && <span>💨</span>}
+                                                    {theme.name === "Blocks" && <span>🧱</span>}
+                                                    {theme.name === "Bloom" && <span>🌸</span>}
+                                                    {theme.name === "Breeze" && <span>🌬️</span>}
+                                                    {theme.name === "Lake" && <span>🏞️</span>}
+                                                    {theme.name === "Mineral" && <span>💎</span>}
+                                                    {theme.name === "Ocean" && <span>🌊</span>}
+                                                    {theme.name === "Sunset" && <span>🌅</span>}
+                                                    {theme.name === "Winter" && <span>❄️</span>}
+                                                    {theme.name === "Spring" && <span>🌱</span>}
+                                                    {theme.name === "Summer" && <span>☀️</span>}
+                                                    {theme.name === "Autumn" && <span>🍂</span>}
                                                 </div>
-                                                
-                                                {/* Secondary Preview */}
-                                                <div className={`w-full h-8 rounded-lg ${theme.preview} mb-3 relative overflow-hidden`}>
-                                                    {theme.type === "gradient" && (
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5"></div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Theme Name */}
-                                                <p className="text-sm font-semibold text-center text-gray-800">{theme.name}</p>
-                                                
-                                                {/* Type Badge */}
-                                                <div className="mt-2 flex justify-center">
-                                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                                        theme.type === "gradient" ? "bg-purple-100 text-purple-700" :
-                                                        theme.type === "solid" ? "bg-gray-100 text-gray-700" :
-                                                        "bg-blue-100 text-blue-700"
-                                                    }`}>
-                                                        {theme.type}
-                                                    </span>
+                                                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                                    <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
                                             </div>
                                             
@@ -539,56 +563,31 @@ const DesignTab = () => {
                                     {curatedThemes.map((theme) => (
                                         <Card
                                             key={theme.name}
-                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
                                                 theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
                                             }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
-                                            <div className="aspect-[3/4] p-4">
-                                                {/* Main Preview Area */}
-                                                <div className={`w-full h-24 rounded-xl mb-3 flex items-center justify-center text-2xl font-bold ${theme.preview} ${theme.textColor} relative overflow-hidden`}>
-                                                    {/* Content Type Indicator */}
-                                                    {theme.type === "gradient" && (
-                                                        <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
-                                                    )}
-                                                    {theme.type === "solid" && (
-                                                        <div className="absolute inset-0 bg-white/10 rounded-xl"></div>
-                                                    )}
-                                                    
-                                                    {/* Theme-specific Icons */}
-                                                    {theme.name === "Midnight" && <span className="text-4xl">🌙</span>}
-                                                    {theme.name === "Aurora" && <span className="text-4xl">🌌</span>}
-                                                    {theme.name === "Coral" && <span className="text-4xl">🐟</span>}
-                                                    {theme.name === "Forest" && <span className="text-4xl">🌲</span>}
-                                                    {theme.name === "Lavender" && <span className="text-4xl">💐</span>}
-                                                    {theme.name === "Sage" && <span className="text-4xl">🌿</span>}
-                                                    {theme.name === "Rose" && <span className="text-4xl">🌹</span>}
-                                                    {theme.name === "Sky" && <span className="text-4xl">🌤️</span>}
-                                                    {theme.name === "Amber" && <span className="text-4xl">🔆</span>}
-                                                    {theme.name === "Indigo" && <span className="text-4xl">💙</span>}
-                                                    {theme.name === "Teal" && <span className="text-4xl">💧</span>}
-                                                    {theme.name === "Ruby" && <span className="text-4xl">💎</span>}
+                                            <div className={`aspect-[3/4] relative ${theme.preview} ${theme.textColor}`}>
+                                                {theme.type === "gradient" && (
+                                                    <div className="absolute inset-0 bg-black/10" />
+                                                )}
+                                                <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                                                    {theme.name === "Midnight" && <span>🌙</span>}
+                                                    {theme.name === "Aurora" && <span>🌌</span>}
+                                                    {theme.name === "Coral" && <span>🐟</span>}
+                                                    {theme.name === "Forest" && <span>🌲</span>}
+                                                    {theme.name === "Lavender" && <span>💐</span>}
+                                                    {theme.name === "Sage" && <span>🌿</span>}
+                                                    {theme.name === "Rose" && <span>🌹</span>}
+                                                    {theme.name === "Sky" && <span>🌤️</span>}
+                                                    {theme.name === "Amber" && <span>🔆</span>}
+                                                    {theme.name === "Indigo" && <span>💙</span>}
+                                                    {theme.name === "Teal" && <span>💧</span>}
+                                                    {theme.name === "Ruby" && <span>💎</span>}
                                                 </div>
-                                                
-                                                {/* Secondary Preview */}
-                                                <div className={`w-full h-8 rounded-lg ${theme.preview} mb-3 relative overflow-hidden`}>
-                                                    {theme.type === "gradient" && (
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/5"></div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Theme Name */}
-                                                <p className="text-sm font-semibold text-center text-gray-800">{theme.name}</p>
-                                                
-                                                {/* Type Badge */}
-                                                <div className="mt-2 flex justify-center">
-                                                    <span className={`text-xs px-2 py-1 rounded-full ${
-                                                        theme.type === "gradient" ? "bg-purple-100 text-purple-700" :
-                                                        theme.type === "solid" ? "bg-gray-100 text-gray-700" :
-                                                        "bg-blue-100 text-blue-700"
-                                                    }`}>
-                                                        {theme.type}
-                                                    </span>
+                                                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                                    <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
                                             </div>
                                             
@@ -627,82 +626,50 @@ const DesignTab = () => {
                             {wallpapers.map((wallpaper) => (
                                 <Card
                                     key={wallpaper.name}
-                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${
                                         selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
                                     }`}
                                     onClick={() => handleWallpaperChange(wallpaper.name)}
                                 >
-                                    <div className="aspect-[3/4] p-3">
-                                        {/* Main Preview Area */}
-                                        <div className={`w-full h-20 rounded-xl mb-2 flex items-center justify-center relative overflow-hidden ${wallpaper.type !== 'image' ? wallpaper.preview : ''}`}>
-                                            {wallpaper.type === 'image' && selectedWallpaper === 'Image' && data?.design?.wallpaperImage && (
-                                                <img src={data.design.wallpaperImage} alt="Selected wallpaper" className="absolute inset-0 w-full h-full object-cover" />
-                                            )}
-                                            {/* Content Type Overlay */}
-                                            {wallpaper.type === "gradient" && (
-                                                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
-                                            )}
-                                            {wallpaper.type === "blur" && (
-                                                <div className="absolute inset-0 backdrop-blur-sm bg-white/20"></div>
-                                            )}
-                                            {wallpaper.type === "pattern" && (
-                                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]"></div>
-                                            )}
-                                            
-                                            {/* Content-specific Icons */}
-                                            {wallpaper.type === "image" && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                                                        <span className="text-white text-lg">📷</span>
+                                    <div className={`aspect-[3/4] relative ${wallpaper.type !== 'image' && !wallpaper.style ? wallpaper.preview : ''}`} style={wallpaper.style || undefined}>
+                                        {wallpaper.type === 'image' && (
+                                            <img src={(selectedWallpaper === 'Image' && data?.design?.wallpaperImage) ? data.design.wallpaperImage : defaultWallpaperImage} alt="Selected wallpaper" className="absolute inset-0 w-full h-full object-cover" />
+                                        )}
+                                        {wallpaper.type === 'video' && (
+                                            <>
+                                                {selectedWallpaper === 'Video' && isWallpaperVideoLoading && (
+                                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                                        <div className="w-full h-full">
+                                                            <div className="h-full rounded-lg bg-white/10 animate-pulse" />
+                                                        </div>
                                                     </div>
-                                                    <span className="text-white text-sm font-medium">Image</span>
-                                                </div>
-                                            )}
-                                            {wallpaper.type === "video" && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                                                        <span className="text-white text-lg">🎥</span>
-                                                    </div>
-                                                    <span className="text-white text-sm font-medium">Video</span>
-                                                </div>
-                                            )}
-                                            {wallpaper.type === "gradient" && (
-                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                                                </div>
-                                            )}
-                                            {wallpaper.type === "solid" && (
-                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                                                </div>
-                                            )}
-                                            {wallpaper.type === "blur" && (
-                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                    <span className="text-white text-xs">✨</span>
-                                                </div>
-                                            )}
-                                            {wallpaper.type === "pattern" && (
-                                                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                                    <span className="text-white text-xs">🔲</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        
-                                        {/* Wallpaper Name */}
-                                        <p className="text-xs font-semibold text-center text-gray-800 mb-2">{wallpaper.name}</p>
-                                        
-                                        {/* Type Badge */}
-                                        <div className="flex justify-center">
-                                            <span className={`text-xs px-2 py-1 rounded-full ${
-                                                wallpaper.type === "image" ? "bg-blue-100 text-blue-700" :
-                                                wallpaper.type === "video" ? "bg-red-100 text-red-700" :
-                                                wallpaper.type === "gradient" ? "bg-purple-100 text-purple-700" :
-                                                wallpaper.type === "solid" ? "bg-gray-100 text-gray-700" :
-                                                wallpaper.type === "blur" ? "bg-indigo-100 text-indigo-700" :
-                                                "bg-orange-100 text-orange-700"
-                                            }`}>
-                                                {wallpaper.type}
-                                            </span>
+                                                )}
+                                                <video
+                                                    src={data?.design?.wallpaperVideo || defaultWallpaperVideo}
+                                                    className="absolute inset-0 w-full h-full object-cover"
+                                                    muted
+                                                    playsInline
+                                                    autoPlay
+                                                    loop
+                                                    onLoadedData={() => setIsWallpaperVideoLoading(false)}
+                                                    onCanPlay={() => setIsWallpaperVideoLoading(false)}
+                                                />
+                                            </>
+                                        )}
+                                        {/* Overlays */}
+                                        {wallpaper.type === "gradient" && (
+                                            <div className="absolute inset-0 bg-black/10" />
+                                        )}
+                                        {wallpaper.type === "blur" && (
+                                            <div className="absolute inset-0 backdrop-blur-sm bg-white/10" />
+                                        )}
+                                        {wallpaper.type === "pattern" && (
+                                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)]" />
+                                        )}
+
+                                        {/* Bottom labels */}
+                                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                            <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{wallpaper.name}</span>
                                         </div>
                                     </div>
                                     
@@ -820,6 +787,111 @@ const DesignTab = () => {
                                       }}
                                     >
                                       <img src={src} alt="Unsplash" className="w-full h-24 object-cover" />
+                                      <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Wallpaper Video Modal */}
+                        <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
+                          <DialogContent className="max-w-xl">
+                            <DialogHeader>
+                              <DialogTitle>Choose a video</DialogTitle>
+                              <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
+                            </DialogHeader>
+
+                            {videoModalStep === 'menu' && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                <Card onClick={() => setVideoModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                  <div className="flex items-center gap-3">
+                                    <Upload className="w-5 h-5" />
+                                    <div>
+                                      <p className="font-medium">Upload your own</p>
+                                      <p className="text-xs text-gray-500">Use a video from your device</p>
+                                    </div>
+                                  </div>
+                                </Card>
+                                <Card onClick={() => setVideoModalStep('gallery')} className="p-4 cursor-pointer hover:shadow-md transition">
+                                  <div className="flex items-center gap-3">
+                                    <Image className="w-5 h-5" />
+                                    <div>
+                                      <p className="font-medium">Select royalty-free video</p>
+                                      <p className="text-xs text-gray-500">Browse curated Coverr videos</p>
+                                    </div>
+                                  </div>
+                                </Card>
+                              </div>
+                            )}
+
+                            {videoModalStep === 'upload' && (
+                              <div className="mt-4">
+                                <p className="text-sm font-medium mb-2">Upload Video</p>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                  <p className="text-sm text-gray-700">Select file to upload,</p>
+                                  <p className="text-sm text-gray-500">or drag-and-drop file</p>
+                                  <p className="text-xs text-gray-400 mt-2">Allowed file types: MP4, WebM, Ogg</p>
+                                  <input
+                                    type="file"
+                                    accept="video/mp4,video/webm,video/ogg"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      const reader = new FileReader();
+                                      reader.onload = (ev) => {
+                                        const videoData = ev.target?.result;
+                                        if (!videoData) return;
+                                        updateData({
+                                          design: {
+                                            ...data.design,
+                                            wallpaper: 'Video',
+                                            theme: '',
+                                            wallpaperVideo: videoData,
+                                          }
+                                        });
+                                        toast.success('Video set as wallpaper');
+                                        setIsVideoModalOpen(false);
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }}
+                                    className="mt-4"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {videoModalStep === 'gallery' && (
+                              <div className="mt-4">
+                                <Input
+                                  placeholder="Search videos (e.g., nature, city, abstract)"
+                                  value={videoGalleryQuery}
+                                  onChange={(e) => setVideoGalleryQuery(e.target.value)}
+                                  className="mb-3"
+                                />
+                                <div className="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto">
+                                  {getCoverrSamples(videoGalleryQuery).map((src, idx) => (
+                                    <button
+                                      key={idx}
+                                      type="button"
+                                      className="relative group rounded overflow-hidden"
+                                      onClick={() => {
+                                        updateData({
+                                          design: {
+                                            ...data.design,
+                                            wallpaper: 'Video',
+                                            theme: '',
+                                            wallpaperVideo: src,
+                                          }
+                                        });
+                                        toast.success('Video set as wallpaper');
+                                        setIsVideoModalOpen(false);
+                                      }}
+                                    >
+                                      <video src={src} className="w-full h-28 object-cover" muted playsInline />
                                       <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
                                     </button>
                                   ))}

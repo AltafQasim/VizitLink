@@ -910,7 +910,7 @@ const DesignTab = () => {
                         <Dialog open={isTintModalOpen} onOpenChange={setIsTintModalOpen}>
                             <DialogContent className="max-w-xl">
                                 <DialogHeader>
-                                    <DialogTitle>Adjust tint</DialogTitle>
+                                    <DialogTitle>Adjust Tint</DialogTitle>
                                     <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
                                 </DialogHeader>
 
@@ -930,18 +930,18 @@ const DesignTab = () => {
                                             : "This amount of tint improves text visibility and helps make your content more accessible."}
                                     </p>
 
-                                    <div className="mt-4">
+                                    <div className="my-6">
                                         <input
                                             type="range"
                                             min={-20}
                                             max={80}
                                             value={tintValue}
                                             onChange={(e) => setTintValue(Number(e.target.value))}
-                                            className="w-full"
+                                            className="w-full h-1 mb-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-sm dark:bg-gray-700"
                                         />
                                         <div className="flex items-center justify-between w-full mt-2">
-                                            <Sun className="w-4 h-4" />
-                                            <Moon className="w-4 h-4" />
+                                            <Sun className="w-5 h-5" />
+                                            <Moon className="w-5 h-5" />
                                         </div>
                                     </div>
 

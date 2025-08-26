@@ -705,7 +705,7 @@ const DesignTab = () => {
                                 </DialogHeader>
 
                                 {wallpaperModalStep === 'menu' && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                    <div className="flex flex-col gap-4 mt-4">
                                         <Card onClick={() => setWallpaperModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
                                             <div className="flex items-center gap-3">
                                                 <Upload className="w-5 h-5" />
@@ -810,7 +810,7 @@ const DesignTab = () => {
                                 </DialogHeader>
 
                                 {videoModalStep === 'menu' && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                    <div className="flex flex-col gap-4 mt-4">
                                         <Card onClick={() => setVideoModalStep('upload')} className="p-4 cursor-pointer hover:shadow-md transition">
                                             <div className="flex items-center gap-3">
                                                 <Upload className="w-5 h-5" />

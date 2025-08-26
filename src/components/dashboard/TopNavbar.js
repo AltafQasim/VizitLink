@@ -19,7 +19,7 @@ import {
 
 export default function TopNavbar() {
   const { user, signOut } = useAuth();
-  const { data, hasUnsavedChanges, saveChanges } = useDashboard();
+  const { data } = useDashboard();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -28,10 +28,6 @@ export default function TopNavbar() {
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSave = async () => {
-    await saveChanges();
   };
 
   return (
@@ -72,21 +68,6 @@ export default function TopNavbar() {
 
       {/* Right side */}
       <div className="flex items-center space-x-4">
-        {/* Save button */}
-        {hasUnsavedChanges && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
-            <Button
-              onClick={handleSave}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              Save Changes
-            </Button>
-          </motion.div>
-        )}
-
         {/* Upgrade button */}
         <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
           <Crown className="w-4 h-4 mr-2" />

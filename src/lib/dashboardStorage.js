@@ -47,12 +47,15 @@ const defaultData = {
     },
   ],
   design: {
-    theme: 'default',
-    wallpaper: '',
+    theme: 'Blocks',
+    wallpaper: 'Hero',
     backgroundColor: '#ffffff',
     textColor: '#000000',
-    buttonStyle: 'rounded',
+    buttonStyle: 'Minimal',
     fontFamily: 'Inter',
+    fontWeight: '400',
+    fontSize: '16px',
+    hideLinktreeFooter: false,
   },
   analytics: {
     views: 1250,

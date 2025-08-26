@@ -1,20 +1,145 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, Edit, Share, Star, Home, Palette, Image, Wand2, ChevronRight, Zap, Upload, X, Undo2, Redo2, Save } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Switch } from "../../ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Card } from "../../ui/card";
+import { useDashboard } from "../../../context/DashboardContext";
+import toast, { Toaster } from 'react-hot-toast';
 
 const DesignTab = () => {
+    const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveChanges } = useDashboard();
+    const fileInputRef = useRef(null);
+    
     const [activeTab, setActiveTab] = useState("Customizable");
-    const [hideLinktreeFooter, setHideLinktreeFooter] = useState(false);
-    const [selectedTheme, setSelectedTheme] = useState("Blocks");
-    const [selectedWallpaper, setSelectedWallpaper] = useState("Hero");
-    const [selectedStyle, setSelectedStyle] = useState("Minimal");
     const [activeStyleTab, setActiveStyleTab] = useState("Presets");
-    const [selectedFont, setSelectedFont] = useState("Inter");
+    const [isSaving, setIsSaving] = useState(false);
+
+
+
+    // Enhanced action handlers with toast feedback
+    const handleUndo = () => {
+        if (canUndo) {
+            undo();
+            toast.success("Undone last action");
+            // Prevent focus issues
+            document.activeElement?.blur();
+        }
+    };
+
+    const handleRedo = () => {
+        if (canRedo) {
+            redo();
+            toast.success("Redone last action");
+            // Prevent focus issues
+            document.activeElement?.blur();
+        }
+    };
+
+    const handleSave = async () => {
+        if (hasUnsavedChanges) {
+            setIsSaving(true);
+            try {
+                await saveChanges();
+                toast.success("Changes saved successfully!");
+            } catch (error) {
+                toast.error("Failed to save changes");
+            } finally {
+                setIsSaving(false);
+            }
+        }
+    };
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            // Check if user is typing in an input field
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            // Undo: Ctrl+Z or Cmd+Z
+            if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+                event.preventDefault();
+                handleUndo();
+            }
+
+            // Redo: Ctrl+Y or Cmd+Y or Ctrl+Shift+Z
+            if ((event.ctrlKey || event.metaKey) && (event.key === 'y' || (event.key === 'z' && event.shiftKey))) {
+                event.preventDefault();
+                handleRedo();
+            }
+
+            // Save: Ctrl+S or Cmd+S
+            if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+                event.preventDefault();
+                handleSave();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [canUndo, canRedo, hasUnsavedChanges, undo, redo, saveChanges]);
+
+    // Get current design settings from context
+    const selectedTheme = data?.design?.theme || "Blocks";
+    const selectedWallpaper = data?.design?.wallpaper || "Hero";
+    const selectedStyle = data?.design?.buttonStyle || "Minimal";
+    const selectedFont = data?.design?.fontFamily || "Inter";
+    const hideLinktreeFooter = data?.design?.hideLinktreeFooter || false;
+
+    // Enhanced design change handlers with visual feedback
+    const handleThemeChange = (themeName) => {
+        updateDesignData({ theme: themeName });
+        toast.success(`Theme changed to ${themeName}`);
+    };
+
+    const handleWallpaperChange = (wallpaperName) => {
+        updateDesignData({ wallpaper: wallpaperName });
+        toast.success(`Wallpaper changed to ${wallpaperName}`);
+    };
+
+    const handleStyleChange = (styleName) => {
+        updateDesignData({ buttonStyle: styleName });
+        toast.success(`Button style changed to ${styleName}`);
+    };
+
+    const handleFontChange = (fontName) => {
+        updateDesignData({ fontFamily: fontName });
+        toast.success(`Font changed to ${fontName}`);
+    };
+
+    const handleHideFooterChange = (checked) => {
+        updateDesignData({ hideLinktreeFooter: checked });
+    };
+
+    const handleProfilePictureUpload = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const imageData = e.target.result;
+                updateData({
+                    profile: {
+                        ...data.profile,
+                        avatar: imageData
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeProfilePicture = () => {
+        updateData({
+            profile: {
+                ...data.profile,
+                avatar: ""
+            }
+        });
+    };
 
     const themes = [
         { name: "Air", preview: "bg-gray-100", textColor: "text-black", selected: selectedTheme === "Air", type: "gradient" },
@@ -89,7 +214,93 @@ const DesignTab = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto space-y-12">
+            {/* Toast Container */}
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        background: '#363636',
+                        color: '#fff',
+                    },
+                    success: {
+                        duration: 3000,
+                        iconTheme: {
+                            primary: '#10B981',
+                            secondary: '#fff',
+                        },
+                    },
+                    error: {
+                        duration: 4000,
+                        iconTheme: {
+                            primary: '#EF4444',
+                            secondary: '#fff',
+                        },
+                    },
+                }}
+            />
+            {/* Sticky Design Controls Header */}
+            <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm transform-gpu">
+                <div className="max-w-4xl mx-auto px-4 py-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleUndo}
+                                    disabled={!canUndo}
+                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200"
+                                >
+                                    <Undo2 className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Undo</span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleRedo}
+                                    disabled={!canRedo}
+                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200"
+                                >
+                                    <Redo2 className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Redo</span>
+                                </Button>
+                            </div>
+                            
+                            {/* Status indicator */}
+                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <div className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
+                                <span className="hidden sm:inline">
+                                    {hasUnsavedChanges ? 'Unsaved changes' : 'All changes saved'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3">
+                            {hasUnsavedChanges && (
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                                >
+                                    {isSaving ? (
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <Save className="w-4 h-4" />
+                                    )}
+                                    <span className="hidden sm:inline">
+                                        {isSaving ? "Saving..." : "Save Changes"}
+                                    </span>
+                                </Button>
+                            )}
+                            
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto space-y-12 px-4 py-6 overflow-visible">
 
                 {/* Profile Section */}
                 <section>
@@ -100,16 +311,40 @@ const DesignTab = () => {
 
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
-                            <Avatar className="h-20 w-20">
-                                <AvatarImage src="/lovable-uploads/bcf6d711-ef47-406e-893f-23ca9cb81b9a.png" />
-                                <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-600 text-white text-2xl font-bold">
-                                    A
-                                </AvatarFallback>
-                            </Avatar>
-                            <Button variant="outline" size="sm" className="gap-2">
-                                <Edit className="h-4 w-4" />
-                                Edit
-                            </Button>
+                            <div className="relative">
+                                <Avatar className="h-20 w-20">
+                                    <AvatarImage src={data?.profile?.avatar} />
+                                    <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-600 text-white text-2xl font-bold">
+                                        {data?.profile?.displayName?.charAt(0).toUpperCase() || 'A'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                {data?.profile?.avatar && (
+                                    <button
+                                        onClick={removeProfilePicture}
+                                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="gap-2"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <Upload className="h-4 w-4" />
+                                    {data?.profile?.avatar ? 'Change Photo' : 'Add Photo'}
+                                </Button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleProfilePictureUpload}
+                                    className="hidden"
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-4">
@@ -122,7 +357,7 @@ const DesignTab = () => {
                                     <Zap className="h-3 w-3 text-gray-400" />
                                     <Switch
                                         checked={hideLinktreeFooter}
-                                        onCheckedChange={setHideLinktreeFooter}
+                                        onCheckedChange={handleHideFooterChange}
                                     />
                                 </div>
                             </div>
@@ -170,7 +405,7 @@ const DesignTab = () => {
                                             className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
                                                 theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
                                             }`}
-                                            onClick={() => setSelectedTheme(theme.name)}
+                                            onClick={() => handleThemeChange(theme.name)}
                                         >
                                             <div className="aspect-[3/4] p-4">
                                                 {/* Main Preview Area */}
@@ -246,7 +481,7 @@ const DesignTab = () => {
                                             className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
                                                 theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
                                             }`}
-                                            onClick={() => setSelectedTheme(theme.name)}
+                                            onClick={() => handleThemeChange(theme.name)}
                                         >
                                             <div className="aspect-[3/4] p-4">
                                                 {/* Main Preview Area */}
@@ -333,7 +568,7 @@ const DesignTab = () => {
                                     className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
                                         selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
                                     }`}
-                                    onClick={() => setSelectedWallpaper(wallpaper.name)}
+                                    onClick={() => handleWallpaperChange(wallpaper.name)}
                                 >
                                     <div className="aspect-[3/4] p-3">
                                         {/* Main Preview Area */}
@@ -473,7 +708,7 @@ const DesignTab = () => {
                                             key={style.name}
                                             className={`cursor-pointer transition-all hover:scale-105 ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
                                                 }`}
-                                            onClick={() => setSelectedStyle(style.name)}
+                                            onClick={() => handleStyleChange(style.name)}
                                         >
                                             <div className="p-4 flex flex-col items-center gap-3">
                                                 <div className={`px-4 py-2 text-sm ${style.style}`}>
@@ -481,11 +716,11 @@ const DesignTab = () => {
                                                 </div>
                                                 <p className="text-sm font-medium text-center">{style.name}</p>
                                             </div>
-                                            {(style.name === "Retro" || style.name === "Modern") && (
+                                            {/* {(style.name === "Retro" || style.name === "Modern") && (
                                                 <div className="absolute top-2 right-2 w-5 h-5 bg-gray-400 rounded-full flex items-center justify-center">
                                                     <span className="text-white text-xs">?</span>
                                                 </div>
-                                            )}
+                                            )} */}
                                         </Card>
                                     ))}
                                 </div>
@@ -504,7 +739,7 @@ const DesignTab = () => {
                                                 className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
                                                     selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
                                                 }`}
-                                                onClick={() => setSelectedFont(font.name)}
+                                                onClick={() => handleFontChange(font.name)}
                                             >
                                                 <div className="p-4 flex flex-col items-center gap-3">
                                                     {/* Font Preview */}

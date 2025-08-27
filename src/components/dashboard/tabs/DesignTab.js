@@ -9,7 +9,7 @@ import { Switch } from "../../ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Card } from "../../ui/card";
 import { useDashboard } from "../../../context/DashboardContext";
-import toast, { Toaster } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const DesignTab = () => {
     const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveChanges } = useDashboard();
@@ -65,9 +65,9 @@ const DesignTab = () => {
             setIsSaving(true);
             try {
                 await saveChanges();
-                toast.success("Changes saved successfully!");
+                toast.success("Design changes saved successfully!");
             } catch (error) {
-                toast.error("Failed to save changes");
+                toast.error("Failed to save design changes");
             } finally {
                 setIsSaving(false);
             }
@@ -103,7 +103,7 @@ const DesignTab = () => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [canUndo, canRedo, hasUnsavedChanges, undo, redo, saveChanges]);
+    }, [canUndo, canRedo, hasUnsavedChanges]);
 
     // Get current design settings from context
     const selectedTheme = data?.design?.theme || "";
@@ -326,31 +326,6 @@ const DesignTab = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Toast Container */}
-            <Toaster
-                position="top-right"
-                toastOptions={{
-                    duration: 3000,
-                    style: {
-                        background: '#363636',
-                        color: '#fff',
-                    },
-                    success: {
-                        duration: 3000,
-                        iconTheme: {
-                            primary: '#10B981',
-                            secondary: '#fff',
-                        },
-                    },
-                    error: {
-                        duration: 4000,
-                        iconTheme: {
-                            primary: '#EF4444',
-                            secondary: '#fff',
-                        },
-                    },
-                }}
-            />
             {/* Sticky Design Controls Header */}
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm transform-gpu">
                 <div className="max-w-4xl mx-auto px-0 sm:px-4 py-2.5 sm:py-3">

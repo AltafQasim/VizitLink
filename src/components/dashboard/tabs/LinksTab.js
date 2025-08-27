@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   DndContext,
   closestCenter,
@@ -29,11 +30,22 @@ import {
   Eye, 
   EyeOff, 
   GripVertical,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle
 } from 'lucide-react';
 import AddSocialLinkModal from '../modals/AddSocialLinkModal';
 import EditLinkModal from '../modals/EditLinkModal';
 import { socialIconsMap, socialColorsMap } from '../../../lib/social';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+
+const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined);
 
 // Sortable Link Item Component
 function SortableLinkItem({ 
@@ -121,7 +133,7 @@ function SortableLinkItem({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDelete(link.id)}
+            onClick={() => onDelete(link)}
             className="text-red-600 hover:text-red-700"
           >
             <Trash2 className="w-4 h-4" />
@@ -133,10 +145,12 @@ function SortableLinkItem({
 }
 
 export default function LinksTab() {
-  const { data, updateData } = useDashboard();
+  const { data, updateData, saveChanges } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [deletingLink, setDeletingLink] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -145,23 +159,36 @@ export default function LinksTab() {
     })
   );
 
-  const handleDragEnd = (event) => {
+  const persist = async (snapshot) => {
+    try {
+      await saveChanges(snapshot);
+      toast.success('Link saved successfully');
+    } catch (e) {
+      toast.error(e?.message || 'Failed to save link');
+    }
+  };
+
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
       const oldIndex = data.links.findIndex(link => link.id === active.id);
       const newIndex = data.links.findIndex(link => link.id === over.id);
       
-      const newLinks = arrayMove(data.links, oldIndex, newIndex);
+      const newLinks = arrayMove(data.links, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
+      const snapshot = { ...data, links: newLinks };
       updateData({ links: newLinks });
+      await persist(snapshot);
     }
   };
 
-  const handleToggleActive = (id) => {
+  const handleToggleActive = async (id) => {
     const updatedLinks = data.links.map(link =>
       link.id === id ? { ...link, active: !link.active } : link
     );
+    const snapshot = { ...data, links: updatedLinks };
     updateData({ links: updatedLinks });
+    await persist(snapshot);
   };
 
   const handleEdit = (link) => {
@@ -169,35 +196,49 @@ export default function LinksTab() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this link?')) {
-      const updatedLinks = data.links.filter(link => link.id !== id);
-      updateData({ links: updatedLinks });
-    }
+  const handleDelete = (link) => {
+    setDeletingLink(link);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingLink) return;
+    
+    const updatedLinks = data.links.filter(link => link.id !== deletingLink.id);
+    const snapshot = { ...data, links: updatedLinks };
+    updateData({ links: updatedLinks });
+    await persist(snapshot);
+    setShowDeleteModal(false);
+    setDeletingLink(null);
   };
 
   const handleOpen = (url) => {
     window.open(url, '_blank');
   };
 
-  const handleAddLink = (newLink) => {
+  const handleAddLink = async (newLink) => {
+    const newId = generateId();
     const linkWithId = {
       ...newLink,
-      id: Date.now().toString(),
+      ...(newId ? { id: newId } : {}),
       order: data.links.length + 1,
       createdAt: new Date().toISOString(),
     };
     
     const updatedLinks = [...data.links, linkWithId];
+    const snapshot = { ...data, links: updatedLinks };
     updateData({ links: updatedLinks });
+    await persist(snapshot);
     setShowAddModal(false);
   };
 
-  const handleUpdateLink = (updatedLink) => {
+  const handleUpdateLink = async (updatedLink) => {
     const updatedLinks = data.links.map(link =>
       link.id === updatedLink.id ? updatedLink : link
     );
+    const snapshot = { ...data, links: updatedLinks };
     updateData({ links: updatedLinks });
+    await persist(snapshot);
     setShowEditModal(false);
     setEditingLink(null);
   };
@@ -290,6 +331,38 @@ export default function LinksTab() {
           link={editingLink}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Delete Link
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{deletingLink?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeletingLink(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

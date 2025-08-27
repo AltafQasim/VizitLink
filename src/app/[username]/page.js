@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { loadPublicProfileByUsername } from "../../lib/dashboardStorage";
 
 export default function PublicProfilePage({ params }) {
     // Unwrap params using React.use() to fix the Next.js warning
@@ -10,11 +11,17 @@ export default function PublicProfilePage({ params }) {
     const [isVideoLoading, setIsVideoLoading] = useState(false);
 
     useEffect(() => {
-        try {
-            const raw = localStorage.getItem("vizitlink_dashboard_data");
-            if (raw) setData(JSON.parse(raw));
-        } catch (_) { }
-    }, []);
+        const run = async () => {
+            const username = unwrappedParams?.username;
+            if (!username) return;
+            try {
+                const loaded = await loadPublicProfileByUsername(username);
+                if (loaded) setData(loaded);
+            } catch (_) { }
+        };
+        run();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [unwrappedParams?.username]);
 
     const design = data?.design || {};
     const theme = design.theme || '';

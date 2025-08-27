@@ -246,11 +246,12 @@ export function DashboardProvider({ children }) {
     }
   }, [history, historyIndex]);
 
-  const saveChanges = useCallback(async () => {
-    if (data) {
+  const saveChanges = useCallback(async (overrideData) => {
+    const snapshot = overrideData || data;
+    if (snapshot) {
       try {
-        await saveToBackend(data, currentProfileId);
-        setOriginalData(data);
+        await saveToBackend(snapshot, currentProfileId);
+        setOriginalData(snapshot);
       } catch (error) {
         console.error('Error saving data:', error);
       }

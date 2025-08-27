@@ -85,7 +85,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-auto h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-3xl h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
         <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold">
@@ -174,37 +174,6 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                   </select>
                 </div>
 
-                {/* Show Product In Section */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">
-                    Show product in (optional)
-                  </label>
-                  
-                  <div className="space-y-2">
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.showInShop}
-                        onChange={(e) => handleInputChange('showInShop', e.target.checked)}
-                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-gray-700">My Shop</span>
-                      <div className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-xs text-gray-600">i</span>
-                      </div>
-                    </label>
-                    
-                    <label className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.showInTest}
-                        onChange={(e) => handleInputChange('showInTest', e.target.checked)}
-                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                      />
-                      <span className="text-sm text-gray-700">test</span>
-                    </label>
-                  </div>
-                </div>
               </div>
 
               {/* Right Column - Product Image */}

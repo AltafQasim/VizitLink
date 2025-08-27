@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import Image from 'next/image';
 import { Button } from '../../ui/button';
 import { useDashboard } from '../../../context/DashboardContext';
@@ -13,10 +14,19 @@ import {
   EyeOff, 
   MoreVertical,
   Share2,
-  Upload
+  Upload,
+  AlertTriangle
 } from 'lucide-react';
 import AddProductModal from '../modals/AddProductModal';
 import EditProductModal from '../modals/EditProductModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
 
 // Mock products data for now (will be replaced with Supabase later)
 const mockProducts = [
@@ -66,6 +76,8 @@ export default function ProductsTab() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize products in localStorage if not exists
@@ -81,12 +93,22 @@ export default function ProductsTab() {
     setIsInitialized(true);
   }, [isInitialized, data, updateData, saveChanges]);
 
-  const handleToggleActive = (id) => {
+  const persist = async (snapshot) => {
+    try {
+      await saveChanges(snapshot);
+      toast.success('Product saved successfully');
+    } catch (e) {
+      toast.error(e?.message || 'Failed to save product');
+    }
+  };
+
+  const handleToggleActive = async (id) => {
     const updatedProducts = data.products.map(product =>
       product.id === id ? { ...product, active: !product.active } : product
     );
+    const snapshot = { ...data, products: updatedProducts };
     updateData({ products: updatedProducts });
-    saveChanges();
+    await persist(snapshot);
   };
 
   const handleEdit = (product) => {
@@ -94,22 +116,33 @@ export default function ProductsTab() {
     setShowEditModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      const updatedProducts = data.products.filter(product => product.id !== id);
-      updateData({ products: updatedProducts });
-      saveChanges();
+  const handleDelete = (product) => {
+    setDeletingProduct(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingProduct) return;
+    
+    const updatedProducts = data.products.filter(product => product.id !== deletingProduct.id);
+    const snapshot = { ...data, products: updatedProducts };
+    updateData({ products: updatedProducts });
+    await persist(snapshot);
+    setShowDeleteModal(false);
+    setDeletingProduct(null);
+  };
+
+  const handleShare = async (product) => {
+    try {
+      // Copy product URL to clipboard
+      await navigator.clipboard.writeText(product.url);
+      toast.success('Product URL copied to clipboard!');
+    } catch (error) {
+      toast.error('Failed to copy URL to clipboard');
     }
   };
 
-  const handleShare = (product) => {
-    // Copy product URL to clipboard
-    navigator.clipboard.writeText(product.url);
-    // You can add a toast notification here
-    alert('Product URL copied to clipboard!');
-  };
-
-  const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined);
 
   const normalizeProduct = (p) => ({
     id: generateId(),
@@ -125,21 +158,23 @@ export default function ProductsTab() {
     createdAt: new Date().toISOString(),
   });
 
-  const handleAddProduct = (newProductOrArray) => {
+  const handleAddProduct = async (newProductOrArray) => {
     const items = Array.isArray(newProductOrArray) ? newProductOrArray : [newProductOrArray];
     const normalized = items.map(normalizeProduct);
     const updatedProducts = [...data.products, ...normalized];
+    const snapshot = { ...data, products: updatedProducts };
     updateData({ products: updatedProducts });
-    saveChanges();
+    await persist(snapshot);
     setShowAddModal(false);
   };
 
-  const handleUpdateProduct = (updatedProduct) => {
+  const handleUpdateProduct = async (updatedProduct) => {
     const updatedProducts = data.products.map(product =>
       product.id === updatedProduct.id ? updatedProduct : product
     );
+    const snapshot = { ...data, products: updatedProducts };
     updateData({ products: updatedProducts });
-    saveChanges();
+    await persist(snapshot);
     setShowEditModal(false);
     setEditingProduct(null);
   };
@@ -183,7 +218,7 @@ export default function ProductsTab() {
         
         {data.products.length === 0 ? (
           <div className="text-center py-10 sm:py-12">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-2 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
             </div>
             <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products yet</h3>
@@ -199,7 +234,7 @@ export default function ProductsTab() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="grid gap-3 sm:gap-4">
             <AnimatePresence>
               {data.products.map((product) => (
                 <motion.div
@@ -207,78 +242,83 @@ export default function ProductsTab() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4"
+                  className={`bg-white border border-gray-200 rounded-lg p-3 sm:p-4 ${
+                    !product.active ? 'opacity-60' : ''
+                  }`}
                 >
-                  <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4">
                     {/* Product Image */}
-                    <div className="relative flex-shrink-0">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
-                        <Image
-                          src={product.image || '/placeholder.svg'}
-                          alt={product.title}
-                          width={64}
-                          height={64}
-                          className="object-cover w-full h-full"
-                          sizes="56px, (min-width: 640px) 64px"
-                        />
-                      </div>
-                      <button className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg transition-all duration-200 flex items-center justify-center">
-                        <MoreVertical className="w-4 h-4 text-white opacity-0 group-hover:opacity-100" />
-                      </button>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
+                        src={product.image}
+                        alt={product.title}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm text-gray-500 font-medium">{product.brand}</p>
-                      <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{product.title}</h3>
-                      <p className="text-base sm:text-lg font-bold text-gray-900">${product?.price?.toFixed(2)}</p>
-                      
-                      {/* Performance Metrics */}
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-800">
-                          {product.clicks} Clicks
-                        </span>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-800">
-                          {product?.ctr?.toFixed(1)}% CTR
-                        </span>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                            {product.title}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-gray-500 truncate">
+                            {product.brand}
+                          </p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="font-semibold text-gray-900 text-sm sm:text-base">
+                            ${product.price.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {product.clicks} clicks • {product.ctr.toFixed(1)}% CTR
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleActive(product.id)}
-                        className={product.active ? 'text-green-600' : 'text-gray-400'}
-                      >
-                        {product.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      </Button>
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleShare(product)}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </Button>
+                      <p className="text-xs text-gray-500 truncate mb-2">
+                        {product.url}
+                      </p>
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleActive(product.id)}
+                          className={product.active ? 'text-green-600' : 'text-gray-400'}
+                        >
+                          {product.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleShare(product)}
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(product)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -303,10 +343,41 @@ export default function ProductsTab() {
             setEditingProduct(null);
           }}
           onSave={handleUpdateProduct}
-          onDelete={handleDelete}
           product={editingProduct}
         />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Delete Product
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{deletingProduct?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeletingProduct(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

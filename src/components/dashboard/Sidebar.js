@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useDashboard } from '../../context/DashboardContext';
+import ProfileSwitcher from './ProfileSwitcher';
 import { 
   Link as LinkIcon, 
   ShoppingBag, 
@@ -17,6 +18,7 @@ const menuItems = [
   { id: 'links', label: 'My VizitLink', icon: LinkIcon },
   { id: 'shop', label: 'Shop', icon: ShoppingBag },
   { id: 'design', label: 'Design', icon: Palette },
+  { id: 'profiles', label: 'Profiles', icon: Users },
   { id: 'audience', label: 'Audience', icon: Users },
   { id: 'insights', label: 'Insights', icon: BarChart3 },
   { id: 'tools', label: 'Tools', icon: Wrench },
@@ -32,17 +34,9 @@ export default function Sidebar() {
       animate={{ x: 0, opacity: 1 }}
       className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col"
     >
-      {/* User info */}
+      {/* User/Profile Switcher */}
       <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-medium">U</span>
-          </div>
-          <div>
-            <p className="font-medium text-gray-900">User</p>
-            <p className="text-sm text-gray-500">Free Plan</p>
-          </div>
-        </div>
+        <ProfileSwitcher />
       </div>
 
       {/* Navigation */}

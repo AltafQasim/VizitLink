@@ -8,6 +8,7 @@ import LivePreview from './LivePreview';
 import MobilePreview from './MobilePreview';
 import LinksTab from './tabs/LinksTab';
 import ProductsTab from './tabs/ProductsTab';
+import ProfileManagementTab from './tabs/ProfileManagementTab';
 import { useDashboard } from '../../context/DashboardContext';
 import { useEffect, useState } from 'react';
 import DesignTab from './tabs/DesignTab';
@@ -53,6 +54,8 @@ export default function DashboardLayout() {
         return <ProductsTab />;
       case 'design':
         return <DesignTab />;
+      case 'profiles':
+        return <ProfileManagementTab />;
       case 'audience':
         return (
           <div className="space-y-6">

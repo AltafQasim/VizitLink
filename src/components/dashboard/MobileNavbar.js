@@ -40,6 +40,7 @@ export default function MobileNavbar() {
     { id: 'links', label: 'My VizitLink' },
     { id: 'shop', label: 'Shop' },
     { id: 'design', label: 'Design' },
+    { id: 'profiles', label: 'Profiles' },
     { id: 'audience', label: 'Audience' },
     { id: 'insights', label: 'Insights' },
     { id: 'tools', label: 'Tools' },

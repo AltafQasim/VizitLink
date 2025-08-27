@@ -352,7 +352,7 @@ const DesignTab = () => {
                 }}
             />
             {/* Sticky Design Controls Header */}
-            <div className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm transform-gpu">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm transform-gpu">
                 <div className="max-w-4xl mx-auto px-4 py-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">

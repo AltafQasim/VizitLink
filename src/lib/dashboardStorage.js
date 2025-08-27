@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'vizitlink_dashboard_data';
+const PROFILES_STORAGE_KEY = 'vizitlink_profiles';
 
 // Default data
 const defaultData = {
@@ -65,17 +66,34 @@ const defaultData = {
   },
 };
 
-export const saveToBackend = async (data) => {
-  // Currently using localStorage, can be replaced with Supabase API calls
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+// Default profiles
+const defaultProfiles = [
+  {
+    id: 'profile_1',
+    username: 'user',
+    displayName: 'Your Name',
+    bio: 'Add your bio here',
+    avatar: '',
+    customUrl: 'vizitlink.com/user',
+    isLive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+];
+
+export const saveToBackend = async (data, profileId = null) => {
+  // If profileId is provided, save to profile-specific storage
+  const storageKey = profileId ? `vizitlink_profile_${profileId}` : STORAGE_KEY;
+  localStorage.setItem(storageKey, JSON.stringify(data));
   
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
 };
 
-export const loadFromBackend = async () => {
-  // Currently using localStorage, can be replaced with Supabase API calls
-  const stored = localStorage.getItem(STORAGE_KEY);
+export const loadFromBackend = async (profileId = null) => {
+  // If profileId is provided, load from profile-specific storage
+  const storageKey = profileId ? `vizitlink_profile_${profileId}` : STORAGE_KEY;
+  const stored = localStorage.getItem(storageKey);
   
   if (stored) {
     const parsed = JSON.parse(stored);
@@ -102,6 +120,61 @@ export const loadFromBackend = async () => {
   return defaultData;
 };
 
+export const saveProfileToBackend = async (profiles) => {
+  localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify(profiles));
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+};
+
+export const loadProfilesFromBackend = async () => {
+  const stored = localStorage.getItem(PROFILES_STORAGE_KEY);
+  
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    return parsed;
+  }
+  
+  // Return default profiles if nothing stored
+  return defaultProfiles;
+};
+
 export const getProfileUrl = (username) => {
   return `https://vizitlink.com/${username}`;
+};
+
+// Migration function for existing users
+export const migrateToMultipleProfiles = async () => {
+  const existingData = localStorage.getItem(STORAGE_KEY);
+  if (!existingData) return;
+  
+  try {
+    const parsed = JSON.parse(existingData);
+    
+    // Create a profile from existing data
+    const profile = {
+      id: 'profile_1',
+      username: parsed.profile?.username || 'user',
+      displayName: parsed.profile?.displayName || 'Your Name',
+      bio: parsed.profile?.bio || 'Add your bio here',
+      avatar: parsed.profile?.avatar || '',
+      customUrl: parsed.profile?.customUrl || 'vizitlink.com/user',
+      isLive: parsed.profile?.isLive || true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    // Save profiles
+    await saveProfileToBackend([profile]);
+    
+    // Save profile data
+    await saveToBackend(parsed, profile.id);
+    
+    // Remove old storage
+    localStorage.removeItem(STORAGE_KEY);
+    
+    console.log('Successfully migrated to multiple profiles');
+  } catch (error) {
+    console.error('Error migrating to multiple profiles:', error);
+  }
 };

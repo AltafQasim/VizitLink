@@ -99,31 +99,21 @@ export default function TopNavbar() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+              className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg"
             >
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-medium text-gray-900">{user?.email}</p>
-                <p className="text-xs text-gray-500">Free Plan</p>
-              </div>
-              
-              <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                Account Settings
-              </button>
-              
-              <button className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center">
-                <Settings className="w-4 h-4 mr-2" />
-                Preferences
-              </button>
-              
-              <div className="border-t border-gray-100 mt-2 pt-2">
-                <button 
-                  onClick={signOut}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center text-red-600"
-                >
+              <div className="p-2">
+                <Button variant="ghost" className="w-full justify-start">
+                  <User className="w-4 h-4 mr-2" />
+                  Account Settings
+                </Button>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+                <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
                   <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </button>
+                  Sign out
+                </Button>
               </div>
             </motion.div>
           )}

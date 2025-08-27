@@ -156,19 +156,19 @@ export default function ProductsTab() {
   }
 
   return (
-    <div className="space-y-6 p-4 lg:p-8 pt-0">
+    <div className="space-y-4 sm:space-y-6 px-3 py-3 sm:px-4 lg:p-8 pt-0">
       {/* Header */}
-      <div className="py-4 flex items-center justify-between sticky top-0 bg-gray-50 z-10">
+      <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 sticky top-0 bg-gray-50 z-10">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Shop</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Shop</h2>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
             Manage your products and track their performance
           </p>
         </div>
         
         <Button
           onClick={() => setShowAddModal(true)}
-          className="bg-purple-600 hover:bg-purple-700"
+          className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Product
@@ -176,30 +176,30 @@ export default function ProductsTab() {
       </div>
 
       {/* Products List */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
           Products ({data.products.filter(product => product.active).length} active)
         </h3>
         
         {data.products.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus className="w-8 h-8 text-gray-400" />
+          <div className="text-center py-10 sm:py-12">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-2 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products yet</h3>
+            <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
               Start selling by adding your first product to your shop
             </p>
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 h-9 px-3 text-sm"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Product
             </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <AnimatePresence>
               {data.products.map((product) => (
                 <motion.div
@@ -207,19 +207,19 @@ export default function ProductsTab() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="bg-white border border-gray-200 rounded-lg p-4"
+                  className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4"
                 >
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     {/* Product Image */}
-                    <div className="relative">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
                         <Image
                           src={product.image || '/placeholder.svg'}
                           alt={product.title}
                           width={64}
                           height={64}
                           className="object-cover w-full h-full"
-                          sizes="64px"
+                          sizes="56px, (min-width: 640px) 64px"
                         />
                       </div>
                       <button className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg transition-all duration-200 flex items-center justify-center">
@@ -229,23 +229,23 @@ export default function ProductsTab() {
                     
                     {/* Product Details */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-500 font-medium">{product.brand}</p>
-                      <h3 className="font-semibold text-gray-900 truncate">{product.title}</h3>
-                      <p className="text-lg font-bold text-gray-900">${product?.price?.toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium">{product.brand}</p>
+                      <h3 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{product.title}</h3>
+                      <p className="text-base sm:text-lg font-bold text-gray-900">${product?.price?.toFixed(2)}</p>
                       
                       {/* Performance Metrics */}
-                      <div className="flex space-x-2 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-800">
                           {product.clicks} Clicks
                         </span>
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium bg-gray-100 text-gray-800">
                           {product?.ctr?.toFixed(1)}% CTR
                         </span>
                       </div>
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"

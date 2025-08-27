@@ -138,36 +138,36 @@ function SortableLinkItem({
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 cursor-move ${
+      className={`bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-3 cursor-move ${
         isDragging ? 'opacity-50' : ''
       }`}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-0">
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0"
           >
             <GripVertical className="w-4 h-4 text-gray-400" />
           </div>
           
-          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
             <IconComponent 
               className="w-5 h-5" 
               style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
             />
           </div>
           
-          <div>
-            <h3 className="font-medium text-gray-900">{link.title}</h3>
-            <p className="text-sm text-gray-500 truncate max-w-[200px]">{link.url}</p>
+          <div className="min-w-0">
+            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{link.title}</h3>
+            <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[180px] sm:max-w-[200px]">{link.url}</p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <Button
             variant="ghost"
             size="sm"
@@ -278,19 +278,19 @@ export default function LinksTab() {
   };
 
   return (
-    <div className="space-y-6 p-4 lg:p-8 pt-0">
+    <div className="space-y-4 sm:space-y-6 px-3 py-3 sm:px-4 lg:p-8 pt-0">
       {/* Header */}
-      <div className="py-4 flex items-center justify-between sticky top-0 bg-gray-50 z-10">
+      <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 sticky top-0 bg-gray-50 z-10">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My VizitLink</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My VizitLink</h2>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
             Manage your social media links and customize your profile
           </p>
         </div>
         
         <Button
           onClick={() => setShowAddModal(true)}
-          className="bg-purple-600 hover:bg-purple-700"
+          className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
         >
           <Plus className="w-4 h-4" />
           Add Link
@@ -298,23 +298,23 @@ export default function LinksTab() {
       </div>
 
       {/* Links List */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
           Social Links ({data.links.filter(link => link.active).length} active)
         </h3>
         
         {data.links.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus className="w-8 h-8 text-gray-400" />
+          <div className="text-center py-10 sm:py-12">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No links yet</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No links yet</h3>
+            <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
               Start building your VizitLink by adding your first social media link
             </p>
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 h-9 px-3 text-sm"
             >
               <Plus className="w-4 h-4" />
               Add Your First Link

@@ -353,16 +353,16 @@ const DesignTab = () => {
             />
             {/* Sticky Design Controls Header */}
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm transform-gpu">
-                <div className="max-w-4xl mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
+                <div className="max-w-4xl mx-auto px-0 sm:px-4 py-2.5 sm:py-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="flex items-center space-x-2 sm:space-x-3">
                             <div className="flex items-center space-x-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={handleUndo}
                                     disabled={!canUndo}
-                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200"
+                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200 h-9"
                                 >
                                     <Undo2 className="w-4 h-4" />
                                     <span className="hidden sm:inline">Undo</span>
@@ -372,7 +372,7 @@ const DesignTab = () => {
                                     size="sm"
                                     onClick={handleRedo}
                                     disabled={!canRedo}
-                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200"
+                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200 h-9"
                                 >
                                     <Redo2 className="w-4 h-4" />
                                     <span className="hidden sm:inline">Redo</span>
@@ -380,7 +380,7 @@ const DesignTab = () => {
                             </div>
 
                             {/* Status indicator */}
-                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
                                 <div className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
                                 <span className="hidden sm:inline">
                                     {hasUnsavedChanges ? 'Unsaved changes' : 'All changes saved'}
@@ -388,12 +388,12 @@ const DesignTab = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center justify-end">
                             {hasUnsavedChanges && (
                                 <Button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md h-9 px-3"
                                 >
                                     {isSaving ? (
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -412,21 +412,21 @@ const DesignTab = () => {
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-12 px-4 py-6 overflow-visible">
+            <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12 px-3 sm:px-4 py-4 sm:py-6 overflow-visible">
 
                 {/* Profile Section */}
                 <section>
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-semibold text-gray-900 mb-2">Profile</h1>
-                        <p className="text-gray-600">Customize your profile appearance</p>
+                    <div className="mb-4 sm:mb-6">
+                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-1 sm:mb-2">Profile</h1>
+                        <p className="text-gray-600 text-sm sm:text-base">Customize your profile appearance</p>
                     </div>
 
-                    <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                             <div className="relative">
-                                <Avatar className="h-20 w-20">
+                                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
                                     <AvatarImage src={data?.profile?.avatar} />
-                                    <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-600 text-white text-2xl font-bold">
+                                    <AvatarFallback className="bg-gradient-to-br from-teal-400 to-blue-600 text-white text-xl sm:text-2xl font-bold">
                                         {data?.profile?.displayName?.charAt(0).toUpperCase() || 'A'}
                                     </AvatarFallback>
                                 </Avatar>

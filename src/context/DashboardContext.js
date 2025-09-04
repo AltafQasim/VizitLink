@@ -15,6 +15,9 @@ export function DashboardProvider({ children }) {
   const [profiles, setProfiles] = useState([]);
   const [currentProfileId, setCurrentProfileId] = useState(null);
   
+  // New state for profile creation flow
+  const [needsProfileCreation, setNeedsProfileCreation] = useState(false);
+  
   // Undo/Redo functionality
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -30,7 +33,7 @@ export function DashboardProvider({ children }) {
         const loadedProfiles = await loadProfilesFromBackend();
         setProfiles(loadedProfiles);
         
-        // Set current profile (first profile or last used)
+        // Check if user has any profiles
         if (loadedProfiles.length > 0) {
           const lastUsedProfile = localStorage.getItem('vizitlink_last_profile');
           const profileToUse = lastUsedProfile && loadedProfiles.find(p => p.id === lastUsedProfile) 
@@ -45,6 +48,11 @@ export function DashboardProvider({ children }) {
           setOriginalData(loadedData);
           setHistory([loadedData]);
           setHistoryIndex(0);
+          setNeedsProfileCreation(false);
+        } else {
+          // User has no profiles, show profile creation form
+          setNeedsProfileCreation(true);
+          setActiveTab('profiles'); // Switch to profiles tab
         }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -281,7 +289,21 @@ export function DashboardProvider({ children }) {
 
   const value = {
     data,
+    setData,
+    originalData,
     activeTab,
+    setActiveTab,
+    isLoading,
+    profiles,
+    currentProfileId,
+    currentProfile: data?.profile,
+    switchProfile,
+    createProfile,
+    updateProfile,
+    deleteProfile,
+    duplicateProfile,
+    needsProfileCreation,
+    setNeedsProfileCreation,
     hasUnsavedChanges,
     isLoading,
     canUndo,

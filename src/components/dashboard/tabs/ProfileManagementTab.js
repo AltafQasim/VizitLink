@@ -25,10 +25,12 @@ export default function ProfileManagementTab() {
     switchProfile, 
     createProfile, 
     updateProfile, 
-    deleteProfile 
+    deleteProfile,
+    needsProfileCreation, // Add this new state
+    setNeedsProfileCreation // Add this new function
   } = useDashboard();
   
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(needsProfileCreation || false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [formData, setFormData] = useState({
@@ -38,12 +40,22 @@ export default function ProfileManagementTab() {
     avatar: ''
   });
 
+  // Auto-open create modal for new users
+  useEffect(() => {
+    if (needsProfileCreation) {
+      setShowCreateModal(true);
+    }
+  }, [needsProfileCreation]);
+
   const handleCreateProfile = async (e) => {
     e.preventDefault();
     try {
       await createProfile(formData);
       setShowCreateModal(false);
       setFormData({ username: '', displayName: '', bio: '', avatar: '' });
+      if (needsProfileCreation) {
+        setNeedsProfileCreation(false);
+      }
     } catch (error) {
       console.error('Error creating profile:', error);
     }
@@ -98,15 +110,18 @@ export default function ProfileManagementTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Profile Management</h2>
-          <p className="text-gray-600">Manage your multiple VizitLink profiles</p>
+          {needsProfileCreation ? (
+            <p className="text-gray-600">Welcome! Please create your first profile to get started.</p>
+          ) : (
+            <p className="text-gray-600">Manage your VizitLink profiles</p>
+          )}
         </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-purple-600 hover:bg-purple-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create New Profile
-        </Button>
+        {!needsProfileCreation && (
+          <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
+            <Plus size={16} />
+            <span>Create Profile</span>
+          </Button>
+        )}
       </div>
 
       {/* Profiles Grid */}

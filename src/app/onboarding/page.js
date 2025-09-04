@@ -9,7 +9,7 @@ import { isUsernameAvailable, getUsernameSuggestions } from '../../lib/dashboard
 import { useDashboard } from '../../context/DashboardContext';
 
 function OnboardingInner() {
-  const { createProfile, needsProfileCreation, setNeedsProfileCreation } = useDashboard();
+  const { createProfile, needsProfileCreation, setNeedsProfileCreation, isLoading, profiles } = useDashboard();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -18,11 +18,7 @@ function OnboardingInner() {
   const [suggestions, setSuggestions] = useState([]);
   const debounceRef = useRef(null);
 
-  useEffect(() => {
-    if (!needsProfileCreation) {
-      router.replace('/dashboard');
-    }
-  }, [needsProfileCreation, router]);
+  // Do not auto-redirect from onboarding; dashboard handles routing
 
   const normalized = (value) => value
     .toLowerCase()
@@ -79,19 +75,21 @@ function OnboardingInner() {
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-      <div className="px-6 sm:px-10 lg:px-16 py-8 flex flex-col">
-        <button onClick={() => router.push('/dashboard')} className="text-sm text-gray-600 mb-8 inline-flex items-center gap-2">
-          <span>←</span> Back to admin
-        </button>
-        <div className="max-w-2xl">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 mb-6">Choose a username</h1>
-          <p className="text-gray-600 mb-8">Choose a VizitLink URL for your new profile. You can always change it later.</p>
+      <div className="px-6 sm:px-10 lg:px-16 py-8 flex flex-col items-center justify-center">
+        {Array.isArray(profiles) && profiles.length > 0 && (
+          <button onClick={() => router.push('/dashboard')} className="self-start text-sm text-gray-600 mb-8 inline-flex items-center gap-2">
+            <span>←</span> Back to admin
+          </button>
+        )}
+        <div className="w-full bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 text-center">Choose a username</h1>
+          <p className="text-gray-600 mb-6 text-center">Choose a VizitLink URL for your new profile. You can always change it later.</p>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <div className="relative">
-                <div className="flex items-stretch border rounded-xl bg-white overflow-hidden transition-colors 
-                  ${checking ? 'border-gray-300' : available === true && isValidPattern ? 'border-green-400' : available === false || !isValidPattern ? 'border-red-300' : 'border-gray-300'}
-                ">
+                <div className={`flex items-stretch border rounded-xl bg-white overflow-hidden transition-colors ${
+                  checking ? 'border-gray-300' : (available === true && isValidPattern) ? 'border-green-400' : ((available === false || !isValidPattern) ? 'border-red-300' : 'border-gray-300')
+                }`}>
                   <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">vizitlink.com/</span>
                   <input
                     type="text"

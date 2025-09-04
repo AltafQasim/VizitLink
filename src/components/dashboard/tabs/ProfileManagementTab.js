@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { useDashboard } from '../../../context/DashboardContext';
@@ -30,7 +31,7 @@ export default function ProfileManagementTab() {
     setNeedsProfileCreation // Add this new function
   } = useDashboard();
   
-  const [showCreateModal, setShowCreateModal] = useState(needsProfileCreation || false);
+  const router = useRouter();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [formData, setFormData] = useState({
@@ -40,26 +41,12 @@ export default function ProfileManagementTab() {
     avatar: ''
   });
 
-  // Auto-open create modal for new users
+  // If user needs profile, encourage onboarding page
   useEffect(() => {
     if (needsProfileCreation) {
-      setShowCreateModal(true);
+      // No modal; show message and provide button below
     }
   }, [needsProfileCreation]);
-
-  const handleCreateProfile = async (e) => {
-    e.preventDefault();
-    try {
-      await createProfile(formData);
-      setShowCreateModal(false);
-      setFormData({ username: '', displayName: '', bio: '', avatar: '' });
-      if (needsProfileCreation) {
-        setNeedsProfileCreation(false);
-      }
-    } catch (error) {
-      console.error('Error creating profile:', error);
-    }
-  };
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
@@ -117,7 +104,7 @@ export default function ProfileManagementTab() {
           )}
         </div>
         {!needsProfileCreation && (
-          <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
+          <Button onClick={() => router.push('/onboarding')} className="flex items-center gap-2">
             <Plus size={16} />
             <span>Create Profile</span>
           </Button>
@@ -242,96 +229,13 @@ export default function ProfileManagementTab() {
         })}
       </div>
 
-      {/* Create Profile Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowCreateModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-lg p-6 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Create New Profile</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  ×
-                </Button>
-              </div>
-              
-              <form onSubmit={handleCreateProfile} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="username"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Display Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.displayName}
-                    onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Your Name"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Add your bio here"
-                    rows="3"
-                  />
-                </div>
-                
-                <div className="flex space-x-3 pt-2">
-                  <Button
-                    type="submit"
-                    className="flex-1 bg-purple-600 hover:bg-purple-700"
-                  >
-                    Create Profile
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowCreateModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* If no profiles yet, provide clear call-to-action */}
+      {needsProfileCreation && (
+        <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg flex items-center justify-between">
+          <p className="text-sm text-purple-800">You don’t have any profiles yet. Create your first one to get started.</p>
+          <Button onClick={() => router.push('/onboarding')} className="ml-4">Create Profile</Button>
+        </div>
+      )}
 
       {/* Edit Profile Modal */}
       <AnimatePresence>

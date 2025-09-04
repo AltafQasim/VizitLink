@@ -15,16 +15,16 @@ import { useRouter } from 'next/navigation';
 import DesignTab from './tabs/DesignTab';
 
 export default function DashboardLayout() {
-  const { activeTab, setActiveTab, needsProfileCreation } = useDashboard();
+  const { activeTab, setActiveTab, needsProfileCreation, isLoading } = useDashboard();
   const [isFading, setIsFading] = useState(false);
   const router = useRouter();
 
   // Redirect brand new users to onboarding
   useEffect(() => {
-    if (needsProfileCreation) {
+    if (!isLoading && needsProfileCreation) {
       router.replace('/onboarding');
     }
-  }, [needsProfileCreation, router]);
+  }, [needsProfileCreation, isLoading, router]);
 
   // Read initial tab from path (/dashboard/links) or query (?tab=links)
   useEffect(() => {

@@ -490,6 +490,29 @@ const DesignTab = () => {
                         </div>
 
                         <div className="space-y-4">
+                            {/* Moved from onboarding modal: Display Name and Bio editing */}
+                            <div className="flex flex-col gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Display name</label>
+                                    <input
+                                        type="text"
+                                        value={data?.profile?.displayName || ''}
+                                        onChange={(e) => updateData({ profile: { ...data.profile, displayName: e.target.value } })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        placeholder="Your name"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                    <textarea
+                                        value={data?.profile?.bio || ''}
+                                        onChange={(e) => updateData({ profile: { ...data.profile, bio: e.target.value } })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        rows="3"
+                                        placeholder="Add a short bio"
+                                    />
+                                </div>
+                            </div>
                             <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                     <Star className="h-4 w-4 text-gray-500" />

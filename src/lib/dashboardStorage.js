@@ -348,8 +348,8 @@ export const saveProfileToBackend = async (profiles) => {
   if (!userId) return;
 
   for (const p of profiles) {
+    // Do not send client-generated ids; let Supabase generate UUIDs.
     await supabase.from('profiles').upsert({
-      id: p.id !== 'profile_1' ? p.id : undefined,
       user_id: userId,
       username: p.username,
       display_name: p.displayName,
@@ -375,6 +375,50 @@ export const loadProfilesFromBackend = async () => {
 
 export const getProfileUrl = (username) => {
   return `https://vizitlink.com/${username}`;
+};
+
+// Check if a username is available (fast, head request with count)
+export const isUsernameAvailable = async (username) => {
+  if (!username || username.length < 3) return false;
+  const { count, error } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('username', username.toLowerCase());
+  if (error) {
+    console.error('Username availability check failed:', error);
+    return false;
+  }
+  return (count || 0) === 0;
+};
+
+// Given a base string, generate a few candidate usernames and return available ones
+export const getUsernameSuggestions = async (base) => {
+  const clean = (base || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .slice(0, 20);
+  const seed = clean || 'user';
+  const now = Date.now().toString().slice(-4);
+  const candidates = Array.from(new Set([
+    seed,
+    `${seed}${now.slice(0, 2)}`,
+    `${seed}${now}`,
+    `${seed}official`,
+    `${seed}studio`,
+    `${seed}_${Math.floor(Math.random() * 90 + 10)}`,
+  ])).slice(0, 6);
+
+  // Query availability for all candidates in one request
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('username')
+    .in('username', candidates);
+  if (error) {
+    console.error('Suggestion check failed:', error);
+    return candidates;
+  }
+  const taken = new Set((data || []).map((r) => r.username));
+  return candidates.filter((c) => !taken.has(c));
 };
 
 export async function loadPublicProfileByUsername(username) {

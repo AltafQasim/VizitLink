@@ -24,7 +24,9 @@ export default function TopNavbar() {
   const [copied, setCopied] = useState(false);
 
   const handleCopyUrl = async () => {
-    const url = getProfileUrl(data.profile.username);
+    const username = data?.profile?.username;
+    if (!username) return;
+    const url = getProfileUrl(username);
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -46,19 +48,21 @@ export default function TopNavbar() {
         </div>
 
         {/* Profile URL */}
-        <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-          <span className="text-sm text-gray-600">{getProfileUrl(data.profile.username)}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopyUrl}
-            className="h-6 w-6 p-0"
-          >
-            {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
-          </Button>
-        </div>
+        {data?.profile?.username && (
+          <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
+            <span className="text-sm text-gray-600">{getProfileUrl(data.profile.username)}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopyUrl}
+              className="h-6 w-6 p-0"
+            >
+              {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+            </Button>
+          </div>
+        )}
 
-        {data.profile.isLive && (
+        {data?.profile?.isLive && (
           <div className="flex items-center space-x-1 text-green-600 text-sm">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span>Live</span>

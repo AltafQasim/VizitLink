@@ -66,25 +66,28 @@ export function DashboardProvider({ children }) {
 
   // Profile management functions
   const createProfile = useCallback(async (profileData) => {
-    const newProfile = {
-      id: `profile_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      username: profileData.username,
-      displayName: profileData.displayName,
-      bio: profileData.bio || '',
-      avatar: profileData.avatar || '',
-      customUrl: `vizitlink.com/${profileData.username}`,
-      isLive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    // First persist basic profile without id (UUID generated in DB)
+    await saveProfileToBackend([
+      ...profiles,
+      {
+        username: profileData.username,
+        displayName: profileData.displayName,
+        bio: profileData.bio || '',
+        avatar: profileData.avatar || '',
+        customUrl: `vizitlink.com/${profileData.username}`,
+        isLive: true,
+      },
+    ]);
 
-    const updatedProfiles = [...profiles, newProfile];
-    setProfiles(updatedProfiles);
-    await saveProfileToBackend(updatedProfiles);
+    // Reload profiles from backend to get the UUID
+    const refreshed = await loadProfilesFromBackend();
+    setProfiles(refreshed);
+    const created = refreshed.find(p => p.username === profileData.username);
+    if (!created) return null;
 
-    // Create default data for new profile
+    // Create default data for the new profile id
     const defaultProfileData = {
-      profile: newProfile,
+      profile: created,
       links: [],
       products: [],
       design: {
@@ -106,8 +109,15 @@ export function DashboardProvider({ children }) {
       },
     };
 
-    await saveToBackend(defaultProfileData, newProfile.id);
-    return newProfile;
+    await saveToBackend(defaultProfileData, created.id);
+    setCurrentProfileId(created.id);
+    setData(defaultProfileData);
+    setOriginalData(defaultProfileData);
+    setHistory([defaultProfileData]);
+    setHistoryIndex(0);
+    localStorage.setItem('vizitlink_last_profile', created.id);
+
+    return created;
   }, [profiles]);
 
   const switchProfile = useCallback(async (profileId) => {
@@ -279,7 +289,8 @@ export function DashboardProvider({ children }) {
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
 
-  if (isLoading || !data) {
+  // Allow rendering even if data is null when onboarding is needed
+  if (isLoading || (!data && !needsProfileCreation)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>

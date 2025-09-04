@@ -11,11 +11,20 @@ import ProductsTab from './tabs/ProductsTab';
 import ProfileManagementTab from './tabs/ProfileManagementTab';
 import { useDashboard } from '../../context/DashboardContext';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import DesignTab from './tabs/DesignTab';
 
 export default function DashboardLayout() {
-  const { activeTab, setActiveTab } = useDashboard();
+  const { activeTab, setActiveTab, needsProfileCreation } = useDashboard();
   const [isFading, setIsFading] = useState(false);
+  const router = useRouter();
+
+  // Redirect brand new users to onboarding
+  useEffect(() => {
+    if (needsProfileCreation) {
+      router.replace('/onboarding');
+    }
+  }, [needsProfileCreation, router]);
 
   // Read initial tab from path (/dashboard/links) or query (?tab=links)
   useEffect(() => {

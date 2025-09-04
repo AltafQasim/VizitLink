@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { 
   FaInstagram, FaYoutube, FaTwitter, FaFacebook, FaLinkedin, FaSnapchatGhost, FaPinterest, FaTiktok, FaReddit, FaGithub, FaDribbble, FaBehance, FaMedium, FaSpotify, FaSoundcloud, FaTwitch, FaDiscord, FaWhatsapp, FaTelegram, FaGlobe
 } from 'react-icons/fa';
-import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad, SiLinktree } from 'react-icons/si';
+import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad, SiVizitlink } from 'react-icons/si';
 import { MdEmail } from 'react-icons/md';
 import { CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 
@@ -331,14 +331,14 @@ const socialPlatforms = [
     }
   },
   { 
-    id: 'linktree', 
-    name: 'Linktree', 
-    icon: SiLinktree, 
+    id: 'vizitlink', 
+    name: 'Vizitlink', 
+    icon: SiVizitlink, 
     color: '#00DA00', 
     placeholder: 'https://linktr.ee/username',
     validation: (url) => {
-      const linktreeRegex = /^https?:\/\/(www\.)?linktr\.ee\/[a-zA-Z0-9._-]+\/?$/;
-      return linktreeRegex.test(url);
+      const vizitlinkRegex = /^https?:\/\/(www\.)?linktr\.ee\/[a-zA-Z0-9._-]+\/?$/;
+      return vizitlinkRegex.test(url);
     }
   },
   { 

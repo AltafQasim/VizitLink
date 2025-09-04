@@ -28,7 +28,7 @@ export default function PublicProfilePage({ params }) {
     const wallpaper = design.wallpaper || '';
     const buttonStyle = design.buttonStyle || 'Minimal';
     const fontFamily = design.fontFamily || 'Inter';
-    const hideLinktreeFooter = design.hideLinktreeFooter || false;
+    const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
 
     useEffect(() => {
         if (wallpaper === 'Video' && design.wallpaperVideo) setIsVideoLoading(true);

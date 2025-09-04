@@ -2,7 +2,7 @@
 
 ## 🎯 Overview
 
-A complete admin dashboard for VizitLink, inspired by Linktree, built with Next.js, React, TailwindCSS, and Framer Motion.
+A complete admin dashboard for VizitLink, inspired by Vizitlink, built with Next.js, React, TailwindCSS, and Framer Motion.
 
 ## 🏗️ Architecture
 

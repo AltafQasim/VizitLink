@@ -99,7 +99,7 @@ export function DashboardProvider({ children }) {
         fontFamily: 'Inter',
         fontWeight: '400',
         fontSize: '16px',
-        hideLinktreeFooter: false,
+        hideVizitlinkFooter: false,
       },
       analytics: {
         views: 0,

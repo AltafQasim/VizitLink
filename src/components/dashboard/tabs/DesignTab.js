@@ -111,7 +111,7 @@ const DesignTab = () => {
     const selectedWallpaper = data?.design?.wallpaper || "";
     const selectedStyle = data?.design?.buttonStyle || "Minimal";
     const selectedFont = data?.design?.fontFamily || "Inter";
-    const hideLinktreeFooter = data?.design?.hideLinktreeFooter || false;
+    const hideVizitlinkFooter = data?.design?.hideVizitlinkFooter || false;
 
     // Enhanced design change handlers with visual feedback
     const handleThemeChange = (themeName) => {
@@ -159,7 +159,7 @@ const DesignTab = () => {
     };
 
     const handleHideFooterChange = (checked) => {
-        updateDesignData({ hideLinktreeFooter: checked });
+        updateDesignData({ hideVizitlinkFooter: checked });
     };
 
     const handleProfilePictureUpload = async (event) => {
@@ -516,12 +516,12 @@ const DesignTab = () => {
                             <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                     <Star className="h-4 w-4 text-gray-500" />
-                                    <span className="text-sm text-gray-700">Hide Linktree footer</span>
+                                    <span className="text-sm text-gray-700">Hide Vizitlink footer</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Zap className="h-3 w-3 text-gray-400" />
                                     <Switch
-                                        checked={hideLinktreeFooter}
+                                        checked={hideVizitlinkFooter}
                                         onCheckedChange={handleHideFooterChange}
                                     />
                                 </div>

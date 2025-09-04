@@ -30,7 +30,7 @@ export default function DashboardContent() {
           <ul className="space-y-2">
             <li>
               <a className="flex items-center px-3 py-2 rounded-lg bg-purple-100 text-purple-700 font-medium" href="#">
-                <span className="mr-2">My Linktree</span>
+                <span className="mr-2">My Vizitlink</span>
               </a>
             </li>
             <li>
@@ -228,7 +228,7 @@ export default function DashboardContent() {
               {/* Hide logo */}
               <div className="mt-4 flex justify-center">
                 <span className="text-xs text-gray-400 flex items-center gap-1">
-                  Hide Linktree logo <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 17v.01M12 7v6m0 8a10 10 0 100-20 10 10 0 000 20z" stroke="gray" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Hide Vizitlink logo <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 17v.01M12 7v6m0 8a10 10 0 100-20 10 10 0 000 20z" stroke="gray" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   <span className="ml-1">🔒</span>
                 </span>
               </div>

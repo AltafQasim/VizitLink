@@ -1,7 +1,7 @@
 import { 
   FaInstagram, FaYoutube, FaTwitter, FaFacebook, FaLinkedin, FaSnapchatGhost, FaPinterest, FaTiktok, FaReddit, FaGithub, FaDribbble, FaBehance, FaMedium, FaSpotify, FaSoundcloud, FaTwitch, FaDiscord, FaWhatsapp, FaTelegram, FaGlobe
 } from 'react-icons/fa';
-import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad, SiLinktree } from 'react-icons/si';
+import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad, SiVizitlink } from 'react-icons/si';
 import { MdEmail } from 'react-icons/md';
 
 export const socialIconsMap = {
@@ -34,7 +34,7 @@ export const socialIconsMap = {
   amazon: SiAmazon,
   shopify: SiShopify,
   gumroad: SiGumroad,
-  linktree: SiLinktree,
+  vizitlink: SiVizitlink,
   website: FaGlobe,
   default: FaGlobe,
 };
@@ -69,7 +69,7 @@ export const socialColorsMap = {
   amazon: '#FF9900',
   shopify: '#7AB55C',
   gumroad: '#FF9000',
-  linktree: '#00DA00',
+  vizitlink: '#00DA00',
   website: '#4A5568',
   default: '#4A5568',
 };

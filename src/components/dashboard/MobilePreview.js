@@ -21,7 +21,7 @@ export default function MobilePreview() {
   const wallpaper = design.wallpaper || '';
   const buttonStyle = design.buttonStyle || 'Minimal';
   const fontFamily = design.fontFamily || 'Inter';
-  const hideLinktreeFooter = design.hideLinktreeFooter || false;
+  const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
 
   const themeStyles = useMemo(() => ({
     'Air': { background: 'bg-gray-100', textColor: 'text-black' },
@@ -268,7 +268,7 @@ export default function MobilePreview() {
                     </div>
 
                     {/* Hide logo notice */}
-                    {!hideLinktreeFooter && (
+                    {!hideVizitlinkFooter && (
                       <div className="mt-4 text-center">
                         <div className="flex items-center justify-center space-x-1 text-xs opacity-70">
                           <Lock className="w-3 h-3" />

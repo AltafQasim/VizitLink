@@ -14,12 +14,12 @@ const CustomizeSection = () => {
         </div>
 
         {/* Right Content */}
-        <div className="text-center lg:text-left space-y-4 md:space-y-6 animate-fade-in order-1 lg:order-2" style={{ animationDelay: '0.2s' }}>
+        <div className="text-left space-y-4 md:space-y-6 animate-fade-in order-1 lg:order-2" style={{ animationDelay: '0.2s' }}>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             Create and customize your VizitLink in minutes
           </h2>
           
-          <p className="text-gray-700 text-base md:text-lg leading-relaxed max-w-lg mx-auto lg:mx-0">
+          <p className="text-gray-700 text-base md:text-lg leading-relaxed max-w-lg">
             Connect your TikTok, Instagram, Twitter, website, store, videos, music, podcast, 
             events and more. It all comes together in a link in bio landing page designed 
             to convert.

@@ -331,17 +331,6 @@ const socialPlatforms = [
     }
   },
   { 
-    id: 'vizitlink', 
-    name: 'Vizitlink', 
-    icon: SiVizitlink, 
-    color: '#00DA00', 
-    placeholder: 'https://linktr.ee/username',
-    validation: (url) => {
-      const vizitlinkRegex = /^https?:\/\/(www\.)?linktr\.ee\/[a-zA-Z0-9._-]+\/?$/;
-      return vizitlinkRegex.test(url);
-    }
-  },
-  { 
     id: 'website', 
     name: 'Website', 
     icon: FaGlobe, 

@@ -11,7 +11,7 @@ const ShareSection = () => {
             Share your VizitLink from your Instagram, TikTok, Twitter and other bios
           </h2>
           
-          <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-white text-lg mb-8 max-w-2xl">
             Add your unique VizitLink URL to all the platforms and places you find your
             audience. Then use your QR code to drive your offline traffic online.
           </p>

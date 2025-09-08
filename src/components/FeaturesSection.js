@@ -89,7 +89,7 @@ const FeaturesSection = () => {
                   </div>
                   
                   {/* Record */}
-                  <div className="bg-white rounded-lg p-3 transform -rotate-2 shadow-md">
+                  <div className="bg-white rounded-lg p-3 transform -rotate-2 shadow-md sm:block hidden">
                     <div className="w-16 h-16 bg-gray-800 rounded-lg mb-2"></div>
                     <div className="text-center">
                       <p className="text-xs text-gray-600">Record</p>

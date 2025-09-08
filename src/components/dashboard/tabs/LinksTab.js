@@ -53,7 +53,6 @@ function SortableLinkItem({
   onToggleActive, 
   onEdit, 
   onDelete, 
-  onOpen 
 }) {
   const {
     attributes,
@@ -120,14 +119,6 @@ function SortableLinkItem({
             onClick={() => onEdit(link)}
           >
             <Edit className="w-4 h-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpen(link.url)}
-          >
-            <ExternalLink className="w-4 h-4" />
           </Button>
           
           <Button
@@ -212,9 +203,6 @@ export default function LinksTab() {
     setDeletingLink(null);
   };
 
-  const handleOpen = (url) => {
-    window.open(url, '_blank');
-  };
 
   const handleAddLink = async (newLink) => {
     const newId = generateId();
@@ -304,7 +292,6 @@ export default function LinksTab() {
                     onToggleActive={handleToggleActive}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onOpen={handleOpen}
                   />
                 ))}
               </AnimatePresence>

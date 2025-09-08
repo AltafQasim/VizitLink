@@ -132,15 +132,6 @@ export default function ProductsTab() {
     setDeletingProduct(null);
   };
 
-  const handleShare = async (product) => {
-    try {
-      // Copy product URL to clipboard
-      await navigator.clipboard.writeText(product.url);
-      toast.success('Product URL copied to clipboard!');
-    } catch (error) {
-      toast.error('Failed to copy URL to clipboard');
-    }
-  };
 
   const generateId = () => (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined);
 
@@ -300,14 +291,6 @@ export default function ProductsTab() {
                           onClick={() => handleEdit(product)}
                         >
                           <Edit className="w-4 h-4" />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleShare(product)}
-                        >
-                          <Share2 className="w-4 h-4" />
                         </Button>
                         
                         <Button

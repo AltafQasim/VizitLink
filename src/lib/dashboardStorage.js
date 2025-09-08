@@ -123,7 +123,7 @@ function mapDesignRowToApp(row) {
     fontFamily: row.font_family || 'Inter',
     fontWeight: row.font_weight || '400',
     fontSize: row.font_size || '16px',
-    hideVizitlinkFooter: Boolean(row.hide_vizitlink_footer),
+    hideVizitlinkFooter: Boolean(row.hide_linktree_footer),
   };
 }
 
@@ -185,7 +185,7 @@ export const saveToBackend = async (data, profileId = null) => {
     font_family: data?.design?.fontFamily || 'Inter',
     font_weight: data?.design?.fontWeight || '400',
     font_size: data?.design?.fontSize || '16px',
-    hide_vizitlink_footer: Boolean(data?.design?.hideVizitlinkFooter),
+    hide_linktree_footer: Boolean(data?.design?.hideVizitlinkFooter),
     updated_at: new Date().toISOString(),
   };
 

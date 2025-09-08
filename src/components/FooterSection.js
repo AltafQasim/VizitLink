@@ -10,30 +10,38 @@ const FooterSection = () => {
         {/* Person Silhouette */}
         <div className="absolute left-0 bottom-0 w-32 h-48 md:w-48 md:h-72 lg:w-64 lg:h-96 opacity-80">
           <svg viewBox="0 0 200 300" className="w-full h-full fill-cyan-400">
-            <path d="M100 50C120 50 135 65 135 85C135 105 120 120 100 120C80 120 65 105 65 85C65 65 80 50 100 50ZM70 140C70 135 75 130 80 130H120C125 130 130 135 130 140V180C130 185 135 190 140 190H160C165 190 170 195 170 200V290C170 295 165 300 160 300H40C35 300 30 295 30 290V200C30 195 35 190 40 190H60C65 190 70 185 70 180V140Z"/>
+            <path d="M100 50C120 50 135 65 135 85C135 105 120 120 100 120C80 120 65 105 65 85C65 65 80 50 100 50ZM70 140C70 135 75 130 80 130H120C125 130 130 135 130 140V180C130 185 135 190 140 190H160C165 190 170 195 170 200V290C170 295 165 300 160 300H40C35 300 30 295 30 290V200C30 195 35 190 40 190H60C65 190 70 185 70 180V140Z" />
           </svg>
         </div>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 md:mb-8 leading-tight px-4">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 gap-y-6 justify-center items-center text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight px-4">
             jumpstart your corner of the internet today
           </h2>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-0 max-w-md mx-auto px-4">
-            <div className="bg-white rounded-t-full sm:rounded-l-full sm:rounded-tr-none px-4 md:px-6 py-3 text-gray-600 font-medium w-full sm:w-auto text-center sm:text-left">
-              vizitlink.com/
+          <div className="flex flex-col gap-2 sm:flex-row animate-slide-up max-w-lg" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center bg-white rounded-full px-4 md:px-5 py-1 flex-1">
+              <span className="text-gray-500 mr-2 text-sm md:text-base">{process.env.SITE_URL}/</span>
+              <Input
+                placeholder=""
+                className="w-auto border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-gray-700 text-sm md:text-base"
+              />
             </div>
-            <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6 py-3 font-semibold">
-              Claim your VizitLink
-            </Button>
+            <Link href="/signup">
+              <Button
+                size="lg"
+                className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6 md:px-8 py-6 font-semibold text-base md:text-lg w-auto"
+              >
+                Claim your VizitLink
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* Decorative Plant */}
         <div className="absolute right-4 md:right-8 bottom-0 w-16 h-24 md:w-24 md:h-36 lg:w-32 lg:h-48 opacity-60">
           <svg viewBox="0 0 100 150" className="w-full h-full fill-purple-300">
-            <path d="M50 150V100C50 90 55 85 60 80C70 70 80 65 85 55C90 45 85 35 75 30C65 25 55 30 50 40C45 30 35 25 25 30C15 35 10 45 15 55C20 65 30 70 40 80C45 85 50 90 50 100V150Z"/>
+            <path d="M50 150V100C50 90 55 85 60 80C70 70 80 65 85 55C90 45 85 35 75 30C65 25 55 30 50 40C45 30 35 25 25 30C15 35 10 45 15 55C20 65 30 70 40 80C45 85 50 90 50 100V150Z" />
           </svg>
         </div>
       </div>
@@ -118,23 +126,23 @@ const FooterSection = () => {
             {/* App Store Badges and Social Icons */}
             <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full lg:w-auto">
               <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-              {/* App Store Badge */}
-              <div className="bg-black text-white px-3 md:px-4 py-2 rounded-lg text-xs flex items-center gap-2 min-w-0">
-                <span>📱</span>
-                <div className="min-w-0">
-                  <div className="text-xs">Download on the</div>
-                  <div className="font-bold">App Store</div>
+                {/* App Store Badge */}
+                <div className="bg-black text-white px-3 md:px-4 py-2 rounded-lg text-xs flex items-center gap-2 min-w-0">
+                  <span>📱</span>
+                  <div className="min-w-0">
+                    <div className="text-xs">Download on the</div>
+                    <div className="font-bold">App Store</div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Google Play Badge */}
-              <div className="bg-black text-white px-3 md:px-4 py-2 rounded-lg text-xs flex items-center gap-2 min-w-0">
-                <span>▶️</span>
-                <div className="min-w-0">
-                  <div className="text-xs">GET IT ON</div>
-                  <div className="font-bold">Google Play</div>
+                {/* Google Play Badge */}
+                <div className="bg-black text-white px-3 md:px-4 py-2 rounded-lg text-xs flex items-center gap-2 min-w-0">
+                  <span>▶️</span>
+                  <div className="min-w-0">
+                    <div className="text-xs">GET IT ON</div>
+                    <div className="font-bold">Google Play</div>
+                  </div>
                 </div>
-              </div>
               </div>
 
               {/* Social Icons */}
@@ -165,7 +173,7 @@ const FooterSection = () => {
             <div className="w-10 h-6 md:w-12 md:h-8 bg-gradient-to-r from-black via-red-600 to-yellow-400 rounded"></div>
             <div className="w-10 h-6 md:w-12 md:h-8 bg-gradient-to-r from-green-600 via-black to-blue-600 rounded"></div>
           </div>
-          
+
           <p className="text-white text-xs max-w-4xl mx-auto leading-relaxed px-4">
             We acknowledge the Traditional Custodians of the land on which our office stands, The Wurundjeri people of the Kulin Nation, and pay our respects to Elders past, present and emerging. VizitLink Pty Ltd (ABN 68 633 489), 1-9 Sackville St, Collingwood VIC 3066
           </p>

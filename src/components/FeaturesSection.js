@@ -1,8 +1,8 @@
 const FeaturesSection = () => {
   return (
-    <div className="bg-gray-50 py-20 px-4 md:px-6">
+    <div className="bg-gray-50 py-12 md:py-20 px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           
           {/* Left Column - Two Stacked Blocks */}
           <div className="space-y-8">
@@ -50,7 +50,7 @@ const FeaturesSection = () => {
                 </div>
                 
                 {/* Text */}
-                <p className="text-gray-800 text-lg font-medium leading-relaxed">
+                <p className="text-gray-800 text-base md:text-lg font-medium leading-relaxed">
                   Share your content in limitless ways on your VizitLink.
                 </p>
               </div>
@@ -99,7 +99,7 @@ const FeaturesSection = () => {
                 </div>
                 
                 {/* Text */}
-                <p className="text-gray-800 text-lg font-medium leading-relaxed">
+                <p className="text-gray-800 text-base md:text-lg font-medium leading-relaxed">
                   Sell products and collect payments. It's monetization made simple.
                 </p>
               </div>

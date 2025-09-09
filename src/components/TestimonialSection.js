@@ -40,13 +40,13 @@ const TestimonialSection = () => {
   const currentTestimonial = testimonials[currentIndex];
 
   return (
-    <div className="bg-white py-20 px-4 md:px-6">
+    <div className="bg-white py-12 md:py-20 px-4 md:px-6">
       <div className="max-w-4xl mx-auto text-center">
         
         {/* Testimonial Image */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <div className="relative inline-block">
-            <div className="w-64 h-48 md:w-80 md:h-60 rounded-full overflow-hidden bg-gradient-to-r from-orange-400 to-green-600 relative">
+            <div className="w-56 h-44 md:w-80 md:h-60 rounded-full overflow-hidden bg-gradient-to-r from-orange-400 to-green-600 relative">
               {/* Placeholder for testimonial image */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center">
@@ -62,15 +62,15 @@ const TestimonialSection = () => {
         </div>
 
         {/* Testimonial Quote */}
-        <div className="mb-6">
-          <blockquote className="text-gray-800 text-2xl md:text-3xl font-bold leading-relaxed max-w-3xl mx-auto">
+        <div className="mb-4 md:mb-6">
+          <blockquote className="text-gray-800 text-xl md:text-3xl font-bold leading-relaxed tracking-tight max-w-3xl mx-auto">
             "{currentTestimonial.quote}"
           </blockquote>
         </div>
 
         {/* Author Information */}
-        <div className="mb-8">
-          <p className="text-gray-600 text-lg">
+        <div className="mb-6 md:mb-8">
+          <p className="text-gray-600 text-base md:text-lg">
             {currentTestimonial.author}, {currentTestimonial.title}
           </p>
         </div>

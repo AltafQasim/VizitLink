@@ -6,7 +6,7 @@ const FooterSection = () => {
   return (
     <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 relative overflow-hidden">
       {/* Hero Section */}
-      <div className="relative py-16 md:py-20 px-4 md:px-6">
+      <div className="relative py-12 md:py-20 px-4 md:px-6">
         {/* Person Silhouette */}
         <div className="absolute left-0 bottom-0 w-32 h-48 md:w-48 md:h-72 lg:w-64 lg:h-96 opacity-80">
           <svg viewBox="0 0 200 300" className="w-full h-full fill-cyan-400">
@@ -15,8 +15,8 @@ const FooterSection = () => {
         </div>
 
         {/* Content */}
-        <div className="max-w-4xl mx-auto flex flex-col gap-4 gap-y-6 justify-center items-center text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight px-4">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4 md:gap-6 justify-center items-center text-center relative z-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight px-4">
             jumpstart your corner of the internet today
           </h2>
           <div className="flex flex-col gap-2 sm:flex-row animate-slide-up max-w-lg" style={{ animationDelay: '0.4s' }}>
@@ -47,8 +47,8 @@ const FooterSection = () => {
       </div>
 
       {/* Footer Links */}
-      <div className="bg-white mx-4 md:mx-6 mb-16 md:mb-20 rounded-2xl md:rounded-3xl p-6 md:p-8">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+      <div className="bg-white mx-4 md:mx-6 mb-12 md:mb-20 rounded-2xl md:rounded-3xl p-6 md:p-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {/* Company */}
           <div>
             <h3 className="font-bold text-gray-900 mb-3 md:mb-4 text-sm md:text-base">Company</h3>

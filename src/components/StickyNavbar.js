@@ -14,10 +14,10 @@ const StickyNavbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Check if scrolled past threshold
       setIsScrolled(currentScrollY > 10);
-      
+
       // Hide/show navbar based on scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down - hide navbar
@@ -26,7 +26,7 @@ const StickyNavbar = () => {
         // Scrolling up - show navbar
         setIsVisible(true);
       }
-      
+      console.log({ currentScrollY })
       setLastScrollY(currentScrollY);
     };
 
@@ -35,10 +35,10 @@ const StickyNavbar = () => {
   }, [lastScrollY]);
 
   return (
-    <nav 
-      className={`sticky top-0 z-50 transition-all duration-500 px-6 py-4 ${
-        isVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-500 px-6 py-4 ${isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      style={{ background: isScrolled && lastScrollY > 150 ? "transparent" : '#21232a url(/profilebg.jpg) repeat 0 0' }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Pill-shaped navbar container */}
@@ -82,10 +82,10 @@ const StickyNavbar = () => {
                       Dashboard
                     </Button>
                   </Link>
-                  <Button 
+                  <Button
                     onClick={signOut}
-                    variant="ghost" 
-                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" 
+                    variant="ghost"
+                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                     style={{ fontSize: '16px' }}
                   >
                     Log out

@@ -6,6 +6,7 @@ import {
   CarouselItem,
 } from './ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
+import { WordRotate } from './magicui/word-rotate';
 
 const CreatorsSection = () => {
   const creators = [
@@ -19,42 +20,113 @@ const CreatorsSection = () => {
     { name: '@justintimberlake', bg: 'bg-gradient-to-br from-indigo-500 to-indigo-600', shape: 'circle' },
   ];
 
+  const passions = [
+    "creators",
+    "influencers",
+    "small businesses",
+    "athletes",
+    "models",
+    "monetizers",
+    "health educators",
+    "streamers",
+    "vloggers",
+    "fitness coaches",
+    "ecommerce sellers",
+    "retailers",
+    "products",
+    "wellness leaders",
+    "musicians",
+    "bands",
+    "podcasters",
+    "fashion designers",
+    "culture creators",
+    "merch sellers",
+    "writers",
+    "DJs",
+    "creators",
+    "influencers",
+    "small businesses",
+    "athletes",
+    "models",
+    "monetizers",
+    "health educators",
+    "streamers",
+    "vloggers",
+    "fitness coaches",
+    "ecommerce sellers",
+    "retailers",
+    "products",
+    "wellness leaders",
+    "musicians",
+    "bands",
+    "podcasters",
+    "fashion designers",
+    "culture creators",
+    "merch sellers",
+    "writers",
+    "DJs",
+    "creators",
+    "influencers",
+    "small businesses",
+    "athletes",
+    "models",
+    "monetizers",
+    "health educators",
+    "streamers",
+    "vloggers",
+    "fitness coaches",
+    "ecommerce sellers",
+    "retailers",
+    "products",
+    "wellness leaders",
+    "musicians",
+    "bands",
+    "podcasters",
+    "fashion designers",
+    "culture creators",
+    "merch sellers",
+    "writers",
+    "DJs"
+  ]
+
   const autoplayPlugin = Autoplay({
     delay: 1500,
     stopOnInteraction: false,
-    stopOnMouseEnter: false,
+    stopOnMouseEnter: true,
   });
 
   const getShapeClasses = (shape) => {
+    const baseHeight = 'h-64 sm:h-72 md:h-80';
     switch (shape) {
       case 'circle':
-        return 'rounded-full w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80';
+        return `${baseHeight} rounded-full w-64 sm:w-72 md:w-80`;
       case 'square':
-        return 'rounded-2xl w-44 h-44 sm:w-56 sm:h-56 md:w-72 md:h-72';
+        return `${baseHeight} rounded-2xl w-64 sm:w-72 md:w-80`;
       case 'oval':
-        return 'rounded-full w-56 h-40 sm:w-72 sm:h-52 md:w-96 md:h-72';
+        return `${baseHeight} rounded-full w-80 sm:w-96 md:w-[28rem]`;
       case 'rounded-rectangle':
-        return 'rounded-3xl w-44 h-60 sm:w-56 sm:h-76 md:w-72 md:h-96';
+        return `${baseHeight} rounded-3xl w-72 sm:w-80 md:w-96`;
       default:
-        return 'rounded-2xl w-44 h-60 sm:w-56 sm:h-76 md:w-72 md:h-96';
+        return `${baseHeight} rounded-2xl w-72 sm:w-80 md:w-96`;
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-black py-16 md:py-20 px-4 md:px-6">
-      <div className="max-w-7xl mx-auto text-center">
-        
+    <div className="bg-gradient-to-br from-gray-900 to-black py-12 md:py-32 px-4 md:px-6">
+      <div className="mx-auto text-center">
+
         {/* Header */}
-        <div className="mb-12 md:mb-16 animate-fade-in">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-2 md:mb-4">
+        <div className="mb-8 md:mb-16 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-2 md:mb-4">
             The only link in bio trusted by{' '}
             <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               70M+
             </span>
-          </h2>
-          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-            creators
-          </h3>
+          </h1>
+          <WordRotate
+            words={passions}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2665d6] capitalize"
+          />
         </div>
 
         {/* Carousel */}
@@ -64,20 +136,22 @@ const CreatorsSection = () => {
               align: "start",
             }}
             plugins={[autoplayPlugin]}
-            className="w-full max-w-6xl mx-auto overflow-hidden"
+            className="w-full mx-auto overflow-hidden"
           >
             <CarouselContent className="-ml-1 md:-ml-2 lg:-ml-4">
               {[...creators, ...creators, ...creators].map((creator, index) => (
                 <CarouselItem key={index} className="pl-1 md:pl-2 lg:pl-4 basis-auto">
-                  <div className="hover-scale">
-                    <div 
-                      className={`${creator.bg} ${getShapeClasses(creator.shape)} flex items-end relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20 p-3 md:p-4 lg:p-6`}
+                  <div className="group relative">
+                    {/* Gradient shadow on hover */}
+                    <div className="pointer-events-none absolute inset-0 translate-y-2 scale-105 rounded-3xl opacity-0 blur-2xl transition duration-300 group-hover:opacity-100 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.35),rgba(168,85,247,0.35)_55%,transparent_70%)]" />
+                    <div
+                      className={`${creator.bg} ${getShapeClasses(creator.shape)} flex items-end relative overflow-hidden transition-transform duration-300 group-hover:scale-[1.04] p-3 md:p-4 lg:p-6`}
                     >
                       {/* Background pattern */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                      
+
                       {/* Creator badge */}
-                      <div className="relative z-10 bg-white rounded-full px-2 py-1 md:px-3 md:py-1 shadow-lg">
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-3 z-10 bg-white rounded-full px-2 py-1 md:px-3 md:py-1 shadow-lg">
                         <span className="text-gray-800 font-medium text-xs">
                           {creator.name}
                         </span>

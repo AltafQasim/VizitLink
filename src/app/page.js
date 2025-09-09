@@ -13,11 +13,8 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <TopBanner />
-      <div style={{ background: '#21232a url(/profilebg.jpg) repeat 0 0' }}>
-
-        <StickyNavbar />
-        <HeroSection />
-      </div>
+      <StickyNavbar />
+      <HeroSection />
       <CustomizeSection />
       <AnalyticsSection />
       <CreatorsSection />

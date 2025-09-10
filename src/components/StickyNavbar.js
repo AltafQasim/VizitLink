@@ -26,7 +26,6 @@ const StickyNavbar = () => {
         // Scrolling up - show navbar
         setIsVisible(true);
       }
-      console.log({ currentScrollY })
       setLastScrollY(currentScrollY);
     };
 

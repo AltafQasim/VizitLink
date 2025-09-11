@@ -2,6 +2,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import PhoneMockup from './PhoneMockup';
 import Link from 'next/link';
+import ProfileCard from './reactbit/ProfileCard/Profilecard';
 
 const HeroSection = () => {
   return (
@@ -47,7 +48,19 @@ const HeroSection = () => {
         {/* Right Content - Phone Mockup */}
         <div className="flex justify-center  animate-slide-in-left order-1 lg:order-2" style={{ animationDelay: '0.6s' }}>
           <div className="scale-75 sm:scale-90 md:scale-100">
-            <PhoneMockup />
+            {/* <PhoneMockup /> */}
+            <ProfileCard
+              name="Javi A. Torres"
+              title="Software Engineer"
+              handle="javicodes"
+              status="Online"
+              contactText="Contact Me"
+              avatarUrl="/emailtemp.avif"
+              showUserInfo={true}
+              enableTilt={true}
+              enableMobileTilt={false}
+              // onContactClick={() => console.log('Contact clicked')}
+            />
           </div>
         </div>
       </div>

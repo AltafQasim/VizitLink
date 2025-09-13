@@ -16,9 +16,9 @@ export default function Home() {
       <StickyNavbar />
       <HeroSection />
       <CustomizeSection />
+      <ShareSection />
       <AnalyticsSection />
       <CreatorsSection />
-      <ShareSection />
       <FeaturesSection />
       <TestimonialSection />
       <FooterSection />

@@ -1,4 +1,4 @@
-const PhoneMockup = () => {
+const PhoneMockup = ({ step = 'link' }) => {
   return (
     <div className="relative animate-float">
       {/* Phone Frame */}
@@ -6,7 +6,7 @@ const PhoneMockup = () => {
         <div className="w-full h-full bg-background rounded-[2rem] overflow-hidden relative">
           
           {/* Profile Section */}
-          <div className="bg-gradient-to-br from-blue-200 to-purple-300 p-6 text-center">
+          <div className={`bg-gradient-to-br p-6 text-center transition-colors duration-500 ${step === 'design' ? 'from-indigo-200 to-cyan-300' : 'from-blue-200 to-purple-300'}`}>
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-orange-300 mx-auto mb-4 flex items-center justify-center">
               <img 
                 src="/api/placeholder/80/80" 
@@ -14,18 +14,18 @@ const PhoneMockup = () => {
                 className="w-16 h-16 rounded-full object-cover"
               />
             </div>
-            <h3 className="font-bold text-lg text-gray-800">Artist J</h3>
-            <p className="text-gray-600 text-sm">Music is our cure</p>
+            <h3 className="font-bold text-lg text-gray-800">{step === 'design' ? 'Artist Nova' : 'Artist J'}</h3>
+            <p className="text-gray-600 text-sm">{step === 'design' ? 'Design updated ✨' : 'Music is our cure'}</p>
           </div>
 
           {/* Content Links */}
           <div className="p-4 space-y-3">
-            <div className="bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl p-4 text-white">
-              <p className="font-semibold">Latest Single</p>
+            <div className={`bg-gradient-to-r rounded-2xl p-4 text-white transition-all duration-500 ${step === 'link' ? 'from-emerald-500 to-green-500 ring-2 ring-emerald-300' : 'from-purple-400 to-pink-400'}`}>
+              <p className="font-semibold">{step === 'link' ? 'New Link: Portfolio' : 'Latest Single'}</p>
             </div>
             
-            <div className="bg-gradient-to-r from-blue-400 to-purple-400 rounded-2xl p-4 text-white">
-              <p className="font-semibold">Music Video</p>
+            <div className={`bg-gradient-to-r rounded-2xl p-4 text-white transition-all duration-500 ${step === 'product' ? 'from-amber-500 to-orange-500 ring-2 ring-amber-300' : 'from-blue-400 to-purple-400'}`}>
+              <p className="font-semibold">{step === 'product' ? 'New Product: E-book' : 'Music Video'}</p>
             </div>
             
             <div className="bg-gradient-to-r from-green-400 to-blue-400 rounded-2xl p-4 text-white">
@@ -33,9 +33,9 @@ const PhoneMockup = () => {
             </div>
 
             {/* Album Art Section */}
-            <div className="relative bg-gradient-to-br from-orange-300 to-pink-400 rounded-2xl p-4 h-32">
+            <div className={`relative bg-gradient-to-br rounded-2xl p-4 h-32 transition-colors duration-500 ${step === 'design' ? 'from-sky-300 to-violet-400' : 'from-orange-300 to-pink-400'}`}>
               <div className="absolute top-2 left-2 text-white">
-                <p className="text-lg font-bold italic">Double Return</p>
+                <p className="text-lg font-bold italic">{step === 'design' ? 'Fresh Theme' : 'Double Return'}</p>
               </div>
               <div className="absolute bottom-2 left-2">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
@@ -46,9 +46,9 @@ const PhoneMockup = () => {
 
             {/* Social Icons */}
             <div className="flex justify-center space-x-3 pt-2">
-              <div className="w-10 h-10 bg-purple-400 rounded-full"></div>
-              <div className="w-10 h-10 bg-pink-400 rounded-full"></div>
-              <div className="w-10 h-10 bg-blue-400 rounded-full"></div>
+              <div className={`w-10 h-10 rounded-full transition-transform duration-300 ${step === 'link' ? 'bg-emerald-400 scale-110' : 'bg-purple-400'}`}></div>
+              <div className={`w-10 h-10 rounded-full transition-transform duration-300 ${step === 'product' ? 'bg-amber-400 scale-110' : 'bg-pink-400'}`}></div>
+              <div className={`w-10 h-10 rounded-full transition-transform duration-300 ${step === 'design' ? 'bg-sky-400 scale-110' : 'bg-blue-400'}`}></div>
             </div>
           </div>
         </div>

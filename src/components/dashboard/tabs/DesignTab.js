@@ -11,6 +11,9 @@ import { Card } from "../../ui/card";
 import { useDashboard } from "../../../context/DashboardContext";
 import { toast } from 'sonner';
 import { supabase } from "../../../lib/supabase";
+import LiquidEther from "../../reactbit/LiquidEther/LiquidEther";
+import Prism from "../../reactbit/Prism/Prism";
+import DarkVeil from "../../reactbit/DarkVeil/DarkVeil";
 
 const DesignTab = () => {
     const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveChanges } = useDashboard();
@@ -168,11 +171,11 @@ const DesignTab = () => {
             try {
                 // Show loading toast
                 const loadingToast = toast.loading("Uploading profile picture...");
-                
+
                 // Check if there's an existing avatar to delete
                 const currentAvatarUrl = data.profile.avatar;
                 let oldFilePath = null;
-                
+
                 // Extract the file path from the URL if it exists and is from Supabase
                 if (currentAvatarUrl && currentAvatarUrl.includes('/avatars/')) {
                     // Extract the path after /avatars/ from the URL
@@ -181,30 +184,30 @@ const DesignTab = () => {
                         oldFilePath = urlParts[1];
                     }
                 }
-                
+
                 // Generate a unique file name for the new upload
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${Date.now()}.${fileExt}`;
                 const filePath = `${data.profile.id}/${fileName}`;
-                
+
                 // Upload to Supabase avatar bucket
                 const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('avatars')
                     .upload(filePath, file);
-                    
+
                 if (uploadError) {
                     toast.dismiss(loadingToast);
                     toast.error("Upload error: " + uploadError.message);
                     return;
                 }
-                
+
                 // Get the public URL
                 const { data: publicUrlData } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(filePath);
-                    
+
                 const avatarUrl = publicUrlData.publicUrl;
-                
+
                 // Update profile with the avatar URL
                 updateData({
                     profile: {
@@ -212,18 +215,18 @@ const DesignTab = () => {
                         avatar: avatarUrl
                     }
                 });
-                
+
                 // Delete the old avatar file if it exists
                 if (oldFilePath) {
                     const { error: deleteError } = await supabase.storage
                         .from('avatars')
                         .remove([oldFilePath]);
-                        
+
                     if (deleteError) {
                         console.error("Error deleting old avatar:", deleteError);
                     }
                 }
-                
+
                 toast.dismiss(loadingToast);
                 toast.success("Profile picture uploaded successfully");
             } catch (error) {
@@ -747,6 +750,47 @@ const DesignTab = () => {
                                     )}
                                 </Card>
                             ))}
+                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
+                                <div className={`aspect-[3/4] relative`}>
+                                    <LiquidEther
+                                        colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+                                        mouseForce={20}
+                                        cursorSize={100}
+                                        isViscous={false}
+                                        viscous={30}
+                                        iterationsViscous={32}
+                                        iterationsPoisson={32}
+                                        resolution={0.5}
+                                        isBounce={false}
+                                        autoDemo={true}
+                                        autoSpeed={0.5}
+                                        autoIntensity={2.2}
+                                        takeoverDuration={0.25}
+                                        autoResumeDelay={3000}
+                                        autoRampDuration={0.6}
+                                    />
+                                </div>
+                            </Card>
+                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
+                                <div className={`aspect-[3/4] relative`}>
+                                    <Prism
+                                        animationType="rotate"
+                                        timeScale={0.5}
+                                        height={3.5}
+                                        baseWidth={1.5}
+                                        scale={3.6}
+                                        hueShift={0}
+                                        colorFrequency={1}
+                                        noise={0.5}
+                                        glow={1}
+                                    />
+                                </div>
+                            </Card>
+                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
+                                <div className={`aspect-[3/4] relative`}>
+                                    <DarkVeil />
+                                </div>
+                            </Card>
                         </div>
 
                         {/* Wallpaper Image Modal */}
@@ -793,15 +837,15 @@ const DesignTab = () => {
                                                 onChange={async (e) => {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
-                                                    
+
                                                     // Show loading toast
                                                     const loadingToast = toast.loading("Uploading wallpaper image...");
-                                                    
+
                                                     try {
                                                         // Check if there's an existing wallpaper image to delete
                                                         const currentWallpaperUrl = data.design?.wallpaperImage;
                                                         let oldFilePath = null;
-                                                        
+
                                                         // Extract the file path from the URL if it exists and is from Supabase
                                                         if (currentWallpaperUrl && currentWallpaperUrl.includes('/wallpaperimage/')) {
                                                             // Extract the path after /wallpaperimage/ from the URL
@@ -810,30 +854,30 @@ const DesignTab = () => {
                                                                 oldFilePath = urlParts[1];
                                                             }
                                                         }
-                                                        
+
                                                         // Generate a unique file name
                                                         const fileExt = file.name.split('.').pop();
                                                         const fileName = `${Date.now()}.${fileExt}`;
                                                         const filePath = `${data.profile.id}/${fileName}`;
-                                                        
+
                                                         // Upload to Supabase wallpaperimage bucket
                                                         const { data: uploadData, error: uploadError } = await supabase.storage
                                                             .from('wallpaperimage')
                                                             .upload(filePath, file);
-                                                            
+
                                                         if (uploadError) {
                                                             toast.dismiss(loadingToast);
                                                             toast.error("Upload error: " + uploadError.message);
                                                             return;
                                                         }
-                                                        
+
                                                         // Get the public URL
                                                         const { data: publicUrlData } = supabase.storage
                                                             .from('wallpaperimage')
                                                             .getPublicUrl(filePath);
-                                                            
+
                                                         const wallpaperUrl = publicUrlData.publicUrl;
-                                                        
+
                                                         // Update design with the wallpaper URL
                                                         updateData({
                                                             design: {
@@ -843,18 +887,18 @@ const DesignTab = () => {
                                                                 wallpaperImage: wallpaperUrl,
                                                             }
                                                         });
-                                                        
+
                                                         // If there was an old file, try to delete it
                                                         if (oldFilePath) {
                                                             const { error: deleteError } = await supabase.storage
                                                                 .from('wallpaperimage')
                                                                 .remove([oldFilePath]);
-                                                                
+
                                                             if (deleteError) {
                                                                 console.error("Error deleting old wallpaper image:", deleteError);
                                                             }
                                                         }
-                                                        
+
                                                         toast.dismiss(loadingToast);
                                                         toast.success("Image set as wallpaper");
                                                         setIsWallpaperModalOpen(false);
@@ -952,15 +996,15 @@ const DesignTab = () => {
                                                 onChange={async (e) => {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
-                                                    
+
                                                     // Show loading toast
                                                     const loadingToast = toast.loading("Uploading wallpaper video...");
-                                                    
+
                                                     try {
                                                         // Check if there's an existing wallpaper video to delete
                                                         const currentVideoUrl = data.design?.wallpaperVideo;
                                                         let oldFilePath = null;
-                                                        
+
                                                         // Extract the file path from the URL if it exists and is from Supabase
                                                         if (currentVideoUrl && currentVideoUrl.includes('/wallpapervideo/')) {
                                                             // Extract the path after /wallpapervideo/ from the URL
@@ -969,30 +1013,30 @@ const DesignTab = () => {
                                                                 oldFilePath = urlParts[1];
                                                             }
                                                         }
-                                                        
+
                                                         // Generate a unique file name
                                                         const fileExt = file.name.split('.').pop();
                                                         const fileName = `${Date.now()}.${fileExt}`;
                                                         const filePath = `${data.profile.id}/${fileName}`;
-                                                        
+
                                                         // Upload to Supabase wallpapervideo bucket
                                                         const { data: uploadData, error: uploadError } = await supabase.storage
                                                             .from('wallpapervideo')
                                                             .upload(filePath, file);
-                                                            
+
                                                         if (uploadError) {
                                                             toast.dismiss(loadingToast);
                                                             toast.error("Upload error: " + uploadError.message);
                                                             return;
                                                         }
-                                                        
+
                                                         // Get the public URL
                                                         const { data: publicUrlData } = supabase.storage
                                                             .from('wallpapervideo')
                                                             .getPublicUrl(filePath);
-                                                            
+
                                                         const videoUrl = publicUrlData.publicUrl;
-                                                        
+
                                                         // Update design with the video URL
                                                         updateData({
                                                             design: {
@@ -1002,18 +1046,18 @@ const DesignTab = () => {
                                                                 wallpaperVideo: videoUrl,
                                                             }
                                                         });
-                                                        
+
                                                         // If there was an old file, try to delete it
                                                         if (oldFilePath) {
                                                             const { error: deleteError } = await supabase.storage
                                                                 .from('wallpapervideo')
                                                                 .remove([oldFilePath]);
-                                                                
+
                                                             if (deleteError) {
                                                                 console.error("Error deleting old wallpaper video:", deleteError);
                                                             }
                                                         }
-                                                        
+
                                                         toast.dismiss(loadingToast);
                                                         toast.success("Video set as wallpaper");
                                                         setIsVideoModalOpen(false);

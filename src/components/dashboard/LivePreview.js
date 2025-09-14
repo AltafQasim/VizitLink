@@ -197,7 +197,7 @@ export default function LivePreview() {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`block w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                        className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
@@ -218,14 +218,14 @@ export default function LivePreview() {
                   })}
               </div>
 
-              {/* Shop section */}
+              {/* Shop section with improved design */}
               {(data?.products || []).filter(p => p.active).length > 0 && (
                 <div className="mt-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className={`font-semibold ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
-                    <button className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/80' : 'text-purple-600'}`}>View all</button>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
+                    <button className={`text-sm px-3 py-1 rounded-full ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'} transition-colors`}>View all</button>
                   </div>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {(data.products || [])
                       .filter(p => p.active)
                       .map((product) => (
@@ -234,28 +234,43 @@ export default function LivePreview() {
                           href={product.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`block rounded-lg p-3 hover:opacity-80 transition-colors ${currentTextColor === 'text-white' ? 'bg-white/10' : 'bg-purple-50'}`}
-                          whileHover={{ scale: 1.02 }}
+                          className={`group block rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-white shadow-sm border border-gray-100'}`}
+                          whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
-                              {product.image ? (
+                          <div className="relative">
+                            {product.image ? (
+                              <div className="relative w-full h-32 overflow-hidden">
                                 <Image
                                   src={product.image}
                                   alt={product.title || 'Product'}
                                   fill
-                                  className="object-cover"
-                                  sizes="48px"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                  sizes="(max-width: 640px) 50vw, 25vw"
                                 />
-                              ) : (
-                                <div className="w-full h-full bg-gray-100" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-medium text-sm truncate ${currentTextColor}`} style={{ fontFamily: fontFamily }}>{product.title}</p>
-                              <p className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>{product.brand || 'Unknown'}</p>
-                              <p className="text-sm font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  <ExternalLink className="w-3 h-3 text-gray-700" />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                <div className="text-gray-400 text-xs">No Image</div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <h4 className={`font-semibold text-sm truncate ${currentTextColor}`} style={{ fontFamily: fontFamily }}>
+                              {product.title}
+                            </h4>
+                            <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>
+                              {product.brand || 'Unknown Brand'}
+                            </p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-sm font-bold text-purple-600">
+                                ${(Number(product.price) || 0).toFixed(2)}
+                              </span>
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             </div>
                           </div>
                         </motion.a>

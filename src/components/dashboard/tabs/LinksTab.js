@@ -142,6 +142,7 @@ export default function LinksTab() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [deletingLink, setDeletingLink] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activeSection, setActiveSection] = useState('social'); // 'social' or 'links'
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -234,12 +235,36 @@ export default function LinksTab() {
   return (
     <div className="space-y-4 sm:space-y-6 px-3 py-3 sm:px-4 lg:p-8 pt-0">
       {/* Header */}
-      <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 sticky top-0 bg-gray-50 z-10">
-        <div>
+      <div className="py-3 sm:py-4 sticky top-0 bg-gray-50 z-10">
+        <div className="mb-4">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My VizitLink</h2>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            Manage your social media links and customize your profile
+            Manage your social media icons and custom links
           </p>
+        </div>
+        
+        {/* Section Tabs */}
+        <div className="flex space-x-1 bg-gray-200 rounded-lg p-1 mb-4">
+          <button
+            onClick={() => setActiveSection('social')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeSection === 'social'
+                ? 'bg-white text-purple-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Social Icons
+          </button>
+          <button
+            onClick={() => setActiveSection('links')}
+            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeSection === 'links'
+                ? 'bg-white text-purple-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Custom Links
+          </button>
         </div>
         
         <Button
@@ -247,15 +272,17 @@ export default function LinksTab() {
           className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
         >
           <Plus className="w-4 h-4" />
-          Add Link
+          Add {activeSection === 'social' ? 'Social Icon' : 'Link'}
         </Button>
       </div>
 
-      {/* Links List */}
-      <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-          Social Links ({data.links.filter(link => link.active).length} active)
-        </h3>
+      {/* Content based on active section */}
+      {activeSection === 'social' ? (
+        /* Social Icons Section */
+        <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+            Social Icons ({data.links.filter(link => link.active).length} active)
+          </h3>
         
         {data.links.length === 0 ? (
           <div className="text-center py-10 sm:py-12">
@@ -298,7 +325,31 @@ export default function LinksTab() {
             </SortableContext>
           </DndContext>
         )}
-      </div>
+        </div>
+      ) : (
+        /* Custom Links Section */
+        <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+            Custom Links (Coming Soon)
+          </h3>
+          <div className="text-center py-10 sm:py-12">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <ExternalLink className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
+            </div>
+            <h4 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Custom Links Yet</h4>
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">
+              Add websites, articles, products, and other custom links to your profile
+            </p>
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Your First Link
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <AddSocialLinkModal

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles } from '../lib/dashboardStorage';
+import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId } from '../lib/dashboardStorage';
 
 const DashboardContext = createContext(undefined);
 
@@ -9,6 +9,7 @@ export function DashboardProvider({ children }) {
   const [data, setData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
   const [activeTab, setActiveTab] = useState('links');
+  const lastFetchedRef = useRef({ links: null, products: null, design: null });
   const [isLoading, setIsLoading] = useState(true);
   
   // Multiple profiles support
@@ -63,6 +64,42 @@ export function DashboardProvider({ children }) {
 
     loadData();
   }, []);
+
+  // Refresh-on-tab when needed only
+  useEffect(() => {
+    const refreshByTab = async () => {
+      if (!currentProfileId || !data) return;
+      try {
+        if (activeTab === 'links') {
+          const fresh = await loadLinksForProfile(currentProfileId);
+          // Avoid extra state updates if unchanged
+          if (JSON.stringify(fresh) !== JSON.stringify(data.links)) {
+            setData(prev => ({ ...prev, links: fresh }));
+          }
+          lastFetchedRef.current.links = Date.now();
+        } else if (activeTab === 'shop') {
+          const fresh = await loadProductsForProfile(currentProfileId);
+          if (JSON.stringify(fresh) !== JSON.stringify(data.products)) {
+            setData(prev => ({ ...prev, products: fresh }));
+          }
+          lastFetchedRef.current.products = Date.now();
+        } else if (activeTab === 'design') {
+          const [freshDesign, freshProfile] = await Promise.all([
+            loadDesignForProfile(currentProfileId),
+            loadProfileForId(currentProfileId)
+          ]);
+          if (JSON.stringify(freshDesign) !== JSON.stringify(data.design) || JSON.stringify(freshProfile) !== JSON.stringify(data.profile)) {
+            setData(prev => ({ ...prev, design: freshDesign, profile: freshProfile }));
+          }
+          lastFetchedRef.current.design = Date.now();
+        }
+      } catch (e) {
+        console.error('Tab refresh failed:', e);
+      }
+    };
+
+    refreshByTab();
+  }, [activeTab, currentProfileId]);
 
   // Profile management functions
   const createProfile = useCallback(async (profileData) => {

@@ -95,7 +95,7 @@ export default function ProductsTab() {
 
   const persist = async (snapshot) => {
     try {
-      await saveChanges(snapshot);
+      await saveChanges(snapshot, 'products');
       toast.success('Product saved successfully');
     } catch (e) {
       toast.error(e?.message || 'Failed to save product');

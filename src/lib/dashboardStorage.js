@@ -319,19 +319,11 @@ export const loadFromBackend = async (profileId = null) => {
     .eq('profile_id', profileId)
     .maybeSingle();
 
-  // Fetch links
-  const { data: linkRows } = await supabase
-    .from('links')
-    .select('*')
-    .eq('profile_id', profileId)
-    .order('order', { ascending: true });
-
-  // Fetch products
-  const { data: productRows } = await supabase
-    .from('products')
-    .select('*')
-    .eq('profile_id', profileId)
-    .order('created_at', { ascending: true });
+  // Eager-load links and products once on first load
+  const [{ data: linkRows }, { data: productRows }] = await Promise.all([
+    supabase.from('links').select('*').eq('profile_id', profileId).order('order', { ascending: true }),
+    supabase.from('products').select('*').eq('profile_id', profileId).order('created_at', { ascending: true })
+  ]);
 
   return {
     profile: mapProfileRowToApp(profileRow),
@@ -340,6 +332,47 @@ export const loadFromBackend = async (profileId = null) => {
     products: (productRows || []).map(mapProductRowToApp),
     analytics: defaultData.analytics,
   };
+};
+
+// Granular loaders for on-demand fetching per tab
+export const loadLinksForProfile = async (profileId) => {
+  if (!profileId) return [];
+  const { data: linkRows } = await supabase
+    .from('links')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('order', { ascending: true });
+  return (linkRows || []).map(mapLinkRowToApp);
+};
+
+export const loadProductsForProfile = async (profileId) => {
+  if (!profileId) return [];
+  const { data: productRows } = await supabase
+    .from('products')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('created_at', { ascending: true });
+  return (productRows || []).map(mapProductRowToApp);
+};
+
+export const loadDesignForProfile = async (profileId) => {
+  if (!profileId) return defaultData.design;
+  const { data: designRow } = await supabase
+    .from('designs')
+    .select('*')
+    .eq('profile_id', profileId)
+    .maybeSingle();
+  return mapDesignRowToApp(designRow);
+};
+
+export const loadProfileForId = async (profileId) => {
+  if (!profileId) return defaultData.profile;
+  const { data: profileRow } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', profileId)
+    .single();
+  return profileRow ? mapProfileRowToApp(profileRow) : defaultData.profile;
 };
 
 // PROFILE LIST CRUD (used by DashboardContext)

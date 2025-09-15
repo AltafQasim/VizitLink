@@ -3,6 +3,7 @@ const nextConfig = {
   images: {
     domains: [
       'localhost',
+      'hhnlsawagpxafcyplsuj.supabase.co',
       'images.unsplash.com',
       'picsum.photos',
       'merlenorman.com',

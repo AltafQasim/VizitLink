@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
-import { X, Edit, Share2, Trash2 } from 'lucide-react';
+import { X, Edit, Share2, Trash2, Loader2 } from 'lucide-react';
+import { supabase } from '../../../lib/supabase';
+import { useDashboard } from '../../../context/DashboardContext';
 
 const currencies = [
   { code: 'USD', symbol: '$', name: 'USD ($)' },
@@ -17,6 +19,7 @@ const currencies = [
 ];
 
 export default function EditProductModal({ isOpen, onClose, onSave, product, onDelete }) {
+  const { data } = useDashboard();
   const [formData, setFormData] = useState({
     url: '',
     title: '',
@@ -24,7 +27,12 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
     currency: 'USD',
     showInShop: true,
     showInTest: false,
+    image: ''
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [pendingFile, setPendingFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
 
   useEffect(() => {
     if (product) {
@@ -35,6 +43,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
         currency: product.currency || 'USD',
         showInShop: product.showInShop !== false,
         showInTest: product.showInTest || false,
+        image: product.image || ''
       });
     }
   }, [product]);
@@ -46,15 +55,72 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
     }));
   };
 
-  const handleSave = () => {
-    if (product) {
+  const handleSave = async () => {
+    if (!product) return;
+    setIsUploading(true);
+    try {
+      let finalImage = product.image;
+
+      if (pendingFile) {
+        // Prepare old path deletion if image belongs to our bucket
+        const currentImageUrl = product.image;
+        let oldFilePath = null;
+        if (currentImageUrl && currentImageUrl.includes('/productimage/')) {
+          const parts = currentImageUrl.split('/productimage/');
+          if (parts.length > 1) oldFilePath = parts[1];
+        }
+
+        // Upload new image (mirrors wallpaper upload)
+        const ext = pendingFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${ext}`;
+        const userId = data?.profile?.id || 'anonymous';
+        const filePath = `${userId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('productimage')
+          .upload(filePath, pendingFile);
+        if (uploadError) throw new Error(uploadError.message);
+
+        const { data: publicUrlData } = supabase.storage
+          .from('productimage')
+          .getPublicUrl(filePath);
+        finalImage = publicUrlData.publicUrl;
+
+        if (oldFilePath) {
+          await supabase.storage.from('productimage').remove([oldFilePath]);
+        }
+      }
+
       const updatedProduct = {
         ...product,
         ...formData,
+        image: finalImage,
         price: parseFloat(formData.price) || 0,
       };
       onSave(updatedProduct);
+      // Clear temp states after successful save
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl('');
+      setPendingFile(null);
+    } catch (err) {
+      alert('Save failed: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsUploading(false);
     }
+  };
+
+  // Mirror wallpaper image upload flow, but into 'productimage' bucket
+  const handleImageButtonClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPendingFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
 
@@ -79,6 +145,9 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
       showInShop: true,
       showInTest: false,
     });
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl('');
+    setPendingFile(null);
     onClose();
   };
 
@@ -177,16 +246,28 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
 
               </div>
 
-              {/* Right Column - Product Image */}
+              {/* Right Column - Product Image (same behavior as wallpaper image upload) */}
               <div className="w-32 flex-shrink-0">
                 <div className="relative">
                   <img
-                    src={product.image}
+                    src={previewUrl || product.image}
                     alt={product.title}
                     className="w-32 h-32 rounded-lg object-cover border border-gray-200"
                   />
-                  <button className="absolute bottom-2 right-2 w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors">
-                    <Edit className="w-4 h-4 text-white" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={handleImageButtonClick}
+                    disabled={isUploading}
+                    className={`absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-600 hover:bg-gray-700'}`}
+                    title="Change image"
+                  >
+                    {isUploading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Edit className="w-4 h-4 text-white" />}
                   </button>
                 </div>
               </div>

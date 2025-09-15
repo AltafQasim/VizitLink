@@ -11,9 +11,6 @@ import { Card } from "../../ui/card";
 import { useDashboard } from "../../../context/DashboardContext";
 import { toast } from 'sonner';
 import { supabase } from "../../../lib/supabase";
-import LiquidEther from "../../reactbit/LiquidEther/LiquidEther";
-import Prism from "../../reactbit/Prism/Prism";
-import DarkVeil from "../../reactbit/DarkVeil/DarkVeil";
 
 const DesignTab = () => {
     const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveDesign } = useDashboard();
@@ -750,47 +747,6 @@ const DesignTab = () => {
                                     )}
                                 </Card>
                             ))}
-                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
-                                <div className={`aspect-[3/4] relative`}>
-                                    <LiquidEther
-                                        colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-                                        mouseForce={20}
-                                        cursorSize={100}
-                                        isViscous={false}
-                                        viscous={30}
-                                        iterationsViscous={32}
-                                        iterationsPoisson={32}
-                                        resolution={0.5}
-                                        isBounce={false}
-                                        autoDemo={true}
-                                        autoSpeed={0.5}
-                                        autoIntensity={2.2}
-                                        takeoverDuration={0.25}
-                                        autoResumeDelay={3000}
-                                        autoRampDuration={0.6}
-                                    />
-                                </div>
-                            </Card>
-                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
-                                <div className={`aspect-[3/4] relative`}>
-                                    <Prism
-                                        animationType="rotate"
-                                        timeScale={0.5}
-                                        height={3.5}
-                                        baseWidth={1.5}
-                                        scale={3.6}
-                                        hueShift={0}
-                                        colorFrequency={1}
-                                        noise={0.5}
-                                        glow={1}
-                                    />
-                                </div>
-                            </Card>
-                            <Card className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden`}>
-                                <div className={`aspect-[3/4] relative`}>
-                                    <DarkVeil />
-                                </div>
-                            </Card>
                         </div>
 
                         {/* Wallpaper Image Modal */}

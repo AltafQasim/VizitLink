@@ -300,6 +300,108 @@ export const saveToBackend = async (data, profileId = null) => {
   }
 };
 
+// Granular saves (used to avoid saving everything)
+export const saveProfileById = async (profile, profileId) => {
+  if (!profileId || !profile) return;
+  const payload = {
+    username: profile?.username,
+    display_name: profile?.displayName,
+    bio: profile?.bio || null,
+    avatar_url: profile?.avatar || null,
+    custom_url: profile?.customUrl || null,
+    is_live: Boolean(profile?.isLive),
+    updated_at: new Date().toISOString(),
+  };
+  await supabase.from('profiles').update(payload).eq('id', profileId);
+};
+
+export const saveDesignByProfileId = async (design, profileId) => {
+  if (!profileId || !design) return;
+  const payload = {
+    profile_id: profileId,
+    theme: design?.theme || null,
+    wallpaper: design?.wallpaper || null,
+    wallpaper_image: design?.wallpaperImage || null,
+    wallpaper_video: design?.wallpaperVideo || null,
+    wallpaper_tint: Number(design?.wallpaperTint ?? 20),
+    background_color: design?.backgroundColor || '#ffffff',
+    text_color: design?.textColor || '#000000',
+    button_style: design?.buttonStyle || 'Minimal',
+    font_family: design?.fontFamily || 'Inter',
+    font_weight: design?.fontWeight || '400',
+    font_size: design?.fontSize || '16px',
+    hide_linktree_footer: Boolean(design?.hideVizitlinkFooter),
+    updated_at: new Date().toISOString(),
+  };
+  const { data: existing } = await supabase
+    .from('designs')
+    .select('id')
+    .eq('profile_id', profileId)
+    .maybeSingle();
+  if (existing) {
+    await supabase.from('designs').update(payload).eq('profile_id', profileId);
+  } else {
+    await supabase.from('designs').insert(payload);
+  }
+};
+
+export const saveLinksForProfile = async (links, profileId) => {
+  if (!profileId || !Array.isArray(links)) return;
+  const { data: existing } = await supabase
+    .from('links')
+    .select('id')
+    .eq('profile_id', profileId);
+  const existingIds = new Set((existing || []).map(r => r.id));
+  const incoming = (links || []).map(l => ({
+    id: l.id && String(l.id).length > 0 ? l.id : undefined,
+    profile_id: profileId,
+    title: l.title,
+    url: l.url,
+    icon: l.icon || 'website',
+    order: Number(l.order) || 1,
+    active: Boolean(l.active),
+  }));
+  const incomingIds = new Set((links || []).map(l => String(l.id)));
+  const toDelete = [...existingIds].filter(id => !incomingIds.has(id));
+  if (toDelete.length) await supabase.from('links').delete().in('id', toDelete);
+  if (incoming.length) await supabase.from('links').upsert(incoming, { onConflict: 'id' });
+};
+
+export const saveProductsForProfile = async (products, profileId) => {
+  if (!profileId || !Array.isArray(products)) return;
+  const { data: existing, error: fetchErr } = await supabase
+    .from('products')
+    .select('id')
+    .eq('profile_id', profileId);
+  if (fetchErr) throw fetchErr;
+  const existingIds = new Set((existing || []).map(r => r.id));
+  const incoming = (products || []).map(p => ({
+    id: p.id && String(p.id).length > 0 ? p.id : undefined,
+    profile_id: profileId,
+    title: p.title || 'Untitled Product',
+    brand: p.brand || 'Unknown',
+    price: Number(p.price) || 0,
+    currency: p.currency || 'USD',
+    url: p.url || '#',
+    image: p.image || '/placeholder.svg',
+    clicks: typeof p.clicks === 'number' ? p.clicks : 0,
+    ctr: typeof p.ctr === 'number' ? p.ctr : 0.0,
+    active: Boolean(p.active),
+    created_at: p.createdAt || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }));
+  const incomingIds = new Set((products || []).map(p => String(p.id)));
+  const toDelete = [...existingIds].filter(id => !incomingIds.has(id));
+  if (toDelete.length) {
+    const { error } = await supabase.from('products').delete().in('id', toDelete);
+    if (error) throw error;
+  }
+  if (incoming.length) {
+    const { error } = await supabase.from('products').upsert(incoming, { onConflict: 'id' });
+    if (error) throw error;
+  }
+};
+
 // LOAD DATA (profile+design+links+products)
 export const loadFromBackend = async (profileId = null) => {
   if (!profileId) return defaultData;

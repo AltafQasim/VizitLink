@@ -136,7 +136,7 @@ function SortableLinkItem({
 }
 
 export default function LinksTab() {
-  const { data, updateData, saveChanges } = useDashboard();
+  const { data, updateData, saveLinks } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -153,7 +153,7 @@ export default function LinksTab() {
 
   const persist = async (snapshot) => {
     try {
-      await saveChanges(snapshot);
+      await saveLinks(snapshot.links);
       toast.success('Link saved successfully');
     } catch (e) {
       toast.error(e?.message || 'Failed to save link');

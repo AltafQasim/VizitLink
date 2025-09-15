@@ -16,7 +16,7 @@ import Prism from "../../reactbit/Prism/Prism";
 import DarkVeil from "../../reactbit/DarkVeil/DarkVeil";
 
 const DesignTab = () => {
-    const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveChanges } = useDashboard();
+    const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveDesign } = useDashboard();
     const fileInputRef = useRef(null);
 
     const [activeTab, setActiveTab] = useState("Customizable");
@@ -68,7 +68,7 @@ const DesignTab = () => {
         if (hasUnsavedChanges) {
             setIsSaving(true);
             try {
-                await saveChanges();
+                await saveDesign(data.design, data.profile);
                 toast.success("Design changes saved successfully!");
             } catch (error) {
                 toast.error("Failed to save design changes");

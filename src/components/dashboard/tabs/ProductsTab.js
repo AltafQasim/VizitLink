@@ -72,7 +72,7 @@ const mockProducts = [
 ];
 
 export default function ProductsTab() {
-  const { data, updateData, saveChanges } = useDashboard();
+  const { data, updateData, saveChanges, currentProfileId, saveProducts } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -95,7 +95,8 @@ export default function ProductsTab() {
 
   const persist = async (snapshot) => {
     try {
-      await saveChanges(snapshot, 'products');
+      // Save only products slice
+      await saveProducts(snapshot.products);
       toast.success('Product saved successfully');
     } catch (e) {
       toast.error(e?.message || 'Failed to save product');

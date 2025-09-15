@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId } from '../lib/dashboardStorage';
+import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId, saveProductsForProfile, saveLinksForProfile, saveDesignByProfileId, saveProfileById } from '../lib/dashboardStorage';
 
 const DashboardContext = createContext(undefined);
 
@@ -313,6 +313,40 @@ export function DashboardProvider({ children }) {
     }
   }, [data, currentProfileId]);
 
+  // Granular saves exposed for tabs
+  const saveProducts = useCallback(async (products) => {
+    if (!currentProfileId) return;
+    try {
+      await saveProductsForProfile(products, currentProfileId);
+      setOriginalData(prev => ({ ...(prev || {}), products }));
+    } catch (error) {
+      console.error('Error saving products:', error);
+    }
+  }, [currentProfileId]);
+
+  const saveLinks = useCallback(async (links) => {
+    if (!currentProfileId) return;
+    try {
+      await saveLinksForProfile(links, currentProfileId);
+      setOriginalData(prev => ({ ...(prev || {}), links }));
+    } catch (error) {
+      console.error('Error saving links:', error);
+    }
+  }, [currentProfileId]);
+
+  const saveDesign = useCallback(async (design, maybeProfile) => {
+    if (!currentProfileId) return;
+    try {
+      await saveDesignByProfileId(design, currentProfileId);
+      if (maybeProfile) {
+        await saveProfileById(maybeProfile, currentProfileId);
+      }
+      setOriginalData(prev => ({ ...(prev || {}), design, ...(maybeProfile ? { profile: maybeProfile } : {}) }));
+    } catch (error) {
+      console.error('Error saving design/profile:', error);
+    }
+  }, [currentProfileId]);
+
   const resetChanges = useCallback(() => {
     if (originalData) {
       setData(originalData);
@@ -364,6 +398,9 @@ export function DashboardProvider({ children }) {
     updateData,
     updateDesignData,
     saveChanges,
+    saveProducts,
+    saveLinks,
+    saveDesign,
     resetChanges,
     undo,
     redo,

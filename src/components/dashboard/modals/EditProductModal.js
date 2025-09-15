@@ -57,6 +57,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
     }
   };
 
+
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       onDelete(product.id);

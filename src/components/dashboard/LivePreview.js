@@ -13,6 +13,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { socialIconsMap, socialColorsMap } from '../../lib/social';
 
+// Format helpers
+const getCurrencySymbol = (currency) => {
+  const map = {
+    INR: '₹',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    CAD: 'C$',
+    AUD: 'A$',
+    JPY: '¥',
+  };
+  return map[currency] || '$';
+};
+
 export default function LivePreview() {
   const { data } = useDashboard();
   const [isVideoLoading, setIsVideoLoading] = useState(false);
@@ -267,9 +281,11 @@ export default function LivePreview() {
                               {product.brand || 'Unknown Brand'}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              <span className="text-sm font-bold text-purple-600">
-                                ${(Number(product.price) || 0).toFixed(2)}
-                              </span>
+                              {Number(product.price) > 0 ? (
+                                <span className="text-sm font-bold text-purple-600">
+                                  {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
+                                </span>
+                              ) : <span />}
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             </div>
                           </div>

@@ -1,12 +1,30 @@
 "use client";
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
-import { Search, X } from 'lucide-react';
+import { Search, X, Link, Loader2, ExternalLink } from 'lucide-react';
+
+// Format price with currency symbol
+const formatPrice = (price, currency) => {
+  if (!price || price <= 0) return 'Price not available';
+  
+  const symbols = {
+    'INR': '₹',
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'CAD': 'C$',
+    'AUD': 'A$',
+    'JPY': '¥'
+  };
+  
+  const symbol = symbols[currency] || '$';
+  return `${symbol}${price.toFixed(2)}`;
+};
 
 // Mock suggested products (will be replaced with Supabase search later)
 const mockProducts = [
@@ -520,17 +538,125 @@ const mockProducts = [
 export default function AddProductModal({ isOpen, onClose, onSave }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [isLoadingLink, setIsLoadingLink] = useState(false);
+  const [extractedProduct, setExtractedProduct] = useState(null);
+  const [linkError, setLinkError] = useState('');
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
 
   const filteredProducts = mockProducts.filter(product =>
     product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.brand.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Check if search term is a URL
+  const isUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Extract product data from URL
+  const extractProductFromUrl = async (url) => {
+    setIsLoadingLink(true);
+    setLinkError('');
+    setExtractedProduct(null);
+
+    try {
+      const response = await fetch('/api/extract-metadata', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const productData = {
+          id: `extracted-${Date.now()}`,
+          title: result.data.title || 'Untitled Product',
+          brand: result.data.brand || result.data.domain || 'Unknown',
+          price: result.data.price || 0,
+          currency: result.data.currency || 'USD',
+          url: result.data.url,
+          image: result.data.image || '/placeholder.svg',
+          description: result.data.description || '',
+          isExtracted: true
+        };
+        setExtractedProduct(productData);
+      } else {
+        throw new Error('No product data found');
+      }
+    } catch (error) {
+      console.error('Error extracting product:', error);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Sorry, we had trouble finding this. Please try a new URL.';
+      
+      if (error.message.includes('Network error')) {
+        errorMessage = 'Network error: Please check your internet connection and try again.';
+      } else if (error.message.includes('Failed to fetch URL')) {
+        errorMessage = 'Unable to access this URL. The website might be blocking our request.';
+      } else if (error.message.includes('Invalid URL')) {
+        errorMessage = 'Please enter a valid URL (e.g., https://example.com)';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again with a different URL.';
+      }
+      
+      setLinkError(errorMessage);
+    } finally {
+      setIsLoadingLink(false);
+    }
+  };
+
+  // Handle search term change with debouncing
+  useEffect(() => {
+    if (searchTerm && isUrl(searchTerm)) {
+      // Debounce the API call to avoid too many requests
+      const timeoutId = setTimeout(() => {
+        extractProductFromUrl(searchTerm);
+      }, 1000); // 1 second delay
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setExtractedProduct(null);
+      setLinkError('');
+    }
+  }, [searchTerm]);
+
   const handleProductSelect = (product) => {
     if (selectedProducts.find(p => p.id === product.id)) {
       setSelectedProducts(selectedProducts.filter(p => p.id !== product.id));
     } else {
       setSelectedProducts([...selectedProducts, product]);
+    }
+  };
+
+  const handleAddExtractedProduct = async () => {
+    if (extractedProduct) {
+      setIsAddingProduct(true);
+      const payload = [{
+        title: extractedProduct.title,
+        brand: extractedProduct.brand,
+        price: extractedProduct.price,
+        currency: extractedProduct.currency,
+        url: extractedProduct.url,
+        image: extractedProduct.image,
+      }];
+      onSave(payload);
+      // Show success message briefly before closing
+      setTimeout(() => {
+        resetModal();
+      }, 1000);
     }
   };
   
@@ -550,12 +676,28 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
   const resetModal = () => {
     setSearchTerm('');
     setSelectedProducts([]);
+    setExtractedProduct(null);
+    setLinkError('');
+    setIsLoadingLink(false);
+    setIsAddingProduct(false);
     onClose();
+  };
+
+  // Clear extracted product when user starts typing new search
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // Clear extracted product if user is typing (not a complete URL)
+    if (extractedProduct && !isUrl(value)) {
+      setExtractedProduct(null);
+      setLinkError('');
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="p-0 overflow-hidden sm:max-w-5xl w-[100vw] sm:w-auto h-[100dvh] sm:h-[85vh] sm:rounded-xl rounded-none flex flex-col">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-5xl w-[100vw] sm:w-full h-[100dvh] sm:h-[85vh] sm:rounded-xl rounded-none flex flex-col">
         <DialogHeader className="px-8 py-5 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-[20px] font-semibold tracking-tight">
@@ -588,18 +730,117 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
             {/* Search Input */}
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 py-2 border-b border-gray-100">
               <div className="w-full bg-gray-100 rounded-full px-5 py-4 flex items-center">
+                {isUrl(searchTerm) ? (
+                  <Link className="w-5 h-5 text-purple-500 mr-3" />
+                ) : (
                 <Search className="w-5 h-5 text-gray-500 mr-3" />
+                )}
                 <input
                   type="text"
-                placeholder="Search products or paste a link"
+                  placeholder="Search products or paste a link (e.g., https://amazon.com/dp/...)"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                   className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-gray-500"
               />
               </div>
+              
+              {/* Link Error */}
+              {linkError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">
+                    Sorry, we had trouble finding this. Please try a new URL.
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Products Grid */}
+            {/* Loading State */}
+            {isLoadingLink && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Loader2 className="w-5 h-5 text-purple-500 mr-2 animate-spin" />
+                  Extracting Product Data...
+                </h3>
+                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                  {/* Loading Image Placeholder */}
+                  <div className="w-20 h-24 bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                  </div>
+                  
+                  {/* Loading Content */}
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                  </div>
+                  
+                  {/* Loading Button */}
+                  <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+              </div>
+            )}
+
+            {/* Extracted Product */}
+            {extractedProduct && !isLoadingLink && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Link className="w-5 h-5 text-purple-500 mr-2" />
+                  Product from Link
+                </h3>
+                <div className="flex items-center space-x-4 p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                  {/* Product Image */}
+                  <div className="w-20 h-24 rounded-lg overflow-hidden bg-gray-50 relative flex-shrink-0">
+                    <img
+                      src={extractedProduct.image || '/placeholder.svg'}
+                      alt={extractedProduct.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  {/* Product Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm text-gray-600 font-medium truncate">{extractedProduct.brand}</p>
+                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1 line-clamp-2">
+                      {extractedProduct.title}
+                    </h3>
+                    {extractedProduct.description && (
+                      <p className="text-xs text-gray-500 mb-1 line-clamp-1">
+                        {extractedProduct.description}
+                      </p>
+                    )}
+                    <p className="text-sm font-semibold text-gray-900">
+                      {formatPrice(extractedProduct.price, extractedProduct.currency)}
+                    </p>
+                  </div>
+                  
+                  {/* Add Button */}
+                  <Button
+                    onClick={handleAddExtractedProduct}
+                    disabled={isAddingProduct}
+                    className={`w-20 h-10 text-sm font-medium transition-all duration-200 ${
+                      isAddingProduct 
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-purple-600 hover:bg-purple-700'
+                    } text-white`}
+                  >
+                    {isAddingProduct ? (
+                      <div className="flex items-center">
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                        Adding...
+                      </div>
+                    ) : (
+                      'Add'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Products Grid - Only show when not extracting from URL */}
+            {!isUrl(searchTerm) && (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pr-1">
               {filteredProducts.map((product) => {
                 const isSelected = selectedProducts.find(p => p.id === product.id);
@@ -650,8 +891,10 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                 );
               })}
             </div>
+            )}
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Hide when loading link or when URL is being processed */}
+            {!isLoadingLink && !isUrl(searchTerm) && !extractedProduct && (
             <div className="flex justify-between items-center pt-5 border-t border-gray-200 sticky bottom-0 bg-white py-4">
               <div className="text-sm text-gray-600">
                 {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
@@ -672,6 +915,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                 </Button>
               </div>
             </div>
+            )}
           </motion.div>
         </div>
       </DialogContent>

@@ -92,9 +92,13 @@ export default function TopNavbar() {
             className="flex items-center space-x-2"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </span>
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user?.user_metadata?.picture} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <span className="text-white text-sm font-medium">
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              )}
             </div>
             <ChevronDown className="w-4 h-4" />
           </Button>
@@ -103,7 +107,7 @@ export default function TopNavbar() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg"
+              className="absolute right-0 mt-2 w-56 z-20 bg-white border border-gray-200 rounded-lg shadow-lg"
             >
               <div className="p-2">
                 <Button variant="ghost" className="w-full justify-start">

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId, saveProductsForProfile, saveLinksForProfile, saveDesignByProfileId, saveProfileById } from '../lib/dashboardStorage';
+import { getCustomLinksByProfile, upsertCustomLinkForProfile, deleteCustomLinkById, reorderCustomLinks } from '../lib/customLinks';
 
 const DashboardContext = createContext(undefined);
 
@@ -11,6 +12,7 @@ export function DashboardProvider({ children }) {
   const [activeTab, setActiveTab] = useState('links');
   const lastFetchedRef = useRef({ links: null, products: null, design: null });
   const [isLoading, setIsLoading] = useState(true);
+  const [customLinks, setCustomLinks] = useState([]);
   
   // Multiple profiles support
   const [profiles, setProfiles] = useState([]);
@@ -50,6 +52,14 @@ export function DashboardProvider({ children }) {
           setHistory([loadedData]);
           setHistoryIndex(0);
           setNeedsProfileCreation(false);
+
+          // Load custom links for the profile from Supabase
+          try {
+            const links = await getCustomLinksByProfile(profileToUse);
+            setCustomLinks(links);
+          } catch (e) {
+            console.error('Failed to load custom links:', e);
+          }
         } else {
           // User has no profiles, show profile creation form
           setNeedsProfileCreation(true);
@@ -77,6 +87,13 @@ export function DashboardProvider({ children }) {
             setData(prev => ({ ...prev, links: fresh }));
           }
           lastFetchedRef.current.links = Date.now();
+          // Also refresh custom links
+          try {
+            const links = await getCustomLinksByProfile(currentProfileId);
+            setCustomLinks(links);
+          } catch (e) {
+            console.error('Refresh custom links failed:', e);
+          }
         } else if (activeTab === 'shop') {
           const fresh = await loadProductsForProfile(currentProfileId);
           if (JSON.stringify(fresh) !== JSON.stringify(data.products)) {
@@ -410,6 +427,36 @@ export function DashboardProvider({ children }) {
     updateProfile,
     deleteProfile,
     duplicateProfile,
+    // Custom links
+    customLinks,
+    setCustomLinks,
+    upsertCustomLink: async (link) => {
+      if (!currentProfileId) return null;
+      const saved = await upsertCustomLinkForProfile(currentProfileId, link);
+      // Merge into state
+      setCustomLinks(prev => {
+        const idx = prev.findIndex(l => l.id === saved.id);
+        if (idx === -1) return [...prev, saved];
+        const next = [...prev];
+        next[idx] = saved;
+        return next;
+      });
+      return saved;
+    },
+    deleteCustomLink: async (id) => {
+      if (!currentProfileId) return;
+      await deleteCustomLinkById(currentProfileId, id);
+      setCustomLinks(prev => prev.filter(l => l.id !== id));
+    },
+    reorderCustomLinks: async (orderedIds) => {
+      if (!currentProfileId) return;
+      await reorderCustomLinks(currentProfileId, orderedIds);
+      // Update local order
+      setCustomLinks(prev => {
+        const idToLink = new Map(prev.map(l => [l.id, l]));
+        return orderedIds.map((id, index) => ({ ...idToLink.get(id), order: index })).filter(Boolean);
+      });
+    },
   };
 
   return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;

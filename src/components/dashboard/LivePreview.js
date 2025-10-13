@@ -28,8 +28,10 @@ const getCurrencySymbol = (currency) => {
 };
 
 export default function LivePreview() {
-  const { data } = useDashboard();
+  const { data, customLinks } = useDashboard();
   const [isVideoLoading, setIsVideoLoading] = useState(false);
+
+  console.log('LivePreview customLinks:', customLinks);
 
   // Get design settings
   const design = data?.design || {};
@@ -38,7 +40,7 @@ export default function LivePreview() {
   const buttonStyle = design.buttonStyle || 'Minimal';
   const fontFamily = design.fontFamily || 'Inter';
   const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
-  
+
   useEffect(() => {
     if (wallpaper === 'Video' && design.wallpaperVideo) {
       setIsVideoLoading(true);
@@ -165,7 +167,7 @@ export default function LivePreview() {
               </>
             )}
             {(wallpaper === 'Image' || wallpaper === 'Video') && (
-              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint||0))/100})` }} />
+              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
             )}
             <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
               {/* Profile */}
@@ -199,22 +201,24 @@ export default function LivePreview() {
 
               {/* Links */}
               <div className="space-y-3">
-                {data?.links
+                {/* Social Links */}
+                {/* {data?.links
                   ?.filter(link => link.active)
                   .sort((a, b) => a.order - b.order)
                   .map((link) => {
                     const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
 
-                    return (
-                      <motion.a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
+                  const redirectHref = `/api/redirect?id=${link.id}`;
+                  return (
+                    <motion.a
+                      key={link.id}
+                      href={redirectHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                         <div className="flex items-center space-x-3">
                           {IconComponent ? (
                             <IconComponent
@@ -229,6 +233,65 @@ export default function LivePreview() {
                         <ExternalLink className="w-4 h-4 text-gray-400" />
                       </motion.a>
                     );
+                  })} */}
+
+                {/* Custom Links */}
+                {customLinks
+                  ?.filter(link => link.active && link.url && link.url.trim() !== '')
+                  .map((link) => {
+                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+
+                    if (link.layout === 'featured') {
+                      return (
+                        <motion.a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          role='div'
+                          rel="noopener noreferrer"
+                          className={`w-full h-40 rounded-xl p-3 relative flex items-center justify-center transition-colors ${currentButtonStyle}`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          {/* <iframe src="https://www.youtube.com/embed/19g66ezsKAg" allowFullScreen /> */}
+                          {/* <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-xl' /> */}
+                          <iframe src={'https://youtu.be/hXebwJGaERM?si=WA_9X1FGEu79SfFO'} allowFullScreen />
+                          <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
+                          <div className="flex items-center h-16 space-x-3 z-10" >
+                            <span className="font-medium text-sm">{link.title}</span>
+                          </div>
+                        </motion.a>
+                      );
+                    } else {
+                      return (
+                        <motion.a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`w-full rounded-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            {link?.thumbnail ?
+                              <img src={link.thumbnail} className='w-7 h-7 rounded-full object-cover' /> :
+                              IconComponent ? (
+                                <IconComponent
+                                  className="w-5 h-5"
+                                  style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                                />
+                              ) : (
+                                <span className="text-lg">{link.icon}</span>
+                              )}
+                            <span className="font-medium text-sm">{link.title}</span>
+                          </div>
+                          <ExternalLink className="w-4 h-4 text-gray-400" />
+                        </motion.a>
+                      );
+                    }
+
+
                   })}
               </div>
 

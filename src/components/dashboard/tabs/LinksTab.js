@@ -37,7 +37,8 @@ import {
   BarChart2,
   Check,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  MoreHorizontal
 } from 'lucide-react';
 import AddSocialLinkModal from '../modals/AddSocialLinkModal';
 import AddCustomLinkModal from '../modals/AddCustomLinkModal';
@@ -97,14 +98,14 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
           ...layoutLink,
           url: url, // Preserve the URL
           title: layoutLink?.title ? layoutLink?.title : data.data.title || '',
-          thumbnail: layoutLink?.thumbnail ? layoutLink?.thumbnail : data.data.image,
+          thumbnail: data.data.image || layoutLink?.thumbnail,
           description: data.data.description || layoutLink.description,
           domain: data.data.domain || layoutLink.domain,
           favicon: data.data.favicon || layoutLink.favicon,
           active: true, // Auto switch ON when data is fetched
         };
 
-        onUpdate(updatedLink);
+        await onUpdate(updatedLink);
 
         // Auto-save the link and switch to edit mode
         setTimeout(() => {
@@ -239,7 +240,7 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
       {/* Top row: Title/URL with actions */}
       <div className="px-4 py-3 flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-xs">UI</div>
+          {/* <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-xs">UI</div> */}
           <input
             value={layoutLink.title || ''}
             onChange={(e) => onUpdate({ title: e.target.value })}
@@ -261,11 +262,11 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
           </Button>
           <Switch checked={layoutLink.active} onCheckedChange={(checked) => onUpdate({ active: checked })} />
         </div>
-        <div className="flex items-center gap-2 pl-10">
+        <div className="flex items-center gap-2">
           <input
             value={layoutLink.url || ''}
             onChange={handleUrlChange}
-            onPaste={handleUrlPaste}
+            // onPaste={handleUrlPaste}
             placeholder="Enter URL to fetch data"
             disabled={!isEditingDraft}
             className={`flex-1 bg-transparent outline-none px-2 py-1 rounded-md text-sm ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
@@ -317,10 +318,10 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
                         <div className="text-sm text-gray-600">Efficient, direct and compact.</div>
                       </div>
                       {/* small preview pill */}
-                      <div className="hidden sm:flex items-center gap-2 bg-teal-800 text-white px-3 py-2 rounded-full">
+                      <div className="hidden sm:flex items-center justify-between gap-2 bg-teal-800 text-white px-3 py-2 rounded-full w-40">
                         <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-200" />
-                        <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-200" />
-                        <div className="text-xs">...</div>
+                        {/* <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-200" /> */}
+                        <MoreHorizontal className="w-4 h-4" />
                       </div>
                     </div>
                   </label>
@@ -493,6 +494,14 @@ export default function LinksTab() {
   // Saved custom links are provided from context (Supabase)
   const [layoutTool, setLayoutTool] = useState('layout'); // 'layout' | 'redirect' | 'thumbnail' | 'clicks'
   const [isEditingDraft, setIsEditingDraft] = useState(true);
+  // Optimistic local edits for saved custom links and debounced API calls
+  const [savedEdits, setSavedEdits] = useState({}); // id -> partial updates
+  const savedDebounceTimersRef = useRef({}); // id -> timeout id
+  const savedEditsRef = useRef(savedEdits);
+  const customLinksRef = useRef(customLinks);
+
+  useEffect(() => { savedEditsRef.current = savedEdits; }, [savedEdits]);
+  useEffect(() => { customLinksRef.current = customLinks; }, [customLinks]);
 
   // Removed localStorage syncing; handled by Supabase via context
 
@@ -615,18 +624,52 @@ export default function LinksTab() {
   const updateSavedCustomLink = async (linkId, updates) => {
     const existing = customLinks.find(l => l.id === linkId);
     if (!existing) return;
-    try {
-      await upsertCustomLink({ ...existing, ...updates });
-    } catch (e) {
-      console.error('Failed to update custom link:', e);
-      toast.error(e?.message || 'Failed to update');
+
+    // Optimistically update UI immediately
+    setSavedEdits(prev => ({
+      ...prev,
+      [linkId]: { ...(prev[linkId] || {}), ...updates },
+    }));
+
+    // Debounce actual API call per link id
+    const timers = savedDebounceTimersRef.current;
+    if (timers[linkId]) {
+      clearTimeout(timers[linkId]);
     }
+    timers[linkId] = setTimeout(async () => {
+      try {
+        const latestExisting = customLinksRef.current.find(l => l.id === linkId) || existing;
+        const latestLocal = savedEditsRef.current[linkId] || {};
+        const payload = { ...latestExisting, ...latestLocal };
+        const saved = await upsertCustomLink(payload);
+        // Clear local edits for this id after successful save
+        setSavedEdits(prev => {
+          const { [linkId]: _omit, ...rest } = prev;
+          return rest;
+        });
+        // Optionally, ensure local reflects any server-generated fields
+        setSavedEdits(prev => prev); // no-op to trigger re-render if needed
+      } catch (e) {
+        console.error('Failed to update custom link:', e);
+        toast.error(e?.message || 'Failed to update');
+      }
+    }, 600);
   };
 
   const deleteSavedCustom = async (linkId) => {
     try {
       await deleteCustomLink(linkId);
       toast.success('Deleted');
+      // Clear any pending debounce and local edits
+      const timers = savedDebounceTimersRef.current;
+      if (timers[linkId]) {
+        clearTimeout(timers[linkId]);
+        delete timers[linkId];
+      }
+      setSavedEdits(prev => {
+        const { [linkId]: _omit, ...rest } = prev;
+        return rest;
+      });
     } catch (e) {
       console.error('Failed to delete custom link:', e);
       toast.error(e?.message || 'Failed to delete');
@@ -757,15 +800,18 @@ export default function LinksTab() {
           ))}
 
           {/* Render saved custom links as editable frames */}
-          {customLinks.map((savedLink) => (
-            <LayoutFrame
-              key={savedLink.id}
-              layoutLink={savedLink}
-              onUpdate={(updates) => updateSavedCustomLink(savedLink.id, updates)}
-              onCancel={() => deleteSavedCustom(savedLink.id)}
-              onSave={() => updateSavedCustomLink(savedLink.id, savedLink)}
-            />
-          ))}
+          {customLinks.map((savedLink) => {
+            const merged = { ...savedLink, ...(savedEdits[savedLink.id] || {}) };
+            return (
+              <LayoutFrame
+                key={savedLink.id}
+                layoutLink={merged}
+                onUpdate={(updates) => updateSavedCustomLink(savedLink.id, updates)}
+                onCancel={() => deleteSavedCustom(savedLink.id)}
+                onSave={(payload) => updateSavedCustomLink(savedLink.id, payload || merged)}
+              />
+            );
+          })}
 
 
           {/* Show empty state only if no drafts and no saved links */}

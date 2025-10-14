@@ -31,8 +31,6 @@ export default function LivePreview() {
   const { data, customLinks } = useDashboard();
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
-  console.log('LivePreview customLinks:', customLinks);
-
   // Get design settings
   const design = data?.design || {};
   const theme = design.theme || '';
@@ -247,16 +245,13 @@ export default function LivePreview() {
                           key={link.id}
                           href={link.url}
                           target="_blank"
-                          role='div'
                           rel="noopener noreferrer"
-                          className={`w-full h-40 rounded-xl p-3 relative flex items-center justify-center transition-colors ${currentButtonStyle}`}
+                          className={`w-full h-40 p-3 relative flex items-center justify-center transition-colors ${currentButtonStyle} !rounded-3xl`}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          {/* <iframe src="https://www.youtube.com/embed/19g66ezsKAg" allowFullScreen /> */}
-                          {/* <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-xl' /> */}
-                          <iframe src={'https://youtu.be/hXebwJGaERM?si=WA_9X1FGEu79SfFO'} allowFullScreen />
-                          <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
+                          <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' />
+                          <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
                           <div className="flex items-center h-16 space-x-3 z-10" >
                             <span className="font-medium text-sm">{link.title}</span>
                           </div>
@@ -269,13 +264,13 @@ export default function LivePreview() {
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`w-full rounded-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                          className={`w-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle} !rounded-3xl`}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
                           <div className="flex items-center space-x-3">
                             {link?.thumbnail ?
-                              <img src={link.thumbnail} className='w-7 h-7 rounded-full object-cover' /> :
+                              <img src={link.thumbnail} className='w-10 h-10 rounded-full object-cover' /> :
                               IconComponent ? (
                                 <IconComponent
                                   className="w-5 h-5"

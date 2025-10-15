@@ -4,8 +4,92 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import GoogleAuthButton from './SignInGoogle';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useToast } from './ui/use-toast';
 
 const Signup = () => {
+  const { signUpWithEmail } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ fullName: '', email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ fullName: false, email: false, password: false });
+
+  const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+
+  const validate = (field, value) => {
+    switch (field) {
+      case 'fullName':
+        return value.trim() ? '' : 'Full name is required';
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        return emailRegex.test(value.trim()) ? '' : 'Enter a valid email';
+      case 'password':
+        if (!value.trim()) return 'Password is required';
+        return value.trim().length >= 6 ? '' : 'At least 6 characters';
+      default:
+        return '';
+    }
+  };
+
+  const onFullNameChange = (v) => {
+    setFullName(v);
+    setErrors(prev => ({ ...prev, fullName: validate('fullName', v) }));
+  };
+  const onEmailChange = (v) => {
+    setEmail(v);
+    setErrors(prev => ({ ...prev, email: validate('email', v) }));
+  };
+  const onPasswordChange = (v) => {
+    setPassword(v);
+    setErrors(prev => ({ ...prev, password: validate('password', v) }));
+  };
+
+  const markTouched = (field) => setTouched(prev => ({ ...prev, [field]: true }));
+  const inputClass = (field, base) => {
+    const hasError = touched[field] && !!errors[field];
+    const isValid = touched[field] && !errors[field];
+    if (hasError) return base + ' border-red-400 focus:ring-red-500 focus:border-red-500';
+    if (isValid) return base + ' border-green-400 focus:ring-green-500 focus:border-green-500';
+    return base;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
+
+    const trimmedFullName = fullName.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirm = '';
+
+    const nextErrors = {
+      fullName: validate('fullName', trimmedFullName),
+      email: validate('email', trimmedEmail),
+      password: validate('password', trimmedPassword),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    try {
+      setSubmitting(true);
+      const { error } = await signUpWithEmail(trimmedEmail, trimmedPassword, trimmedFullName);
+      if (error) throw error;
+      toast({ title: 'Verify your email', description: 'Enter the OTP we sent to your email.' });
+      router.push(`/verify-otp?email=${encodeURIComponent(trimmedEmail)}`);
+    } catch (err) {
+      toast({ title: 'Signup failed', description: err?.message || 'Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Signup Form */}
@@ -29,20 +113,64 @@ const Signup = () => {
 
           {/* Signup Form */}
           <div className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <Input 
-                type="email"
-                placeholder=""
-                className="w-full h-12 bg-white border-gray-300 rounded-lg px-4 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Continue Button */}
-            <Button className="w-full h-12 bg-gray-300 text-gray-600 rounded-lg font-semibold text-base transition-colors duration-200" disabled>
-              Continue
-            </Button>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Full name</label>
+                <Input 
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => onFullNameChange(e.target.value)}
+                  onBlur={() => markTouched('fullName')}
+                  placeholder="Your full name"
+                  className={inputClass('fullName', "w-full h-12 bg-white border-gray-300 rounded-lg px-4 text-gray-900 text-base focus:outline-none focus:ring-2 focus:border-transparent")}
+                />
+                {touched.fullName && errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>}
+                {touched.fullName && !errors.fullName && <p className="mt-1 text-xs text-green-600">Looks good</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <Input 
+                  type="email"
+                  value={email}
+                  onChange={(e) => onEmailChange(e.target.value)}
+                  onBlur={() => markTouched('email')}
+                  placeholder="you@example.com"
+                  className={inputClass('email', "w-full h-12 bg-white border-gray-300 rounded-lg px-4 text-gray-900 text-base focus:outline-none focus:ring-2 focus:border-transparent")}
+                />
+                {touched.email && errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                {touched.email && !errors.email && <p className="mt-1 text-xs text-green-600">We'll send a verification code</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => onPasswordChange(e.target.value)}
+                    onBlur={() => markTouched('password')}
+                    placeholder="Create a password"
+                    className={inputClass('password', "w-full h-12 bg-white border-gray-300 rounded-lg pl-4 pr-12 text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M2 2l20 20"/><path d="M10.58 10.58a2 2 0 102.83 2.83"/><path d="M16.72 16.72A10.94 10.94 0 0112 18c-5 0-9-4-10-6a11.74 11.74 0 013.21-3.88"/><path d="M9.88 5.09A10.94 10.94 0 0112 6c5 0 9 4 10 6a11.67 11.67 0 01-1.67 2.52"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
+                </div>
+                {touched.password && errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+                {touched.password && !errors.password && <p className="mt-1 text-xs text-green-600">Strong enough</p>}
+              </div>
+              <Button disabled={submitting || Object.values(errors).some(Boolean) || !fullName || !email || !password} className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200">
+                {submitting ? 'Creating...' : 'Create account'}
+              </Button>
+            </form>
 
             {/* Legal Text */}
             <p className="text-xs text-gray-600 leading-relaxed">

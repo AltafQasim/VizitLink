@@ -483,7 +483,7 @@ function SortableLinkItem({
 }
 
 export default function LinksTab() {
-  const { data, updateData, saveLinks, customLinks, upsertCustomLink, deleteCustomLink } = useDashboard();
+  const { data, updateData, saveLinks, customLinks, socialLinks, upsertCustomLink, upsertSocialLink, deleteCustomLink, deleteSocialLink, reorderSocialLinks } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -525,23 +525,41 @@ export default function LinksTab() {
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = data.links.findIndex(link => link.id === active.id);
-      const newIndex = data.links.findIndex(link => link.id === over.id);
-
-      const newLinks = arrayMove(data.links, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
-      const snapshot = { ...data, links: newLinks };
-      updateData({ links: newLinks });
-      await persist(snapshot);
+      if (activeSection === 'social') {
+        // For social links: reorder in social_links table
+        const oldIndex = socialLinks.findIndex(link => link.id === active.id);
+        const newIndex = socialLinks.findIndex(link => link.id === over.id);
+        const newLinks = arrayMove(socialLinks, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
+        
+        // Update order in database
+        const orderedIds = newLinks.map(link => link.id);
+        await reorderSocialLinks(orderedIds);
+      } else {
+        // For custom links: reorder in data.links (legacy)
+        const oldIndex = data.links.findIndex(link => link.id === active.id);
+        const newIndex = data.links.findIndex(link => link.id === over.id);
+        const newLinks = arrayMove(data.links, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
+        const snapshot = { ...data, links: newLinks };
+        updateData({ links: newLinks });
+        await persist(snapshot);
+      }
     }
   };
 
   const handleToggleActive = async (id) => {
-    const updatedLinks = data.links.map(link =>
-      link.id === id ? { ...link, active: !link.active } : link
-    );
-    const snapshot = { ...data, links: updatedLinks };
-    updateData({ links: updatedLinks });
-    await persist(snapshot);
+    if (activeSection === 'social') {
+      const link = socialLinks.find(l => l.id === id);
+      if (!link) return;
+      const updatedLink = { ...link, active: !link.active };
+      await upsertSocialLink(updatedLink);
+    } else {
+      const updatedLinks = data.links.map(link =>
+        link.id === id ? { ...link, active: !link.active } : link
+      );
+      const snapshot = { ...data, links: updatedLinks };
+      updateData({ links: updatedLinks });
+      await persist(snapshot);
+    }
   };
 
   const handleEdit = (link) => {
@@ -557,36 +575,60 @@ export default function LinksTab() {
   const confirmDelete = async () => {
     if (!deletingLink) return;
 
-    const updatedLinks = data.links.filter(link => link.id !== deletingLink.id);
-    const snapshot = { ...data, links: updatedLinks };
-    updateData({ links: updatedLinks });
-    await persist(snapshot);
+    if (activeSection === 'social') {
+      await deleteSocialLink(deletingLink.id);
+    } else {
+      const updatedLinks = data.links.filter(link => link.id !== deletingLink.id);
+      const snapshot = { ...data, links: updatedLinks };
+      updateData({ links: updatedLinks });
+      await persist(snapshot);
+    }
     setShowDeleteModal(false);
     setDeletingLink(null);
   };
 
 
   const handleAddLink = async (newLink) => {
-    // For suggestions: open inline layout frame instead of persisting immediately
-    const newId = generateId();
-    const draft = {
-      ...newLink,
-      ...(newId ? { id: newId } : {}),
-      order: (data.links?.length || 0) + 1,
-      createdAt: new Date().toISOString(),
-      layout: 'classic',
-      title: '', // Start with blank title
-      url: '', // Start with blank URL
-      active: false, // Default switch off
-    };
+    if (activeSection === 'social') {
+      // For social links: save directly to social_links table
+      try {
+        const newId = generateId();
+        const socialLink = {
+          ...newLink,
+          id: newId,
+          order: (socialLinks?.length || 0) + 1,
+          createdAt: new Date().toISOString(),
+          active: true,
+        };
+        await upsertSocialLink(socialLink);
+        toast.success('Social link added');
+        setShowAddModal(false);
+      } catch (error) {
+        console.error('Failed to add social link:', error);
+        toast.error('Failed to add social link');
+      }
+    } else {
+      // For custom links: open inline layout frame instead of persisting immediately
+      const newId = generateId();
+      const draft = {
+        ...newLink,
+        ...(newId ? { id: newId } : {}),
+        order: (customLinks?.length || 0) + 1,
+        createdAt: new Date().toISOString(),
+        layout: 'classic',
+        title: '', // Start with blank title
+        url: '', // Start with blank URL
+        active: false, // Default switch off
+      };
 
-    // Check if this link already exists in layoutLinks to prevent duplicates
-    const existingLink = layoutLinks.find(link => link.icon === newLink.icon);
-    if (!existingLink) {
-      setLayoutLinks(prev => [...prev, draft]);
+      // Check if this link already exists in layoutLinks to prevent duplicates
+      const existingLink = layoutLinks.find(link => link.icon === newLink.icon);
+      if (!existingLink) {
+        setLayoutLinks(prev => [...prev, draft]);
+      }
+      setShowAddModal(false);
+      // Do not persist until user saves in layout frame
     }
-    setShowAddModal(false);
-    // Do not persist until user saves in layout frame
   };
 
   // Optionally preload frames from saved links (skipped to avoid duplicates)
@@ -677,14 +719,28 @@ export default function LinksTab() {
   };
 
   const handleUpdateLink = async (updatedLink) => {
-    const updatedLinks = data.links.map(link =>
-      link.id === updatedLink.id ? updatedLink : link
-    );
-    const snapshot = { ...data, links: updatedLinks };
-    updateData({ links: updatedLinks });
-    await persist(snapshot);
-    setShowEditModal(false);
-    setEditingLink(null);
+    if (activeSection === 'social') {
+      // For social links: update in social_links table
+      try {
+        await upsertSocialLink(updatedLink);
+        toast.success('Social link updated');
+        setShowEditModal(false);
+        setEditingLink(null);
+      } catch (error) {
+        console.error('Failed to update social link:', error);
+        toast.error('Failed to update social link');
+      }
+    } else {
+      // For custom links: update in data.links (legacy)
+      const updatedLinks = data.links.map(link =>
+        link.id === updatedLink.id ? updatedLink : link
+      );
+      const snapshot = { ...data, links: updatedLinks };
+      updateData({ links: updatedLinks });
+      await persist(snapshot);
+      setShowEditModal(false);
+      setEditingLink(null);
+    }
   };
 
   return (
@@ -737,10 +793,10 @@ export default function LinksTab() {
         /* Social Icons Section */
         <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-            Social Icons ({data.links.filter(link => link.active).length} active)
+            Social Icons ({socialLinks.filter(link => link.active).length} active)
           </h3>
 
-          {data.links.length === 0 ? (
+          {socialLinks.length === 0 ? (
             <div className="text-center py-10 sm:py-12">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
@@ -764,11 +820,11 @@ export default function LinksTab() {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={data.links.map(link => link.id)}
+                items={socialLinks.map(link => link.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <AnimatePresence>
-                  {data.links.map((link) => (
+                  {socialLinks.map((link) => (
                     <SortableLinkItem
                       key={link.id}
                       link={link}

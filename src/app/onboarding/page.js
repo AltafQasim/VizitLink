@@ -88,7 +88,13 @@ function OnboardingInner() {
             <div>
               <div className="relative">
                 <div className={`flex items-stretch border rounded-xl bg-white overflow-hidden transition-colors ${
-                  checking ? 'border-gray-300' : (available === true && isValidPattern) ? 'border-green-400' : ((available === false || !isValidPattern) ? 'border-red-300' : 'border-gray-300')
+                  checking
+                    ? 'border-gray-300'
+                    : (username && available === true && isValidPattern)
+                      ? 'border-green-400'
+                      : (username && (available === false || !isValidPattern))
+                        ? 'border-red-300'
+                        : 'border-gray-300'
                 }`}>
                   <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">vizitlink.com/</span>
                   <input
@@ -102,8 +108,8 @@ function OnboardingInner() {
                   />
                   <span className="w-12 flex items-center justify-center">
                     {checking && <Loader2 className="h-5 w-5 animate-spin text-gray-400" />}
-                    {!checking && available === true && isValidPattern && <Check className="h-5 w-5 text-green-600" />}
-                    {!checking && (available === false || !isValidPattern) && <X className="h-5 w-5 text-red-500" />}
+                    {!checking && username && available === true && isValidPattern && <Check className="h-5 w-5 text-green-600" />}
+                    {!checking && username && (available === false || !isValidPattern) && <X className="h-5 w-5 text-red-500" />}
                   </span>
                 </div>
                 <div className="mt-2 text-xs sm:text-sm text-gray-500 flex items-center justify-between">

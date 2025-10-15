@@ -5,11 +5,50 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useToast } from './ui/use-toast';
 
 const Login = () => {
-  const { user, signInWithGoogle, loading } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, loading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ email: false, password: false });
+  const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+  const validate = (field, value) => {
+    switch (field) {
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        return emailRegex.test(value.trim()) ? '' : 'Enter a valid email';
+      case 'password':
+        if (!value.trim()) return 'Password is required';
+        return value.trim().length >= 6 ? '' : 'At least 6 characters';
+      default:
+        return '';
+    }
+  };
+
+  const onEmailChange = (v) => {
+    setEmail(v);
+    setErrors(prev => ({ ...prev, email: validate('email', v) }));
+  };
+  const onPasswordChange = (v) => {
+    setPassword(v);
+    setErrors(prev => ({ ...prev, password: validate('password', v) }));
+  };
+
+  const markTouched = (field) => setTouched(prev => ({ ...prev, [field]: true }));
+  const inputClass = (field, base) => {
+    const hasError = touched[field] && !!errors[field];
+    const isValid = touched[field] && !errors[field];
+    if (hasError) return base + ' border-red-400 focus:ring-red-500 focus:border-red-500';
+    if (isValid) return base + ' border-green-400 focus:ring-green-500 focus:border-green-500';
+    return base;
+  };
 
   useEffect(() => {
     if (user && !loading) {
@@ -19,6 +58,33 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     await signInWithGoogle();
+  };
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    const nextErrors = {
+      email: validate('email', trimmedEmail),
+      password: validate('password', trimmedPassword),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    try {
+      setSubmitting(true);
+      const { error } = await signInWithEmail(trimmedEmail, trimmedPassword);
+      if (error) throw error;
+      toast({ title: 'Logged in', description: 'Redirecting to dashboard...' });
+      router.push('/dashboard');
+    } catch (err) {
+      toast({ title: 'Login failed', description: err?.message || 'Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -52,19 +118,50 @@ const Login = () => {
 
           {/* Login Form */}
           <div className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <Input 
-                type="email"
-                placeholder="Email or username"
-                className="w-full h-12 bg-gray-50 border-gray-200 rounded-lg px-4 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div>
+                <Input 
+                  type="email"
+                  value={email}
+                  onChange={(e) => onEmailChange(e.target.value)}
+                  onBlur={() => markTouched('email')}
+                  placeholder="Email"
+                  className={inputClass('email', "w-full h-12 bg-gray-50 border-gray-200 rounded-lg px-4 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+                />
+                {touched.email && errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                {touched.email && !errors.email && <p className="mt-1 text-xs text-green-600">Looks good</p>}
+              </div>
+              <div>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => onPasswordChange(e.target.value)}
+                    onBlur={() => markTouched('password')}
+                    placeholder="Password"
+                    className={inputClass('password', "w-full h-12 bg-gray-50 border-gray-200 rounded-lg pl-4 pr-12 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M2 2l20 20"/><path d="M10.58 10.58a2 2 0 102.83 2.83"/><path d="M16.72 16.72A10.94 10.94 0 0112 18c-5 0-9-4-10-6a11.74 11.74 0 013.21-3.88"/><path d="M9.88 5.09A10.94 10.94 0 0112 6c5 0 9 4 10 6a11.67 11.67 0 01-1.67 2.52"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
+                </div>
+                {touched.password && errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+                {touched.password && !errors.password && <p className="mt-1 text-xs text-green-600">Strong enough</p>}
+              </div>
 
-            {/* Continue Button */}
-            <Button className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200">
-              Continue
-            </Button>
+              <Button disabled={submitting || Object.values(errors).some(Boolean) || !email || !password} className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200">
+                {submitting ? 'Signing in...' : 'Sign in'}
+              </Button>
+            </form>
 
             {/* OR Divider */}
             <div className="relative">
@@ -104,8 +201,9 @@ const Login = () => {
             {/* Links */}
             <div className="space-y-3 text-center">
               <div className="flex justify-center gap-4 text-sm">
-                <a href="#" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot password?</a>
-                <a href="#" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot username?</a>
+                <Link href="/forgot-password" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot password?</Link>
+                <span className="text-gray-400">|</span>
+                <Link href="/signup" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Create account</Link>
               </div>
               <p className="text-gray-600 text-sm">
                 Don't have an account? <Link href="/signup" className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200">Sign up</Link>

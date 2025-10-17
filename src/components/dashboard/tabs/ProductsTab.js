@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { Button } from '../../ui/button';
+import { Switch } from '../../ui/switch';
 import { useDashboard } from '../../../context/DashboardContext';
 import { 
   Plus, 
   Edit, 
   Trash2, 
-  Eye, 
-  EyeOff, 
   MoreVertical,
   Share2,
   Upload,
@@ -176,57 +175,58 @@ export default function ProductsTab() {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 py-3 sm:px-4 lg:p-8 pt-0">
+    <div className="p-1 space-y-4 sm:space-y-6 pt-0 max-w-full">
       {/* Header */}
-      <div className="py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 sticky top-0 bg-gray-50 z-10">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Shop</h2>
-          <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            Manage your products and track their performance
-          </p>
+      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
+        <div className='flex items-center justify-between gap-2'>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">My Shop</h2>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+              Manage your products and track their performance
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product
+          </Button>
         </div>
-        
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Product
-        </Button>
       </div>
 
       {/* Products List */}
-      <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+      <div className="bg-background rounded-lg p-3 sm:p-4 lg:p-6 border border-border max-w-full overflow-hidden">
+        <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
           Products ({data.products.filter(product => product.active).length} active)
         </h3>
         
         {data.products.length === 0 ? (
           <div className="text-center py-10 sm:py-12">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
             </div>
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-            <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
+            <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No products yet</h3>
+            <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
               Start selling by adding your first product to your shop
             </p>
             <Button
               onClick={() => setShowAddModal(true)}
-              className="bg-purple-600 hover:bg-purple-700 h-9 px-3 text-sm"
+              className="h-9 px-3 text-sm"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Product
             </Button>
           </div>
         ) : (
-          <div className="grid gap-3 sm:gap-4">
+          <div className="space-y-3 sm:space-y-4 max-w-full">
             <AnimatePresence>
               {data.products.map((product) => (
                 <motion.div
@@ -234,13 +234,15 @@ export default function ProductsTab() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className={`bg-white border border-gray-200 rounded-lg p-3 sm:p-4 ${
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                  className={`bg-card border border-border rounded-2xl p-3 sm:p-4 transition-shadow hover:shadow-sm max-w-full min-h-16 ${
                     !product.active ? 'opacity-60' : ''
                   }`}
                 >
-                  <div className="flex items-start gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4 max-w-full">
                     {/* Product Image */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                       <Image
                         src={product.image}
                         alt={product.title}
@@ -251,45 +253,51 @@ export default function ProductsTab() {
                     </div>
                     
                     {/* Product Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                    <div className="flex-1 min-w-0 max-w-full overflow-hidden">
+                      <div className="flex items-start justify-between gap-2 mb-1.5 max-w-full">
+                        <div className="min-w-0 flex-1 max-w-full overflow-hidden">
+                          <h3 className="font-medium text-foreground text-sm sm:text-base truncate">
                             {product.title}
                           </h3>
-                          <p className="text-xs sm:text-sm text-gray-500 truncate">
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
                             {product.brand}
                           </p>
                         </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="font-semibold text-gray-900 text-sm sm:text-base">
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold whitespace-nowrap">
                             ${product.price.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-gray-500">
+                          </span>
+                          <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
                             {product.clicks} clicks • {product.ctr.toFixed(1)}% CTR
                           </p>
                         </div>
                       </div>
                       
-                      <p className="text-xs text-gray-500 truncate mb-2">
+                      <p className="text-xs text-muted-foreground truncate mb-2 max-w-full">
                         {product.url}
                       </p>
+                    </div>
+
+                    {/* Action Controls - Right Side */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Active Toggle Switch */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {product.active ? 'Active' : 'Inactive'}
+                        </span>
+                        <Switch
+                          checked={product.active}
+                          onCheckedChange={() => handleToggleActive(product.id)}
+                        />
+                      </div>
                       
                       {/* Action Buttons */}
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleActive(product.id)}
-                          className={product.active ? 'text-green-600' : 'text-gray-400'}
-                        >
-                          {product.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                        </Button>
-                        
+                      <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(product)}
+                          className="hover:bg-muted p-2"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -298,7 +306,7 @@ export default function ProductsTab() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

@@ -295,7 +295,7 @@ export default function LivePreview() {
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
-                    <button className={`text-sm px-3 py-1 rounded-full ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'} transition-colors`}>View all</button>
+                    <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {(data.products || [])
@@ -306,7 +306,7 @@ export default function LivePreview() {
                           href={product.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`group block rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-white shadow-sm border border-gray-100'}`}
+                          className={`group block rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card shadow-sm border border-border'}`}
                           whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -320,6 +320,11 @@ export default function LivePreview() {
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                                   sizes="(max-width: 640px) 50vw, 25vw"
                                 />
+                                {Number(product.price) > 0 && (
+                                  <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-primary text-primary-foreground shadow-sm">
+                                    {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
+                                  </div>
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                   <ExternalLink className="w-3 h-3 text-gray-700" />
@@ -335,15 +340,11 @@ export default function LivePreview() {
                             <h4 className={`font-semibold text-sm truncate ${currentTextColor}`} style={{ fontFamily: fontFamily }}>
                               {product.title}
                             </h4>
-                            <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>
+                            <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>
                               {product.brand || 'Unknown Brand'}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              {Number(product.price) > 0 ? (
-                                <span className="text-sm font-bold text-purple-600">
-                                  {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
-                                </span>
-                              ) : <span />}
+                              <span />
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             </div>
                           </div>

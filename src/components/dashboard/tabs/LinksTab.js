@@ -27,8 +27,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Eye,
-  EyeOff,
   GripVertical,
   ExternalLink,
   AlertTriangle,
@@ -422,60 +420,67 @@ function SortableLinkItem({
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={`bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-3 cursor-move ${isDragging ? 'opacity-50' : ''
+      className={`bg-card border border-border rounded-2xl p-3 sm:p-4 mb-3 cursor-move transition-shadow hover:shadow-sm min-h-16 ${isDragging ? 'opacity-50' : ''
         }`}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded flex-shrink-0"
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded flex-shrink-0"
           >
-            <GripVertical className="w-4 h-4 text-gray-400" />
+            <GripVertical className="w-4 h-4 text-muted-foreground" />
           </div>
 
-          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
             <IconComponent
               className="w-5 h-5"
               style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
             />
           </div>
 
-          <div className="min-w-0">
-            <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{link.title}</h3>
-            <p className="text-xs sm:text-sm text-gray-500 truncate max-w-[180px] sm:max-w-[200px]">{link.url}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-medium text-foreground text-sm sm:text-base truncate">{link.title}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{link.url}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onToggleActive(link.id)}
-            className={link.active ? 'text-green-600' : 'text-gray-400'}
-          >
-            {link.active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-          </Button>
+        {/* Action Controls - Right Side */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Active Toggle Switch */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {link.active ? 'Active' : 'Inactive'}
+            </span>
+            <Switch
+              checked={link.active}
+              onCheckedChange={() => onToggleActive(link.id)}
+            />
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(link)}
+              className="hover:bg-muted p-2"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(link)}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(link)}
-            className="text-red-600 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(link)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -744,19 +749,19 @@ export default function LinksTab() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 py-3 sm:px-4 lg:p-8 pt-0">
+    <div className="p-1 space-y-4 sm:space-y-6  pt-0 max-w-full">
       {/* Header */}
-      <div className="py-3 sm:py-4 sticky top-0 bg-gray-50 z-10">
+      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
         <div className='flex items-center justify-between gap-2'>
-          <div className="mb-4">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My VizitLink</h2>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+          <div className="mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">My VizitLink</h2>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
               Manage your social media icons and custom links
             </p>
           </div>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
+            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
           >
             <Plus className="w-4 h-4" />
             Add {activeSection === 'social' ? 'Social Icon' : 'Link'}
@@ -764,12 +769,12 @@ export default function LinksTab() {
         </div>
 
         {/* Section Tabs */}
-        <div className="flex space-x-1 bg-gray-200 rounded-lg p-1 mb-4">
+        <div className="flex space-x-1 bg-muted rounded-lg p-1">
           <button
             onClick={() => setActiveSection('social')}
             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === 'social'
-              ? 'bg-white text-purple-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-background text-primary shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             Social Icons
@@ -777,8 +782,8 @@ export default function LinksTab() {
           <button
             onClick={() => setActiveSection('links')}
             className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === 'links'
-              ? 'bg-white text-purple-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-background text-primary shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
               }`}
           >
             Custom Links
@@ -791,23 +796,23 @@ export default function LinksTab() {
       {/* Content based on active section */}
       {activeSection === 'social' ? (
         /* Social Icons Section */
-        <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+        <div className="bg-background rounded-lg p-3 sm:p-4 lg:p-6 border border-border">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
             Social Icons ({socialLinks.filter(link => link.active).length} active)
           </h3>
 
           {socialLinks.length === 0 ? (
             <div className="text-center py-10 sm:py-12">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Plus className="w-7 h-7 sm:w-8 sm:h-8 text-gray-400" />
               </div>
-              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No links yet</h3>
-              <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
+              <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">No links yet</h3>
+              <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base">
                 Start building your VizitLink by adding your first social media link
               </p>
               <Button
                 onClick={() => setShowAddModal(true)}
-                className="bg-purple-600 hover:bg-purple-700 h-9 px-3 text-sm"
+                className="h-9 px-3 text-sm"
               >
                 <Plus className="w-4 h-4" />
                 Add Your First Link
@@ -840,8 +845,8 @@ export default function LinksTab() {
         </div>
       ) : (
         /* Custom Links Section */
-        <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+        <div className="bg-background rounded-lg p-3 sm:p-4 lg:p-6 border border-border">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
             Custom Links
           </h3>
           {/* Render all layout draft frames */}

@@ -166,7 +166,7 @@ export default function PublicProfilePage({ params }) {
                                         href={link.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className={`block w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                                        className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
                                         style={{ fontFamily }}
                                     >
                                         <span className="font-medium truncate">{link.title}</span>
@@ -187,7 +187,7 @@ export default function PublicProfilePage({ params }) {
                                                 href={product.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className={`block rounded-lg p-3 hover:opacity-80 transition-colors ${currentTextColor === 'text-white' ? 'bg-white/10' : 'bg-purple-50'}`}
+                                                className={`block rounded-xl p-3 transition-all hover:shadow-md ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card border border-border'}`}
                                             >
                                                 <div className="flex items-center space-x-3">
                                                     <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
@@ -199,8 +199,10 @@ export default function PublicProfilePage({ params }) {
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className={`font-medium text-sm truncate ${currentTextColor}`} style={{ fontFamily }}>{product.title}</p>
-                                                        <p className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>{product.brand || 'Unknown'}</p>
-                                                        <p className="text-sm font-semibold text-purple-600">${(Number(product.price) || 0).toFixed(2)}</p>
+                                                        <p className={`text-xs ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>{product.brand || 'Unknown'}</p>
+                                                        {Number(product.price) > 0 && (
+                                                            <p className="text-sm font-semibold text-primary">${(Number(product.price) || 0).toFixed(2)}</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </a>

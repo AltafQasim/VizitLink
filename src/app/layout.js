@@ -9,8 +9,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from '../context/AuthContext'
 
 const roboto = Roboto({
-  weight: '400',
+  weight: ['400','500','700'],
   subsets: ['latin'],
+  display: 'swap'
 })
 
 const queryClient = new QueryClient()

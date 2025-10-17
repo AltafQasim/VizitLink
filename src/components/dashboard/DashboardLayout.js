@@ -140,7 +140,6 @@ export default function DashboardLayout() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="px-3 py-3 sm:p-4 lg:p-8"
             >
               {renderTabContent()}
             </motion.div>

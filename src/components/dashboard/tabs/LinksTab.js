@@ -62,11 +62,10 @@ const generateId = () => {
 
 // Layout Frame Component
 function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
-  const [layoutTool, setLayoutTool] = useState('layout');
+  const [layoutTool, setLayoutTool] = useState(!layoutLink.title && !layoutLink.url ? 'layout' : null);
   const [isEditingDraft, setIsEditingDraft] = useState(true);
   const [isFetchingMeta, setIsFetchingMeta] = useState(false);
   const fetchTimeoutRef = useRef(null);
-
   // URL validation function
   const isValidUrl = (string) => {
     try {
@@ -271,6 +270,7 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
               checked={layoutLink.active} 
               onCheckedChange={(checked) => onUpdate({ active: checked })} 
               className="scale-90 sm:scale-100"
+              disabled={layoutLink?.url?.trim() === ''}
             />
           </div>
         </div>
@@ -417,7 +417,6 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

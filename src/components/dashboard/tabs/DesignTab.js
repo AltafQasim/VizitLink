@@ -795,8 +795,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <DialogTitle>Choose an image</DialogTitle>
-                                            <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
+                                    <DialogTitle>Choose an image</DialogTitle>
+                                    <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -966,8 +966,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <DialogTitle>Choose a video</DialogTitle>
-                                            <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
+                                    <DialogTitle>Choose a video</DialogTitle>
+                                    <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -1137,8 +1137,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <DialogTitle>Adjust Tint</DialogTitle>
-                                            <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
+                                    <DialogTitle>Adjust Tint</DialogTitle>
+                                    <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -1250,26 +1250,26 @@ const DesignTab = () => {
                         </div>
 
                         {activeStyleTab === "Presets" && (
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4">Button and font</h3>
+                            <div>
+                                <h3 className="text-lg font-semibold mb-4">Button and font</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                                        {buttonStyles.map((style) => (
-                                            <Card
-                                                key={style.name}
+                                    {buttonStyles.map((style) => (
+                                        <Card
+                                            key={style.name}
                                                 className={`cursor-pointer transition-all hover:scale-105 min-h-[100px] sm:min-h-[120px] ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
-                                                    }`}
-                                                onClick={() => handleStyleChange(style.name)}
-                                            >
+                                                }`}
+                                            onClick={() => handleStyleChange(style.name)}
+                                        >
                                                 <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
                                                     <div className={`px-3 sm:px-4 py-2 text-sm ${style.style}`}>
-                                                        Button
-                                                    </div>
-                                                    <p className="text-sm font-medium text-center">{style.name}</p>
+                                                    Button
                                                 </div>
-                                            </Card>
-                                        ))}
-                                    </div>
+                                                <p className="text-sm font-medium text-center">{style.name}</p>
+                                            </div>
+                                        </Card>
+                                    ))}
                                 </div>
+                            </div>
                         )}
 
                         {activeStyleTab === "Text" && (

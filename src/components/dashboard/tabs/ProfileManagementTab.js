@@ -15,7 +15,8 @@ import {
   Calendar,
   Users,
   BarChart3,
-  Globe
+  Globe,
+  X
 } from 'lucide-react';
 
 export default function ProfileManagementTab() {
@@ -178,9 +179,9 @@ export default function ProfileManagementTab() {
                     size="sm"
                     onClick={() => switchProfile(profile.id)}
                     disabled={isActive}
-                    className={isActive ? 'opacity-50 cursor-not-allowed' : ''}
+                    className={`h-8 sm:h-9 ${isActive ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <Eye className="w-4 h-4 mr-1" />
+                    <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                     {isActive ? 'Active' : 'Switch to'}
                   </Button>
                   
@@ -188,8 +189,9 @@ export default function ProfileManagementTab() {
                     variant="outline"
                     size="sm"
                     onClick={() => openEditModal(profile)}
+                    className="h-8 sm:h-9"
                   >
-                    <Edit3 className="w-4 h-4 mr-1" />
+                    <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                     Edit
                   </Button>
                 </div>
@@ -200,10 +202,10 @@ export default function ProfileManagementTab() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteProfile(profile.id)}
-                      className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                      className="h-7 w-7 sm:h-8 sm:w-8 p-0 hover:bg-red-50 hover:text-red-600"
                       title="Delete Profile"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                   )}
                 </div>
@@ -260,8 +262,9 @@ export default function ProfileManagementTab() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowEditModal(false)}
+                  className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
                 >
-                  ×
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
               

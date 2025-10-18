@@ -161,6 +161,14 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
             <DialogTitle className="text-xl font-semibold">
               Edit product
             </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetModal}
+              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 

@@ -7,10 +7,10 @@ import Image from 'next/image';
 import { Button } from '../../ui/button';
 import { Switch } from '../../ui/switch';
 import { useDashboard } from '../../../context/DashboardContext';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Edit,
+  Trash2,
   MoreVertical,
   Share2,
   Upload,
@@ -82,7 +82,7 @@ export default function ProductsTab() {
   // Initialize products in localStorage if not exists
   useEffect(() => {
     if (isInitialized) return;
-    
+
     // If products are missing in context, seed with defaults once
     if (!data?.products || !Array.isArray(data.products)) {
       updateData({ products: mockProducts });
@@ -123,7 +123,7 @@ export default function ProductsTab() {
 
   const confirmDelete = async () => {
     if (!deletingProduct) return;
-    
+
     const updatedProducts = data.products.filter(product => product.id !== deletingProduct.id);
     const snapshot = { ...data, products: updatedProducts };
     updateData({ products: updatedProducts });
@@ -184,7 +184,7 @@ export default function ProductsTab() {
   return (
     <div className="p-1 space-y-4 sm:space-y-6 pt-0 max-w-full">
       {/* Header */}
-      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
+      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sm:sticky sm:top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
         <div className='flex items-center justify-between gap-2'>
           <div className="min-w-0 flex-1">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">My Shop</h2>
@@ -194,10 +194,16 @@ export default function ProductsTab() {
           </div>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
+            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base hidden sm:flex"
           >
             <Plus className="w-4 h-4" />
             Add Product
+          </Button>
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="w-auto h-9 px-3 text-sm sm:hidden block rounded-full"
+          >
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -207,7 +213,7 @@ export default function ProductsTab() {
         <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
           Products ({data.products.filter(product => product.active).length} active)
         </h3>
-        
+
         {data.products.length === 0 ? (
           <div className="text-center py-10 sm:py-12">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -236,13 +242,12 @@ export default function ProductsTab() {
                   exit={{ opacity: 0, y: -20 }}
                   whileHover={{ scale: 1.02 }}
                   transition={{ duration: 0.2 }}
-                  className={`bg-card border border-border rounded-2xl p-3 sm:p-4 transition-shadow hover:shadow-sm max-w-full min-h-16 ${
-                    !product.active ? 'opacity-60' : ''
-                  }`}
+                  className={`bg-card border border-border rounded-2xl p-3 sm:p-4 transition-shadow hover:shadow-sm max-w-full min-h-16 ${!product.active ? 'opacity-60' : ''
+                    }`}
                 >
-                  <div className="flex items-start gap-3 sm:gap-4 max-w-full">
-                    {/* Product Image */}
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="flex items-start gap-3 sm:gap-4 max-w-full mb-3 sm:mb-2">
+                    {/* Product Image - Mobile optimized */}
+                    <div className="w-20 h-20 sm:w-20 sm:h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                       <Image
                         src={product.image}
                         alt={product.title}
@@ -251,66 +256,63 @@ export default function ProductsTab() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    
-                    {/* Product Details */}
+
+                    {/* Product Details - Mobile optimized */}
                     <div className="flex-1 min-w-0 max-w-full overflow-hidden">
-                      <div className="flex items-start justify-between gap-2 mb-1.5 max-w-full">
+                      <div className="flex items-start justify-between gap-1 mb-2 sm:mb-1.5 max-w-full">
                         <div className="min-w-0 flex-1 max-w-full overflow-hidden">
-                          <h3 className="font-medium text-foreground text-sm sm:text-base truncate">
+                          <h3 className="font-medium text-foreground text-base sm:text-base truncate leading-tight">
                             {product.title}
                           </h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                          <p className="text-sm sm:text-sm text-muted-foreground truncate m-0 mt-1">
                             {product.brand}
                           </p>
                         </div>
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold whitespace-nowrap">
-                            ${product.price.toFixed(2)}
-                          </span>
-                          <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
-                            {product.clicks} clicks • {product.ctr.toFixed(1)}% CTR
-                          </p>
-                        </div>
                       </div>
-                      
-                      <p className="text-xs text-muted-foreground truncate mb-2 max-w-full">
-                        {product.url}
-                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-3 py-1 text-sm font-semibold whitespace-nowrap">
+                          ${product.price.toFixed(2)}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Action Controls - Right Side */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Active Toggle Switch */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {product.active ? 'Active' : 'Inactive'}
-                        </span>
-                        <Switch
-                          checked={product.active}
-                          onCheckedChange={() => handleToggleActive(product.id)}
-                        />
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(product)}
-                          className="hover:bg-muted p-2"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  </div>
+                  {/* Action Controls - Mobile optimized */}
+                  <div className="flex items-center justify-between gap-2 flex-shrink-0">
+                    {/* Stats - Mobile optimized */}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="relative flex items-center justify-center gap-1 rounded-full bg-[#f3f3f1] px-2 py-1 text-xs tracking-tight whitespace-nowrap">
+                        {product.clicks} Clicks
+                      </span>
+                      <span className="relative flex items-center justify-center gap-1 rounded-full bg-[#f3f3f1] px-2 py-1 text-xs tracking-tight whitespace-nowrap">
+                        {product.ctr.toFixed(1)}% CTR
+                      </span>
+                    </div>
+
+                    {/* Action Buttons - Mobile optimized */}
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(product)}
+                        className="hover:bg-muted p-1.5 sm:p-2 h-8 w-8 sm:h-9 sm:w-auto sm:px-3"
+                      >
+                        <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(product)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-1.5 sm:p-2 h-8 w-8 sm:h-9 sm:w-auto sm:px-3"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </Button>
+                      <Switch
+                        checked={product.active}
+                        onCheckedChange={() => handleToggleActive(product.id)}
+                        className="scale-90 sm:scale-100"
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -326,7 +328,7 @@ export default function ProductsTab() {
         onClose={() => setShowAddModal(false)}
         onSave={handleAddProduct}
       />
-      
+
       {editingProduct && (
         <EditProductModal
           isOpen={showEditModal}

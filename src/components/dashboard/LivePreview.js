@@ -127,16 +127,18 @@ export default function LivePreview() {
     <motion.div
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex w-[420px] bg-gray-50 border-l border-gray-200 py-6 px-4 flex-col"
+      className="hidden lg:flex w-[300px] xl:w-[340px] 2xl:w-[380px] bg-background border-l border-border py-4 px-3 flex-col min-h-0 h-full overflow-hidden flex-shrink-0"
     >
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-2">Live Preview</h3>
-        <p className="text-sm text-gray-500">See how your VizitLink looks to visitors</p>
+      <div className="mb-3">
+        <h3 className="font-semibold text-foreground">Live Preview</h3>
+        <p className="text-xs text-muted-foreground">See how your VizitLink looks</p>
       </div>
 
-      {/* Mobile mockup */}
-      <div className="flex items-center justify-center">
-        <div className="bg-black rounded-3xl shadow-2xl p-1 w-full h-full max-w-sm">
+      {/* Scrollable panel content */}
+      <div className="flex-1 min-h-0 max-h-[calc(100dvh-120px)] lg:max-h-[calc(100dvh-140px)] xl:max-h-[calc(100dvh-160px)] overflow-y-auto scroll-elegant scrollbar-accent">
+        {/* Mobile mockup */}
+        <div className="flex items-start justify-center">
+          <div className="bg-black rounded-3xl shadow-2xl p-1 w-full max-w-sm">
 
           {/* Content */}
           <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
@@ -167,7 +169,7 @@ export default function LivePreview() {
             {(wallpaper === 'Image' || wallpaper === 'Video') && (
               <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
             )}
-            <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
+             <div className="relative z-10 p-6 min-h-[320px] max-h-[60dvh] lg:max-h-[65dvh] xl:max-h-[70dvh] overflow-y-auto scroll-elegant scrollbar-accent">
               {/* Profile */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
@@ -391,18 +393,19 @@ export default function LivePreview() {
             )}
           </div>
         </div>
+        </div>
       </div>
 
       {/* Preview controls */}
-      <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+      {/* <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-2">
           <Eye className="w-4 h-4" />
           <span>Preview mode</span>
         </div>
-        <button className="text-purple-600 hover:text-purple-700 font-medium">
+        <button className="text-primary hover:opacity-90 font-medium">
           View live
         </button>
-      </div>
+      </div> */}
     </motion.div>
   );
 }

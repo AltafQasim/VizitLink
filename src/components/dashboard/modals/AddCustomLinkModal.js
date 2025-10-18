@@ -6,7 +6,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader } from '../../ui/dialog';
 import { socialIconsMap, socialColorsMap } from '../../../lib/social';
-import { Search, ChevronRight, Loader2, Globe, Image as ImageIcon } from 'lucide-react';
+import { Search, ChevronRight, Loader2, Globe, Image as ImageIcon, X } from 'lucide-react';
 import { DialogTitle } from '@radix-ui/react-dialog';
 
 const sidebarItems = [
@@ -301,9 +301,19 @@ export default function AddCustomLinkModal({ isOpen, onClose, onSave }) {
             <DialogContent className="p-0 overflow-hidden sm:max-w-5xl w-[100vw] sm:w-2xl h-[100dvh] sm:h-[80vh] sm:rounded-xl rounded-none">
                 <div className="h-full flex flex-col">
                     <DialogHeader className="px-4 sm:px-6 py-3 border-b border-gray-200 bg-white shrink-0">
-                        <DialogTitle className="text-xl font-semibold mb-3">
-                            add custom link
-                        </DialogTitle>
+                        <div className="flex items-center justify-between">
+                            <DialogTitle className="text-xl font-semibold mb-3">
+                                add custom link
+                            </DialogTitle>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onClose}
+                                className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
                         <div className="relative rounded-2xl border border-gray-300 bg-white">
                             <Input
                                 placeholder="Paste or search a link"

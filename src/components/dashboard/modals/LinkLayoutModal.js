@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
 import { Button } from '../../ui/button';
+import { X } from 'lucide-react';
 
 export default function LinkLayoutModal({ isOpen, link, onClose, onSave }) {
   const [layout, setLayout] = useState('classic');
@@ -34,7 +35,17 @@ export default function LinkLayoutModal({ isOpen, link, onClose, onSave }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-2xl h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
         <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-white">
-          <DialogTitle className="text-xl font-semibold">Layout</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold">Layout</DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
         <div className="p-5 space-y-5">
           <div>

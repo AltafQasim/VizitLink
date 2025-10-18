@@ -35,13 +35,13 @@ export default function Sidebar() {
       className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col"
     >
       {/* User/Profile Switcher */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="py-3 px-6 border-b border-gray-100">
         <ProfileSwitcher />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+      <nav className="p-4">
+        <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -65,8 +65,8 @@ export default function Sidebar() {
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <Icon className="w-4 h-4" />
+                  <span className='text-sm'>{item.label}</span>
                 </button>
               </motion.li>
             );

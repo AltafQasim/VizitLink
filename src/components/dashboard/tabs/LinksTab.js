@@ -235,58 +235,87 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
 
   return (
     <div className="mb-5 rounded-2xl border border-gray-200 bg-white">
-      {/* Top row: Title/URL with actions */}
-      <div className="px-4 py-3 flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          {/* <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center text-xs">UI</div> */}
+      {/* Top row: Title/URL with actions - Mobile optimized */}
+      <div className="px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <input
             value={layoutLink.title || ''}
             onChange={(e) => onUpdate({ title: e.target.value })}
             placeholder="Enter title"
             disabled={!isEditingDraft}
-            className={`flex-1 bg-transparent outline-none px-2 py-1 rounded-md text-sm ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
+            className={`flex-1 bg-transparent outline-none px-3 py-2 rounded-md text-sm sm:text-base min-h-[44px] ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
           />
-          <Button variant="ghost" size="sm" onClick={() => {
-            if (isEditingDraft) {
-              // Save functionality on tick icon: pass current link payload
-              onSave(layoutLink);
-            }
-            setIsEditingDraft(v => !v);
-          }}>
-            {isEditingDraft ? <Check className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-          </Button>
-          <Button variant="ghost" size="sm" className="text-red-600" onClick={onCancel}>
-            <Trash2 className="w-4 h-4" />
-          </Button>
-          <Switch checked={layoutLink.active} onCheckedChange={(checked) => onUpdate({ active: checked })} />
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => {
+                if (isEditingDraft) {
+                  onSave(layoutLink);
+                }
+                setIsEditingDraft(v => !v);
+              }}
+              className="h-8 w-8 sm:h-9 sm:w-auto sm:px-3 p-1.5 sm:p-2"
+            >
+              {isEditingDraft ? <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-red-600 h-8 w-8 sm:h-9 sm:w-auto sm:px-3 p-1.5 sm:p-2" 
+              onClick={onCancel}
+            >
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </Button>
+            <Switch 
+              checked={layoutLink.active} 
+              onCheckedChange={(checked) => onUpdate({ active: checked })} 
+              className="scale-90 sm:scale-100"
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
           <input
             value={layoutLink.url || ''}
             onChange={handleUrlChange}
-            // onPaste={handleUrlPaste}
             placeholder="Enter URL to fetch data"
             disabled={!isEditingDraft}
-            className={`flex-1 bg-transparent outline-none px-2 py-1 rounded-md text-sm ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
+            className={`flex-1 bg-transparent outline-none px-3 py-2 rounded-md text-sm sm:text-base min-h-[44px] ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
           />
           {isFetchingMeta && (
-            <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-5 h-5 sm:w-4 sm:h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
           )}
         </div>
       </div>
-      {/* Icon toolbar (bottom of header) */}
-      <div className="px-4 py-2 flex items-center gap-4 text-gray-600 border-b border-gray-200">
-        <button onClick={() => setLayoutTool(layoutTool === 'layout' ? null : 'layout')} className={`flex items-center gap-1 text-sm ${layoutTool === 'layout' ? 'text-black' : ''}`}>
-          <Layout className="w-4 h-4" /> Layout
+      {/* Icon toolbar (bottom of header) - Mobile optimized */}
+      <div className="px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-4 text-gray-600 border-b border-gray-200 overflow-x-auto">
+        <button 
+          onClick={() => setLayoutTool(layoutTool === 'layout' ? null : 'layout')} 
+          className={`flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${layoutTool === 'layout' ? 'text-black bg-gray-100' : 'hover:bg-gray-50'}`}
+        >
+          <Layout className="w-4 h-4 sm:w-5 sm:h-5" /> 
+          <span className="hidden xs:inline">Layout</span>
         </button>
-        <button onClick={() => setLayoutTool(layoutTool === 'redirect' ? null : 'redirect')} className={`flex items-center gap-1 text-sm ${layoutTool === 'redirect' ? 'text-black' : ''}`}>
-          <ExternalLink className="w-4 h-4" /> Redirect
+        <button 
+          onClick={() => setLayoutTool(layoutTool === 'redirect' ? null : 'redirect')} 
+          className={`flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${layoutTool === 'redirect' ? 'text-black bg-gray-100' : 'hover:bg-gray-50'}`}
+        >
+          <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" /> 
+          <span className="hidden xs:inline">Redirect</span>
         </button>
-        <button onClick={() => setLayoutTool(layoutTool === 'thumbnail' ? null : 'thumbnail')} className={`flex items-center gap-1 text-sm ${layoutTool === 'thumbnail' ? 'text-black' : ''}`}>
-          <ImageIcon className="w-4 h-4" /> Thumbnail
+        <button 
+          onClick={() => setLayoutTool(layoutTool === 'thumbnail' ? null : 'thumbnail')} 
+          className={`flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${layoutTool === 'thumbnail' ? 'text-black bg-gray-100' : 'hover:bg-gray-50'}`}
+        >
+          <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" /> 
+          <span className="hidden xs:inline">Thumbnail</span>
         </button>
-        <button onClick={() => setLayoutTool(layoutTool === 'clicks' ? null : 'clicks')} className={`flex items-center gap-1 text-sm ${layoutTool === 'clicks' ? 'text-black' : ''}`}>
-          <BarChart2 className="w-4 h-4" /> Clicks
+        <button 
+          onClick={() => setLayoutTool(layoutTool === 'clicks' ? null : 'clicks')} 
+          className={`flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base px-3 py-2 rounded-lg transition-colors whitespace-nowrap ${layoutTool === 'clicks' ? 'text-black bg-gray-100' : 'hover:bg-gray-50'}`}
+        >
+          <BarChart2 className="w-4 h-4 sm:w-5 sm:h-5" /> 
+          <span className="hidden xs:inline">Clicks</span>
         </button>
       </div>
       {/* Cards area - only show if a tool is selected */}
@@ -448,38 +477,32 @@ function SortableLinkItem({
           </div>
         </div>
 
-        {/* Action Controls - Right Side */}
+        {/* Action Controls - Right Side - Mobile optimized */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Active Toggle Switch */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {link.active ? 'Active' : 'Inactive'}
-            </span>
-            <Switch
-              checked={link.active}
-              onCheckedChange={() => onToggleActive(link.id)}
-            />
-          </div>
-          
           {/* Action Buttons */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit(link)}
-              className="hover:bg-muted p-2"
+              className="hover:bg-muted p-1.5 sm:p-2 h-8 w-8 sm:h-9 sm:w-auto sm:px-3"
             >
-              <Edit className="w-4 h-4" />
+              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onDelete(link)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 p-1.5 sm:p-2 h-8 w-8 sm:h-9 sm:w-auto sm:px-3"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
+            <Switch
+              checked={link.active}
+              onCheckedChange={() => onToggleActive(link.id)}
+              className="scale-90 sm:scale-100"
+            />
           </div>
         </div>
       </div>
@@ -535,7 +558,7 @@ export default function LinksTab() {
         const oldIndex = socialLinks.findIndex(link => link.id === active.id);
         const newIndex = socialLinks.findIndex(link => link.id === over.id);
         const newLinks = arrayMove(socialLinks, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
-        
+
         // Update order in database
         const orderedIds = newLinks.map(link => link.id);
         await reorderSocialLinks(orderedIds);
@@ -751,7 +774,7 @@ export default function LinksTab() {
   return (
     <div className="p-1 space-y-4 sm:space-y-6  pt-0 max-w-full">
       {/* Header */}
-      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
+      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sm:sticky sm:top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg">
         <div className='flex items-center justify-between gap-2'>
           <div className="mb-2">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">My VizitLink</h2>
@@ -761,32 +784,38 @@ export default function LinksTab() {
           </div>
           <Button
             onClick={() => setShowAddModal(true)}
-            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base"
+            className="w-full sm:w-auto h-9 sm:h-10 px-3 sm:px-4 text-sm sm:text-base hidden sm:flex"
           >
             <Plus className="w-4 h-4" />
             Add {activeSection === 'social' ? 'Social Icon' : 'Link'}
           </Button>
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="w-auto h-9 px-3 text-sm sm:hidden block rounded-full"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Section Tabs */}
+        {/* Section Tabs - Mobile optimized */}
         <div className="flex space-x-1 bg-muted rounded-lg p-1">
           <button
             onClick={() => setActiveSection('social')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === 'social'
+            className={`flex-1 px-3 sm:px-4 py-3 sm:py-2 rounded-md text-sm sm:text-base font-medium transition-colors min-h-[44px] sm:min-h-auto ${activeSection === 'social'
               ? 'bg-background text-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
               }`}
           >
-            Social Icons
+            <span className="block sm:inline">Social Icons</span>
           </button>
           <button
             onClick={() => setActiveSection('links')}
-            className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeSection === 'links'
+            className={`flex-1 px-3 sm:px-4 py-3 sm:py-2 rounded-md text-sm sm:text-base font-medium transition-colors min-h-[44px] sm:min-h-auto ${activeSection === 'links'
               ? 'bg-background text-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
               }`}
           >
-            Custom Links
+            <span className="block sm:inline">Custom Links</span>
           </button>
         </div>
 

@@ -127,12 +127,12 @@ export default function DashboardLayout() {
       <TopNavbar />
       
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 max-h-[calc(100dvh-70px)]">
         {/* Sidebar */}
         <Sidebar />
         
         {/* Main Panel */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(100dvh-100px)] relative scroll-elegant scrollbar-accent">
+        <div className="flex-1 overflow-y-auto relative scroll-elegant scrollbar-accent">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

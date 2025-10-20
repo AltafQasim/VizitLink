@@ -65,63 +65,163 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
   const [layoutTool, setLayoutTool] = useState(!layoutLink.title && !layoutLink.url ? 'layout' : null);
   const [isEditingDraft, setIsEditingDraft] = useState(true);
   const [isFetchingMeta, setIsFetchingMeta] = useState(false);
+  const [metadataError, setMetadataError] = useState(null);
   const fetchTimeoutRef = useRef(null);
-  // URL validation function
+  const abortControllerRef = useRef(null);
+  const lastFetchedUrlRef = useRef(null);
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+  
+  // URL validation function with enhanced checks
   const isValidUrl = (string) => {
+    if (!string || typeof string !== 'string') return false;
+    
+    // Trim whitespace
+    const trimmed = string.trim();
+    if (!trimmed) return false;
+    
     try {
-      const url = new URL(string);
-      return url.protocol === 'http:' || url.protocol === 'https:';
+      const url = new URL(trimmed);
+      // Only allow http and https protocols
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+      // Ensure hostname exists
+      if (!url.hostname || url.hostname.length === 0) return false;
+      return true;
     } catch (_) {
       return false;
     }
   };
 
-  // Fetch metadata when URL changes
+  // Enhanced metadata fetch with abort controller and error handling
   const fetchMetadata = async (url) => {
-    if (!url || !url.trim() || !isValidUrl(url) || isFetchingMeta) return;
+    // Validation checks
+    if (!url || !url.trim()) return;
+    
+    const trimmedUrl = url.trim();
+    
+    // Skip if already fetching or if URL is the same as last fetch
+    if (isFetchingMeta || trimmedUrl === lastFetchedUrlRef.current) return;
+    
+    // Validate URL format
+    if (!isValidUrl(trimmedUrl)) {
+      setMetadataError('Invalid URL format');
+      return;
+    }
 
+    // Cancel any previous fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this fetch
+    abortControllerRef.current = new AbortController();
+    
     setIsFetchingMeta(true);
+    setMetadataError(null);
+    lastFetchedUrlRef.current = trimmedUrl;
+    
     try {
       const response = await fetch('/api/extract-metadata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: trimmedUrl }),
+        signal: abortControllerRef.current.signal,
       });
+      
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error(`Failed to fetch metadata: ${response.statusText}`);
+      }
+      
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Update with fetched data and auto-save
+        // Extract and validate metadata
+        const metadata = {
+          title: data.data.title?.trim() || '',
+          thumbnail: data.data.image || data.data.og_image || '',
+          description: data.data.description?.trim() || '',
+          domain: data.data.domain || new URL(trimmedUrl).hostname,
+          favicon: data.data.favicon || data.data.icon || '',
+        };
+        
+        // Update with fetched data - preserve existing title if present
         const updatedLink = {
           ...layoutLink,
-          url: url, // Preserve the URL
-          title: layoutLink?.title ? layoutLink?.title : data.data.title || '',
-          thumbnail: data.data.image || layoutLink?.thumbnail,
-          description: data.data.description || layoutLink.description,
-          domain: data.data.domain || layoutLink.domain,
-          favicon: data.data.favicon || layoutLink.favicon,
-          active: true, // Auto switch ON when data is fetched
+          url: trimmedUrl,
+          title: layoutLink?.title?.trim() ? layoutLink.title : metadata.title,
+          thumbnail: metadata.thumbnail || layoutLink?.thumbnail,
+          description: metadata.description || layoutLink?.description,
+          domain: metadata.domain || layoutLink?.domain,
+          favicon: metadata.favicon || layoutLink?.favicon,
+          active: true, // Auto-activate when metadata is successfully fetched
         };
 
         await onUpdate(updatedLink);
 
-        // Auto-save the link and switch to edit mode
+        // Auto-save after successful metadata fetch
         setTimeout(() => {
-          onSave(updatedLink); // pass full payload to avoid stale state
-          setIsEditingDraft(false); // Switch to edit icon after save
+          onSave(updatedLink);
+          setIsEditingDraft(false);
+          toast.success('Link metadata fetched successfully');
         }, 500);
+      } else {
+        // Handle unsuccessful metadata extraction
+        setMetadataError(data.error || 'Could not extract metadata from URL');
+        toast.warning('Limited metadata available for this URL');
+        
+        // Still update with URL and basic info
+        const basicUpdate = {
+          ...layoutLink,
+          url: trimmedUrl,
+          domain: new URL(trimmedUrl).hostname,
+          active: false,
+        };
+        await onUpdate(basicUpdate);
       }
     } catch (error) {
+      // Handle abort separately from other errors
+      if (error.name === 'AbortError') {
+        console.log('Metadata fetch aborted');
+        return;
+      }
+      
       console.error('Error fetching metadata:', error);
+      setMetadataError(error.message || 'Failed to fetch metadata');
+      toast.error('Failed to fetch link metadata');
+      
+      // Update with URL even if metadata fetch failed
+      const fallbackUpdate = {
+        ...layoutLink,
+        url: trimmedUrl,
+        domain: new URL(trimmedUrl).hostname,
+        active: false,
+      };
+      await onUpdate(fallbackUpdate);
     } finally {
       setIsFetchingMeta(false);
+      abortControllerRef.current = null;
     }
   };
 
-  // Debounced URL change handler
+  // Debounced URL change handler with improved validation
   const handleUrlChange = (e) => {
     const newUrl = e.target.value;
 
-    // Only update if URL is different
+    // Clear any error state
+    setMetadataError(null);
+    
+    // Update URL immediately for responsive typing
     if (layoutLink.url !== newUrl) {
       onUpdate({ url: newUrl });
 
@@ -130,33 +230,52 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
         clearTimeout(fetchTimeoutRef.current);
       }
 
-      // Debounce metadata fetch with validation
-      if (newUrl && newUrl.trim() && isValidUrl(newUrl)) {
+      // Only trigger metadata fetch if URL is valid
+      const trimmedUrl = newUrl?.trim();
+      if (trimmedUrl && isValidUrl(trimmedUrl)) {
+        // Debounce with longer delay for better UX
         fetchTimeoutRef.current = setTimeout(() => {
-          fetchMetadata(newUrl);
-        }, 1000);
+          fetchMetadata(trimmedUrl);
+        }, 1200);
+      } else if (trimmedUrl && trimmedUrl.length > 10) {
+        // Show validation error for invalid URLs after some typing
+        fetchTimeoutRef.current = setTimeout(() => {
+          setMetadataError('Please enter a valid URL (http:// or https://)');
+        }, 800);
       }
     }
   };
 
-  // Handle paste event
+  // Enhanced paste handler with immediate fetch
   const handleUrlPaste = (e) => {
-    e.preventDefault(); // Prevent default paste behavior
-    const pastedText = e.clipboardData.getData('text');
-    if (pastedText && pastedText.trim() && isValidUrl(pastedText)) {
-      // Clear previous timeout
-      if (fetchTimeoutRef.current) {
-        clearTimeout(fetchTimeoutRef.current);
-      }
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text')?.trim();
+    
+    if (!pastedText) return;
+    
+    // Clear error state
+    setMetadataError(null);
+    
+    // Validate pasted URL
+    if (!isValidUrl(pastedText)) {
+      setMetadataError('Pasted URL is not valid');
+      onUpdate({ url: pastedText });
+      return;
+    }
 
-      // Update URL first (only if different from current)
-      if (layoutLink.url !== pastedText) {
-        onUpdate({ url: pastedText });
-        // Small delay to allow state update, then auto fetch
-        fetchTimeoutRef.current = setTimeout(() => {
-          fetchMetadata(pastedText);
-        }, 150);
-      }
+    // Clear previous timeout
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
+
+    // Update URL
+    if (layoutLink.url !== pastedText) {
+      onUpdate({ url: pastedText });
+      
+      // Fetch metadata immediately on paste (shorter delay)
+      fetchTimeoutRef.current = setTimeout(() => {
+        fetchMetadata(pastedText);
+      }, 300);
     }
   };
 
@@ -278,14 +397,24 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
           <input
             value={layoutLink.url || ''}
             onChange={handleUrlChange}
+            onPaste={handleUrlPaste}
             placeholder="Enter URL to fetch data"
             disabled={!isEditingDraft}
-            className={`flex-1 bg-transparent outline-none px-3 py-2 rounded-md text-sm sm:text-base min-h-[44px] ${isEditingDraft ? 'border border-gray-300' : 'border border-transparent'}`}
+            className={`flex-1 bg-transparent outline-none px-3 py-2 rounded-md text-sm sm:text-base min-h-[44px] ${
+              isEditingDraft ? 'border border-gray-300' : 'border border-transparent'
+            } ${metadataError ? 'border-red-300' : ''}`}
           />
           {isFetchingMeta && (
-            <div className="w-5 h-5 sm:w-4 sm:h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+            <div className="w-5 h-5 sm:w-4 sm:h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin flex-shrink-0" title="Fetching metadata..."></div>
           )}
         </div>
+        {/* Error message display */}
+        {metadataError && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-md">
+            <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span className="text-xs sm:text-sm text-red-700">{metadataError}</span>
+          </div>
+        )}
       </div>
       {/* Icon toolbar (bottom of header) - Mobile optimized */}
       <div className="px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-4 text-gray-600 border-b border-gray-200 overflow-x-auto">

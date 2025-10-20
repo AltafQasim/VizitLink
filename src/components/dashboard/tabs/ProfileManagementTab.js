@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { useDashboard } from '../../../context/DashboardContext';
-import { 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Settings, 
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  Settings,
   Eye,
   ExternalLink,
   Calendar,
@@ -20,18 +20,18 @@ import {
 } from 'lucide-react';
 
 export default function ProfileManagementTab() {
-  const { 
-    profiles, 
-    currentProfileId, 
+  const {
+    profiles,
+    currentProfileId,
     currentProfile,
-    switchProfile, 
-    createProfile, 
-    updateProfile, 
+    switchProfile,
+    createProfile,
+    updateProfile,
     deleteProfile,
     needsProfileCreation, // Add this new state
     setNeedsProfileCreation // Add this new function
   } = useDashboard();
-  
+
   const router = useRouter();
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
@@ -93,9 +93,9 @@ export default function ProfileManagementTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-1">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="mt-1 px-3 py-3 sm:px-4 lg:px-6 lg:py-4 sm:sticky sm:top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50 border-b border-border rounded-lg flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Profile Management</h2>
           {needsProfileCreation ? (
@@ -113,117 +113,123 @@ export default function ProfileManagementTab() {
       </div>
 
       {/* Profiles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="bg-background rounded-lg p-3 sm:p-4 lg:p-6 border border-border max-w-full overflow-hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {profiles.map((profile) => {
           const stats = getProfileStats(profile);
           const isActive = profile.id === currentProfileId;
-          
+
           return (
             <motion.div
               key={profile.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`bg-white border rounded-lg p-6 transition-all ${
-                isActive 
-                  ? 'border-purple-300 shadow-lg ring-2 ring-purple-100' 
-                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-              }`}
+              exit={{ opacity: 0, scale: 0.95 }}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className={`bg-white border rounded-lg p-6 transition-all flex flex-col justify-between border-border hover:shadow-lg hover:border-primary/50 ${isActive
+                ? 'border-purple-300 shadow-lg ring-2 ring-purple-100'
+                : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                }`}
             >
-              {/* Profile Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                    {profile.avatar ? (
-                      <img src={profile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-white text-lg font-medium">
-                        {profile.displayName?.charAt(0).toUpperCase() || 'U'}
-                      </span>
-                    )}
+              <div>
+                {/* Profile Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      {profile.avatar ? (
+                        <img src={profile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <span className="text-white text-lg font-medium">
+                          {profile.displayName?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{profile.displayName}</h3>
+                      <p className="text-sm text-gray-500">@{profile.username}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{profile.displayName}</h3>
-                    <p className="text-sm text-gray-500">@{profile.username}</p>
-                  </div>
-                </div>
-                
-                {isActive && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                    Active
-                  </span>
-                )}
-              </div>
 
-              {/* Profile Bio */}
-              {profile.bio && (
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{profile.bio}</p>
-              )}
-
-              {/* Profile Stats */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="text-center p-2 bg-gray-50 rounded">
-                  <p className="text-xs text-gray-500">Views</p>
-                  <p className="font-semibold text-gray-900">{stats.views.toLocaleString()}</p>
-                </div>
-                <div className="text-center p-2 bg-gray-50 rounded">
-                  <p className="text-xs text-gray-500">Clicks</p>
-                  <p className="font-semibold text-gray-900">{stats.clicks.toLocaleString()}</p>
-                </div>
-              </div>
-
-              {/* Profile Actions */}
-              <div className="flex items-center justify-between">
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => switchProfile(profile.id)}
-                    disabled={isActive}
-                    className={`h-8 sm:h-9 ${isActive ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
-                    {isActive ? 'Active' : 'Switch to'}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditModal(profile)}
-                    className="h-8 sm:h-9"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
-                    Edit
-                  </Button>
-                </div>
-                
-                <div className="flex space-x-1">
-                  {profiles.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteProfile(profile.id)}
-                      className="h-7 w-7 sm:h-8 sm:w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                      title="Delete Profile"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    </Button>
+                  {isActive && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      Active
+                    </span>
                   )}
                 </div>
-              </div>
 
-              {/* Profile URL */}
-              <div className="mt-4 pt-4 border-t border-gray-100">
+                {/* Profile Bio */}
+                {profile.bio && (
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{profile.bio}</p>
+                )}
+              </div>
+              <div>
+                {/* Profile Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="text-center p-2 bg-gray-50 rounded">
+                    <p className="text-xs text-gray-500">Views</p>
+                    <p className="font-semibold text-gray-900">{stats.views.toLocaleString()}</p>
+                  </div>
+                  <div className="text-center p-2 bg-gray-50 rounded">
+                    <p className="text-xs text-gray-500">Clicks</p>
+                    <p className="font-semibold text-gray-900">{stats.clicks.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Profile Actions */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Profile URL</span>
-                  <a
-                    href={`https://vizitlink.com/${profile.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-purple-600 hover:text-purple-700 flex items-center"
-                  >
-                    vizitlink.com/{profile.username}
-                    <ExternalLink className="w-3 h-3 ml-1" />
-                  </a>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => switchProfile(profile.id)}
+                      disabled={isActive}
+                      className={`h-8 sm:h-9 ${isActive ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                      {isActive ? 'Active' : 'Switch to'}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditModal(profile)}
+                      className="h-8 sm:h-9"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
+                      Edit
+                    </Button>
+                  </div>
+
+                  <div className="flex space-x-1">
+                    {profiles.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteProfile(profile.id)}
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                        title="Delete Profile"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Profile URL */}
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">Profile URL</span>
+                    <a
+                      href={`https://vizitlink.com/${profile.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-purple-600 hover:text-purple-700 flex items-center"
+                    >
+                      vizitlink.com/{profile.username}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -267,7 +273,7 @@ export default function ProfileManagementTab() {
                   <X className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <form onSubmit={handleEditProfile} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -282,7 +288,7 @@ export default function ProfileManagementTab() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Display Name
@@ -296,7 +302,7 @@ export default function ProfileManagementTab() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Bio
@@ -309,7 +315,7 @@ export default function ProfileManagementTab() {
                     rows="3"
                   />
                 </div>
-                
+
                 <div className="flex space-x-3 pt-2">
                   <Button
                     type="submit"

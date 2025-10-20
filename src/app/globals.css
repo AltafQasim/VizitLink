@@ -126,11 +126,23 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    /* Prevent font size scaling on orientation change and browser zoom */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Set base font size */
+    font-size: 16px;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     letter-spacing: 0.01em;
+    /* Maintain consistent font size */
+    font-size: 1rem;
   }
   
   .hero-title {

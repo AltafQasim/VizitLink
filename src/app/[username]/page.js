@@ -2,13 +2,56 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { motion } from 'framer-motion';
+import {
+  Share2,
+  Sparkles,
+  X,
+  Link as LinkIcon,
+  Facebook,
+  MessageCircle,
+  Linkedin,
+  ExternalLink,
+  Lock
+} from 'lucide-react';
 import { loadPublicProfileByUsername } from "../../lib/dashboardStorage";
+import { socialIconsMap, socialColorsMap } from "../../lib/social";
 
 export default function PublicProfilePage({ params }) {
     // Unwrap params using React.use() to fix the Next.js warning
     const unwrappedParams = React.use(params);
     const [data, setData] = useState(null);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
+    const [showBrandModal, setShowBrandModal] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    // Handle copy to clipboard
+    const handleCopyLink = () => {
+        const profileUrl = `${window.location.origin}/${data?.profile?.username || unwrappedParams?.username}`;
+        navigator.clipboard.writeText(profileUrl);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    // Handle social sharing
+    const handleSocialShare = (platform) => {
+        const profileUrl = `${window.location.origin}/${data?.profile?.username || unwrappedParams?.username}`;
+        const text = `Check out ${data?.profile?.displayName || unwrappedParams?.username}'s VizitLink profile!`;
+        
+        const shareUrls = {
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`,
+            twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=${encodeURIComponent(text)}`,
+            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`,
+            whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + profileUrl)}`,
+            messenger: `fb-messenger://share/?link=${encodeURIComponent(profileUrl)}`,
+        };
+        
+        if (shareUrls[platform]) {
+            window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+        }
+    };
 
     useEffect(() => {
         const run = async () => {
@@ -103,18 +146,32 @@ export default function PublicProfilePage({ params }) {
     }
     const currentButtonStyle = buttonStyles[buttonStyle] || buttonStyles['Minimal'];
 
+    // Format helpers
+    const getCurrencySymbol = (currency) => {
+        const map = {
+            INR: '₹',
+            USD: '$',
+            EUR: '€',
+            GBP: '£',
+            CAD: 'C$',
+            AUD: 'A$',
+            JPY: '¥',
+        };
+        return map[currency] || '$';
+    };
+
     return (
         <div className="relative min-h-screen" style={{ background: '#21232a url(/profilebg.jpg) repeat 0 0' }}>
-            <div className="relative max-w-2xl mx-auto px-4 py-10">
-                <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
+            <div className="relative sm:max-w-2xl mx-auto sm:px-4">
+                <div className={`relative sm:rounded-2xl overflow-hidden ${currentBackground}`}>
                     {wallpaper === 'Image' && design.wallpaperImage && (
-                        <img src={design.wallpaperImage} alt="Wallpaper" className="absolute inset-0 w-full h-full object-cover" />
+                        <img src={design.wallpaperImage} alt="Wallpaper" className="sm:rounded-3xl sm:px-4 fixed sm:max-w-2xl mx-auto inset-0 w-full h-full object-cover" />
                     )}
                     {wallpaper === 'Video' && design.wallpaperVideo && (
                         <>
                             <video
                                 src={design.wallpaperVideo}
-                                className="absolute inset-0 w-full h-full object-cover"
+                                className="sm:rounded-[30px] sm:px-4 fixed sm:max-w-2xl mx-auto inset-0 w-full h-full object-cover"
                                 autoPlay
                                 loop
                                 muted
@@ -136,83 +193,432 @@ export default function PublicProfilePage({ params }) {
                     )}
 
                     <div className="relative z-10 p-6 min-h-[90vh]">
+                        {/* Top Icons - Brand and Share */}
+                        <div className="flex items-center justify-between mb-4">
+                            {/* Brand Mini Icon */}
+                            <button
+                                onClick={() => setShowBrandModal(true)}
+                                className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                            >
+                                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
+                                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                                </div>
+                            </button>
+                            
+                            {/* Share Icon */}
+                            <button
+                                onClick={() => setShowShareModal(true)}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
+                                    currentTextColor === 'text-white' 
+                                        ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm' 
+                                        : 'bg-gray-200 hover:bg-gray-300'
+                                }`}
+                                title="Share profile"
+                            >
+                                <Share2 className={`w-4 h-4 ${currentTextColor}`} />
+                            </button>
+                        </div>
+                        
+                        {/* Profile */}
                         <div className="text-center mb-6">
-                            <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
                                 {data?.profile?.avatar ? (
                                     <img src={data.profile.avatar} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-3xl font-bold text-white">
+                                    <span className="text-2xl font-bold text-white">
                                         {data?.profile?.displayName?.charAt(0).toUpperCase() || 'A'}
                                     </span>
                                 )}
                             </div>
-                            <h1 className={`text-2xl font-bold mb-1 ${currentTextColor}`} style={{ fontFamily }}>
+                            <h2 className={`text-lg font-bold mb-1 ${currentTextColor}`} style={{ fontFamily }}>
                                 {data?.profile?.displayName || unwrappedParams?.username}
-                            </h1>
-                            {data?.profile?.bio && (
-                                <p className={`text-sm ${currentTextColor === 'text-white' ? 'text-white/80' : 'text-gray-600'}`} style={{ fontFamily }}>
-                                    {data.profile.bio}
-                                </p>
-                            )}
+                            </h2>
+                            <p className={`text-sm mb-3 ${currentTextColor === 'text-white' ? 'text-white/80' : 'text-gray-600'}`} style={{ fontFamily }}>
+                                {data?.profile?.bio}
+                            </p>
                         </div>
 
+                        {/* Links */}
                         <div className="space-y-3">
-                            {(data?.links || [])
-                                .filter(l => l.active)
-                                .sort((a, b) => a.order - b.order)
-                                .map(link => (
-                                    <a
-                                        key={link.id}
-                                        href={link.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
-                                        style={{ fontFamily }}
-                                    >
-                                        <span className="font-medium truncate">{link.title}</span>
-                                        <span className="text-xs opacity-70">Visit</span>
-                                    </a>
-                                ))}
+                            {/* Custom Links */}
+                            {(data?.customLinks || [])
+                                .filter(link => link.active && link.url && link.url.trim() !== '')
+                                .map((link) => {
+                                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+
+                                    if (link.layout === 'featured') {
+                                        return (
+                                            <motion.a
+                                                key={link.id}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`w-full h-40 p-3 relative flex items-center justify-center transition-colors ${currentButtonStyle} !rounded-3xl`}
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' />
+                                                <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
+                                                <div className="flex items-center h-16 space-x-3 z-10">
+                                                    <span className="font-medium text-sm">{link.title}</span>
+                                                </div>
+                                            </motion.a>
+                                        );
+                                    } else {
+                                        return (
+                                            <motion.a
+                                                key={link.id}
+                                                href={link.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`w-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle} !rounded-3xl`}
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                <div className="flex items-center space-x-3">
+                                                    {link?.thumbnail ?
+                                                        <img src={link.thumbnail} className='w-10 h-10 rounded-full object-cover' alt={link.title} /> :
+                                                        IconComponent ? (
+                                                            <IconComponent
+                                                                className="w-5 h-5"
+                                                                style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-lg">{link.icon}</span>
+                                                        )}
+                                                    <span className="font-medium text-sm" style={{ fontFamily }}>{link.title}</span>
+                                                </div>
+                                                <ExternalLink className="w-4 h-4 text-gray-400" />
+                                            </motion.a>
+                                        );
+                                    }
+                                })}
                         </div>
 
+                        {/* Shop section with improved design */}
                         {(data?.products || []).filter(p => p.active).length > 0 && (
                             <div className="mt-6">
-                                <h3 className={`font-semibold mb-3 ${currentTextColor}`} style={{ fontFamily }}>Shop</h3>
-                                <div className="space-y-3">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily }}>Shop</h3>
+                                    <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
                                     {(data.products || [])
                                         .filter(p => p.active)
                                         .map((product) => (
-                                            <a
+                                            <motion.a
                                                 key={product.id}
                                                 href={product.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className={`block rounded-xl p-3 transition-all hover:shadow-md ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card border border-border'}`}
+                                                className={`group block rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card shadow-sm border border-border'}`}
+                                                whileHover={{ scale: 1.02, y: -2 }}
+                                                whileTap={{ scale: 0.98 }}
                                             >
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-12 h-12 bg-white rounded-lg overflow-hidden relative">
-                                                        {product.image ? (
-                                                            <Image src={product.image} alt={product.title || 'Product'} fill className="object-cover" sizes="48px" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gray-100" />
-                                                        )}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className={`font-medium text-sm truncate ${currentTextColor}`} style={{ fontFamily }}>{product.title}</p>
-                                                        <p className={`text-xs ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>{product.brand || 'Unknown'}</p>
-                                                        {Number(product.price) > 0 && (
-                                                            <p className="text-sm font-semibold text-primary">${(Number(product.price) || 0).toFixed(2)}</p>
-                                                        )}
+                                                <div className="relative">
+                                                    {product.image ? (
+                                                        <div className="relative w-full h-32 overflow-hidden">
+                                                            <Image
+                                                                src={product.image}
+                                                                alt={product.title || 'Product'}
+                                                                fill
+                                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                sizes="(max-width: 640px) 50vw, 25vw"
+                                                            />
+                                                            {Number(product.price) > 0 && (
+                                                                <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-primary text-primary-foreground shadow-sm">
+                                                                    {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
+                                                                </div>
+                                                            )}
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                            <div className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                                <ExternalLink className="w-3 h-3 text-gray-700" />
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                                            <div className="text-gray-400 text-xs">No Image</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="p-3">
+                                                    <h4 className={`font-semibold text-sm truncate ${currentTextColor}`} style={{ fontFamily }}>
+                                                        {product.title}
+                                                    </h4>
+                                                    <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>
+                                                        {product.brand || 'Unknown Brand'}
+                                                    </p>
+                                                    <div className="flex items-center justify-between mt-2">
+                                                        <span />
+                                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                                                     </div>
                                                 </div>
-                                            </a>
+                                            </motion.a>
                                         ))}
                                 </div>
                             </div>
                         )}
+
+                        {/* Social icons */}
+                        <div className="mt-6 flex justify-center space-x-4">
+                            {(data?.links || [])
+                                .filter(link => link.active)
+                                .slice(0, 5)
+                                .map((link) => {
+                                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+                                    return (
+                                        <Link
+                                            key={link.id}
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center ${currentTextColor === 'text-white' ? 'bg-white/20' : 'bg-gray-200'}`}
+                                        >
+                                            <IconComponent
+                                                className="w-5 h-5"
+                                                style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                                            />
+                                        </Link>
+                                    )
+                                })}
+                        </div>
                     </div>
+
+                    {/* Hide logo notice */}
+                    {!hideVizitlinkFooter && (
+                        <div className="mt-4 text-center">
+                            <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
+                                <Lock className="w-3 h-3" />
+                                <span>Hide VizitLink logo</span>
+                                <span className="text-purple-600">🔒</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {/* Brand Modal - Claim your VizitLink */}
+            {showBrandModal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 sm:p-6"
+                    onClick={() => setShowBrandModal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className="bg-[#c4f241] rounded-3xl p-6 sm:p-8 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowBrandModal(false)}
+                            className="sticky top-0 float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:opacity-70 transition-opacity bg-[#c4f241] rounded-full z-10 -mr-2 -mt-2 sm:-mr-4 sm:-mt-4"
+                            aria-label="Close modal"
+                        >
+                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+                        </button>
+
+                        {/* Content */}
+                        <div className="flex flex-col clear-both">
+                            {/* Brand Icon */}
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-5">
+                                <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-gray-800" />
+                            </div>
+
+                            {/* Heading */}
+                            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+                                Join the only link in bio trusted by <span className="text-blue-600">70M+</span>
+                            </h2>
+
+                            {/* Subheading */}
+                            <p className="text-sm sm:text-base text-gray-800 mb-4 sm:mb-5">
+                                One link to share everything you create, curate and sell across IG, TikTok and more.
+                            </p>
+
+                            {/* URL Input */}
+                            <div className="bg-white rounded-xl px-4 py-3 sm:py-3.5 mb-4 sm:mb-5 shadow-sm">
+                                <span className="text-gray-500 text-sm sm:text-base">vizitlink/</span>
+                                <span className="text-gray-400 text-sm sm:text-base">yourname</span>
+                            </div>
+
+                            {/* Claim Button */}
+                            <button className="w-full bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-bold py-3 sm:py-3.5 px-6 rounded-full mb-4 sm:mb-5 transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                Claim your VizitLink
+                            </button>
+
+                            {/* Links */}
+                            <div className="space-y-2 mb-4 sm:mb-5">
+                                <a href="#" className="text-gray-800 hover:underline block text-sm sm:text-base min-h-[44px] flex items-center">
+                                    Subscribe to @altafak01
+                                </a>
+                                <a href="#" className="text-gray-800 hover:underline block text-sm sm:text-base min-h-[44px] flex items-center">
+                                    Learn more about VizitLink
+                                </a>
+                            </div>
+
+                            {/* Bottom CTA */}
+                            <div className="border-t border-gray-800/20 pt-4 sm:pt-5">
+                                <h5 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">Create your VizitLink</h5>
+                                <p className="text-xs sm:text-sm text-gray-700 mb-4">
+                                    Get your own free VizitLink. The only link in bio trusted by 70M+ people.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button className="flex-1 bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                        Sign up free
+                                    </button>
+                                    <button className="flex-1 border-2 border-gray-800 text-gray-800 font-semibold py-3 sm:py-3.5 px-6 rounded-full hover:bg-gray-800 hover:text-[#c4f241] transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                        Find out more
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+
+            {/* Share Modal */}
+            {showShareModal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 sm:p-6"
+                    onClick={() => setShowShareModal(false)}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                        className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowShareModal(false)}
+                            className="sticky top-0 float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors z-10 -mr-2 -mt-2 sm:-mr-4 sm:-mt-4"
+                            aria-label="Close modal"
+                        >
+                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                        </button>
+
+                        {/* Title */}
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-7 text-center clear-both">Share VizitLink</h3>
+
+                        {/* Profile Card */}
+                        <div className="bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-7 text-center">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-800 rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center overflow-hidden">
+                                {data?.profile?.avatar ? (
+                                    <img src={data.profile.avatar} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-2xl sm:text-3xl font-bold text-teal-400">
+                                        {data?.profile?.displayName?.charAt(0).toUpperCase() || unwrappedParams?.username?.charAt(0).toUpperCase() || 'A'}
+                                    </span>
+                                )}
+                            </div>
+                            <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">@{data?.profile?.username || unwrappedParams?.username}</h4>
+                            <p className="text-sm sm:text-base text-gray-800 flex items-center justify-center gap-1">
+                                <Sparkles className="w-4 h-4" />
+                                /{data?.profile?.username || unwrappedParams?.username}
+                            </p>
+                        </div>
+
+                        {/* Social Share Buttons */}
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-7">
+                            {/* Copy Link */}
+                            <button
+                                onClick={handleCopyLink}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Copy profile link"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <LinkIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">{copySuccess ? 'Copied!' : 'Copy'}</span>
+                            </button>
+
+                            {/* X (Twitter) */}
+                            <button
+                                onClick={() => handleSocialShare('twitter')}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Share on X"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-black hover:bg-gray-800 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <span className="text-white text-lg sm:text-xl font-bold">𝕏</span>
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium">X</span>
+                            </button>
+
+                            {/* Facebook */}
+                            <button
+                                onClick={() => handleSocialShare('facebook')}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Share on Facebook"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1877f2] hover:bg-[#0d65d9] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <Facebook className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">Facebook</span>
+                            </button>
+
+                            {/* WhatsApp */}
+                            <button
+                                onClick={() => handleSocialShare('whatsapp')}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Share on WhatsApp"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#25d366] hover:bg-[#1fb855] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">WhatsApp</span>
+                            </button>
+
+                            {/* LinkedIn */}
+                            <button
+                                onClick={() => handleSocialShare('linkedin')}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Share on LinkedIn"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#0a66c2] hover:bg-[#004182] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <Linkedin className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">LinkedIn</span>
+                            </button>
+
+                            {/* Messenger */}
+                            <button
+                                onClick={() => handleSocialShare('messenger')}
+                                className="flex flex-col items-center gap-2 group min-h-[72px] sm:min-h-[80px]"
+                                aria-label="Share on Messenger"
+                            >
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#00b2ff] to-[#006aff] hover:opacity-90 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
+                                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
+                                </div>
+                                <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">Messenger</span>
+                            </button>
+                        </div>
+
+                        {/* Bottom CTA */}
+                        <div className="border-t border-gray-200 pt-5 sm:pt-6">
+                            <h5 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">Join {data?.profile?.username || unwrappedParams?.username} on VizitLink</h5>
+                            <p className="text-xs sm:text-sm text-gray-600 mb-4">
+                                Get your own free VizitLink. The only link in bio trusted by 70M+ people.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <button className="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                    Sign up free
+                                </button>
+                                <button className="flex-1 border-2 border-gray-300 hover:border-gray-400 text-gray-900 font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                    Find out more
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
         </div>
     );
 }

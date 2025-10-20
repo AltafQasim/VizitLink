@@ -569,10 +569,11 @@ export async function loadPublicProfileByUsername(username) {
 
   const profileId = profile.id;
 
-  const [{ data: design }, { data: links }, { data: products }] = await Promise.all([
+  const [{ data: design }, { data: links }, { data: products }, { data: customLinks }] = await Promise.all([
     supabase.from('designs').select('*').eq('profile_id', profileId).maybeSingle(),
     supabase.from('links').select('*').eq('profile_id', profileId).eq('active', true).order('order', { ascending: true }),
     supabase.from('products').select('*').eq('profile_id', profileId).eq('active', true).order('created_at', { ascending: true }),
+    supabase.from('custom_links').select('*').eq('profile_id', profileId).eq('active', true).order('order', { ascending: true, nullsFirst: true }).order('created_at', { ascending: true }),
   ]);
 
   return {
@@ -580,6 +581,7 @@ export async function loadPublicProfileByUsername(username) {
     design: mapDesignRowToApp(design),
     links: (links || []).map(mapLinkRowToApp),
     products: (products || []).map(mapProductRowToApp),
+    customLinks: customLinks || [],
   };
 }
 

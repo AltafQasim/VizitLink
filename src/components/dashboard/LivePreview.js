@@ -7,7 +7,9 @@ import {
   Eye,
   EyeOff,
   Lock,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
+  ShareIcon
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -127,18 +129,17 @@ export default function LivePreview() {
     <motion.div
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex w-[300px] xl:w-[340px] 2xl:w-[380px] bg-background border-l border-border py-4 px-3 flex-col min-h-0 h-full overflow-hidden flex-shrink-0"
+      className="hidden lg:flex w-[300px] xl:w-[340px] 2xl:w-[380px] bg-background border-l border-border py-4 px-3 flex-col min-h-0 max-h-full h-full overflow-hidden flex-shrink-0"
     >
       <div className="mb-3">
         <h3 className="font-semibold text-foreground">Live Preview</h3>
-        <p className="text-xs text-muted-foreground">See how your VizitLink looks</p>
+        <p className="text-xs text-muted-foreground m-0">See how your VizitLink looks</p>
       </div>
 
       {/* Scrollable panel content */}
       <div className="flex-1 min-h-0 max-h-[calc(100dvh-120px)] lg:max-h-[calc(100dvh-140px)] xl:max-h-[calc(100dvh-160px)] overflow-y-auto scroll-elegant scrollbar-accent">
         {/* Mobile mockup */}
-        <div className="flex items-start justify-center">
-          <div className="bg-black rounded-3xl shadow-2xl p-1 w-full max-w-sm">
+        <div className="bg-black rounded-3xl shadow-2xl p-1 w-full max-w-sm">
 
           {/* Content */}
           <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
@@ -169,7 +170,29 @@ export default function LivePreview() {
             {(wallpaper === 'Image' || wallpaper === 'Video') && (
               <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
             )}
-             <div className="relative z-10 p-6 min-h-[320px] max-h-[60dvh] lg:max-h-[65dvh] xl:max-h-[70dvh] overflow-y-auto scroll-elegant scrollbar-accent">
+            <div className="relative z-10 p-6 pb-0 min-h-[320px] max-h-[60dvh] lg:max-h-[65dvh] xl:max-h-[70dvh] overflow-y-auto scroll-elegant scrollbar-accent">
+              {/* Top Icons - Brand and Share */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Brand Mini Icon */}
+                <button
+                  className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  </div>
+                </button>
+
+                {/* Share Icon */}
+                <button
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${currentTextColor === 'text-white'
+                    ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                    : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                  title="Share profile"
+                >
+                  <ShareIcon className={`w-4 h-4 ${currentTextColor}`} />
+                </button>
+              </div>
               {/* Profile */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
@@ -392,7 +415,6 @@ export default function LivePreview() {
               </div>
             )}
           </div>
-        </div>
         </div>
       </div>
 

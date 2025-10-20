@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
@@ -12,9 +12,16 @@ import {
   Edit3,
   User,
   Check,
-  X
+  X,
+  ArrowLeftRight,
+  Zap,
+  HelpCircle,
+  BookOpen,
+  MessageCircle,
+  LogOut
 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ProfileSwitcher() {
   const { 
@@ -28,7 +35,9 @@ export default function ProfileSwitcher() {
   } = useDashboard();
   const router = useRouter();
   
+  const dropdownRef = useRef(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
@@ -81,31 +90,51 @@ export default function ProfileSwitcher() {
     setEditingProfile(null);
   };
 
+  const { signOut } = useAuth();
+
+  // Handle click outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    // Only add listener when dropdown is open
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    // Cleanup listeners
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   return (
     <>
       {/* Profile Switcher Button */}
-      <div className="relative">
-        <Button
-          variant="outline"
+      <div className="relative" ref={dropdownRef}>
+        <button
           onClick={() => setShowDropdown(!showDropdown)}
-          className="flex items-center space-x-2 min-w-[200px] justify-between"
+          className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors w-full"
         >
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              {currentProfile?.avatar ? (
-                <img src={currentProfile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <span className="text-white text-xs font-medium">
-                  {currentProfile?.displayName?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              )}
-            </div>
-            <span className="font-medium truncate">
-              {currentProfile?.displayName || 'Select Profile'}
-            </span>
+          <div className="w-8 h-8 bg-gradient-to-br from-teal-700 to-teal-600 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+            {currentProfile?.avatar ? (
+              <img src={currentProfile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+            ) : (
+              <span className="text-white text-sm font-semibold">
+                {currentProfile?.displayName?.charAt(0).toUpperCase() || 'A'}
+              </span>
+            )}
           </div>
-          <ChevronDown className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-        </Button>
+          <span className="font-semibold text-gray-900 text-sm truncate">
+            {currentProfile?.username || 'altafak01'}
+          </span>
+          <ChevronDown className={`w-4 h-4 text-gray-600 ml-auto transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+        </button>
 
         {/* Dropdown Menu */}
         <AnimatePresence>
@@ -114,89 +143,237 @@ export default function ProfileSwitcher() {
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[280px]"
+              className="absolute top-full left-[-37%] translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-[280px] overflow-hidden"
             >
-              {/* Profile List */}
-              <div className="p-2 space-y-1">
-                {profiles.map((profile) => (
-                  <div
-                    key={profile.id}
-                    className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
-                      profile.id === currentProfileId
-                        ? 'bg-purple-50 border border-purple-200'
-                        : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <div
-                      className="flex items-center space-x-3 flex-1"
-                      onClick={() => {
-                        switchProfile(profile.id);
-                        setShowDropdown(false);
-                      }}
-                    >
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                        {profile.avatar ? (
-                          <img src={profile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-                        ) : (
-                          <span className="text-white text-sm font-medium">
-                            {profile.displayName?.charAt(0).toUpperCase() || 'U'}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{profile.displayName}</p>
-                        <p className="text-xs text-gray-500 truncate">@{profile.username}</p>
-                      </div>
-                    </div>
-                    
-                    {profile.id === currentProfileId && (
-                      <Check className="w-4 h-4 text-purple-600" />
-                    )}
-                    
-                    <div className="flex items-center space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditModal(profile)}
-                        className="h-6 w-6 p-0 hover:bg-gray-100"
-                      >
-                        <Edit3 className="w-3 h-3" />
-                      </Button>
-                      {profiles.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteProfile(profile.id)}
-                          className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+              {/* Current Profile Header */}
+              <div className="px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-teal-700 to-teal-600 rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+                      {currentProfile?.avatar ? (
+                        <img src={currentProfile.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <span className="text-white text-base font-semibold">
+                          {currentProfile?.displayName?.charAt(0).toUpperCase() || 'A'}
+                        </span>
                       )}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 text-sm truncate m-0">
+                        {currentProfile?.username || 'altafak01'}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate m-0">
+                        {process.env.SITE_URL}/{currentProfile?.username || 'altafak01'}
+                      </p>
+                    </div>
                   </div>
-                ))}
+                  <span className="px-2 py-2 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                    Free
+                  </span>
+                </div>
               </div>
+              {/* Menu Items */}
+              <div className="p-2">
+                {/* Switch VizitLink */}
+                <button
+                  onClick={() => {
+                    setShowSwitchModal(true);
+                    setShowDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <ArrowLeftRight className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Switch VizitLink</span>
+                </button>
 
-              {/* Create New Profile Button */}
-              <div className="border-t border-gray-200 p-2">
-                <Button
-                  variant="ghost"
+                {/* Create new VizitLink */}
+                <button
                   onClick={() => {
                     router.push('/onboarding');
                     setShowDropdown(false);
                   }}
-                  className="w-full justify-start text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create New Profile
-                </Button>
+                  <Plus className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Create new VizitLink</span>
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100"></div>
+
+              {/* Account & Settings Section */}
+              <div className="p-2">
+                {/* Account */}
+                <button
+                  onClick={() => {
+                    router.push('/dashboard/settings');
+                    setShowDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <User className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Account</span>
+                </button>
+
+                {/* Upgrade */}
+                <button
+                  onClick={() => {
+                    setShowDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <Zap className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Upgrade</span>
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100"></div>
+
+              {/* Help Section */}
+              <div className="p-2">
+                {/* Ask a question */}
+                <button
+                  onClick={() => setShowDropdown(false)}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <HelpCircle className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Ask a question</span>
+                </button>
+
+                {/* Help topics */}
+                <button
+                  onClick={() => setShowDropdown(false)}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <BookOpen className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Help topics</span>
+                </button>
+
+                {/* Share feedback */}
+                <button
+                  onClick={() => setShowDropdown(false)}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <MessageCircle className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Share feedback</span>
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100"></div>
+
+              {/* Log out */}
+              <div className="p-2">
+                <button
+                  onClick={() => {
+                    signOut();
+                    setShowDropdown(false);
+                  }}
+                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                >
+                  <LogOut className="w-5 h-5 text-gray-700" />
+                  <span className="text-sm font-medium text-gray-900">Log out</span>
+                </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Create Profile Modal removed; onboarding flow handles creation */}
+      {/* Switch VizitLink Modal */}
+      <AnimatePresence>
+        {showSwitchModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowSwitchModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-[28px] w-full max-w-[640px] max-h-[85vh] overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="relative px-8 pt-8 pb-6">
+                <h2 className="text-2xl font-semibold text-gray-900 text-center">Switch VizitLink</h2>
+                <button
+                  onClick={() => setShowSwitchModal(false)}
+                  className="absolute top-6 right-6 p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close modal"
+                >
+                  <X className="w-6 h-6 text-gray-900" strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* Profiles List */}
+              <div className="overflow-y-auto max-h-[calc(85vh-120px)] px-6 pb-8">
+                <div className="space-y-0">
+                  {profiles.map((profile) => (
+                    <button
+                      key={profile.id}
+                      onClick={() => {
+                        switchProfile(profile.id);
+                        setShowSwitchModal(false);
+                      }}
+                      className="w-full flex items-center justify-between px-2 py-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                      <div className="flex items-center space-x-4 flex-1 min-w-0">
+                        {/* Avatar */}
+                        <div className="w-[60px] h-[60px] flex-shrink-0 bg-gray-300 rounded-full flex items-center justify-center">
+                          {profile.avatar ? (
+                            <img 
+                              src={profile.avatar} 
+                              alt={profile.username} 
+                              className="w-full h-full rounded-full object-cover" 
+                            />
+                          ) : (
+                            <User className="w-8 h-8 text-white" strokeWidth={2} />
+                          )}
+                        </div>
+                        
+                        {/* Profile Info */}
+                        <div className="flex-1 min-w-0 text-left">
+                          <p className="font-semibold text-gray-900 text-lg truncate">
+                            @{profile.username}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate mt-0.5">
+                            {process.env.SITE_URL}/{profile.username}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Free Badge */}
+                      <span className="px-3 py-1.5 bg-[#E5E1D8] text-gray-700 text-xs font-medium rounded-md flex-shrink-0 ml-3">
+                        Free
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Create New VizitLink Button */}
+                <button
+                  onClick={() => {
+                    router.push('/onboarding');
+                    setShowSwitchModal(false);
+                  }}
+                  className="w-full flex items-center space-x-4 px-2 py-2 hover:bg-gray-200 rounded-lg transition-colors mt-2"
+                >
+                  <div className="w-[60px] h-[60px] flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Plus className="w-7 h-7 text-gray-700" strokeWidth={2} />
+                  </div>
+                  <span className="font-semibold text-gray-900 text-lg">Create New VizitLink</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Edit Profile Modal */}
       <AnimatePresence>

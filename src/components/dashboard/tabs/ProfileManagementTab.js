@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { useDashboard } from '../../../context/DashboardContext';
+import { supabase } from '../../../lib/supabase';
+import { isUsernameAvailable } from '../../../lib/dashboardStorage';
+import { toast } from 'sonner';
 import {
   Plus,
   Edit3,
@@ -16,7 +19,12 @@ import {
   Users,
   BarChart3,
   Globe,
-  X
+  X,
+  ChevronLeft,
+  Info,
+  AlertCircle,
+  Loader2,
+  Check
 } from 'lucide-react';
 
 export default function ProfileManagementTab() {
@@ -34,7 +42,13 @@ export default function ProfileManagementTab() {
 
   const router = useRouter();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showChangeUsernameModal, setShowChangeUsernameModal] = useState(false);
+  const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
+  const [newUsername, setNewUsername] = useState('');
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [isUsernameAvailableState, setIsUsernameAvailableState] = useState(null);
+  const debounceRef = useRef(null);
   const [formData, setFormData] = useState({
     username: '',
     displayName: '',
@@ -48,6 +62,61 @@ export default function ProfileManagementTab() {
       // No modal; show message and provide button below
     }
   }, [needsProfileCreation]);
+
+  // Username normalization (same as onboarding)
+  const normalizeUsername = (value) => value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+    .slice(0, 20);
+
+  // Check if username matches valid pattern (3-20 chars)
+  const isValidPattern = useMemo(() => 
+    newUsername.length >= 3 && newUsername.length <= 20, 
+    [newUsername]
+  );
+
+  // Real-time username availability check (identical to onboarding)
+  useEffect(() => {
+    const value = normalizeUsername(newUsername.trim());
+    
+    // Reset state if empty
+    if (!value) {
+      setIsUsernameAvailableState(null);
+      return;
+    }
+    
+    // Don't check if less than 3 chars
+    if (value.length < 3) {
+      setIsUsernameAvailableState(null);
+      return;
+    }
+
+    // Don't check if username hasn't changed
+    if (value === editingProfile?.username) {
+      setIsUsernameAvailableState(true);
+      return;
+    }
+
+    // Debounce the availability check
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    
+    debounceRef.current = setTimeout(async () => {
+      setIsCheckingUsername(true);
+      try {
+        const available = await isUsernameAvailable(value);
+        setIsUsernameAvailableState(available);
+      } catch (error) {
+        console.error('Error checking username availability:', error);
+        setIsUsernameAvailableState(false);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 400);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [newUsername, editingProfile?.username]);
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
@@ -70,6 +139,79 @@ export default function ProfileManagementTab() {
       avatar: profile.avatar
     });
     setShowEditModal(true);
+  };
+
+  const openChangeUsernameModal = (profile) => {
+    setEditingProfile(profile);
+    setNewUsername(profile.username);
+    setIsUsernameAvailableState(null);
+    setShowChangeUsernameModal(true);
+  };
+
+  const checkUsernameAvailability = async (username) => {
+    if (!username || username === editingProfile?.username) {
+      setIsUsernameAvailableState(true);
+      return true;
+    }
+
+    setIsCheckingUsername(true);
+    try {
+      const available = await isUsernameAvailable(username);
+      setIsUsernameAvailableState(available);
+      return available;
+    } catch (error) {
+      console.error('Error checking username:', error);
+      return false;
+    } finally {
+      setIsCheckingUsername(false);
+    }
+  };
+
+  const handleUsernameChange = (e) => {
+    const value = normalizeUsername(e.target.value);
+    setNewUsername(value);
+  };
+
+  const handleReviewUsernameChange = async () => {
+    if (!newUsername.trim()) {
+      toast.error('Username cannot be empty');
+      return;
+    }
+
+    if (!isValidPattern) {
+      toast.error('Please enter 3–20 valid characters');
+      return;
+    }
+
+    if (isUsernameAvailableState === false) {
+      toast.error('This username is already taken');
+      return;
+    }
+
+    setShowChangeUsernameModal(false);
+    setShowConfirmChangeModal(true);
+  };
+
+  const handleConfirmUsernameChange = async () => {
+    try {
+      await updateProfile(editingProfile.id, { ...editingProfile, username: normalizeUsername(newUsername) });
+      toast.success('Username updated successfully');
+      setShowConfirmChangeModal(false);
+      setEditingProfile(null);
+      setNewUsername('');
+      setIsUsernameAvailableState(null);
+    } catch (error) {
+      console.error('Error updating username:', error);
+      toast.error('Failed to update username');
+    }
+  };
+
+  const cancelUsernameChange = () => {
+    setShowChangeUsernameModal(false);
+    setShowConfirmChangeModal(false);
+    setEditingProfile(null);
+    setNewUsername('');
+    setIsUsernameAvailableState(null);
   };
 
   const handleDeleteProfile = async (profileId) => {
@@ -193,11 +335,11 @@ export default function ProfileManagementTab() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => openEditModal(profile)}
+                      onClick={() => openChangeUsernameModal(profile)}
                       className="h-8 sm:h-9"
                     >
                       <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
-                      Edit
+                      Change Username
                     </Button>
                   </div>
 
@@ -332,6 +474,231 @@ export default function ProfileManagementTab() {
                   </Button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Change Username Modal - First Modal */}
+      <AnimatePresence>
+        {showChangeUsernameModal && editingProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={cancelUsernameChange}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={cancelUsernameChange}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Go back"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <h3 className="text-xl font-semibold text-gray-900 absolute left-1/2 -translate-x-1/2">
+                  Change username
+                </h3>
+                <button
+                  onClick={cancelUsernameChange}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+
+              {/* Username Input with Real-time Validation */}
+              <div className="mb-2">
+                <div className="relative">
+                  <div className={`flex items-stretch border-2 rounded-xl bg-white overflow-hidden transition-colors ${
+                    isCheckingUsername
+                      ? 'border-gray-300'
+                      : (newUsername && isUsernameAvailableState === true && isValidPattern && editingProfile?.username !== newUsername)
+                        ? 'border-green-400'
+                        : (newUsername && (isUsernameAvailableState === false || !isValidPattern))
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                  }`}>
+                    <span className="px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r text-base">
+                      VizitLink.com/
+                    </span>
+                    <input
+                      type="text"
+                      value={newUsername}
+                      onChange={handleUsernameChange}
+                      className="flex-1 px-4 py-4 outline-none text-base focus:outline-none focus:border-0"
+                      placeholder="username"
+                      autoFocus
+                    />
+                    <span className="w-12 flex items-center justify-center">
+                      {isCheckingUsername && <Loader2 className="h-5 w-5 animate-spin text-gray-400" />}
+                      {!isCheckingUsername && newUsername && isUsernameAvailableState === true && isValidPattern && editingProfile?.username !== newUsername && (
+                        <Check className="h-5 w-5 text-green-600" />
+                      )}
+                      {!isCheckingUsername && newUsername && (isUsernameAvailableState === false || !isValidPattern) && (
+                        <X className="h-5 w-5 text-red-500" />
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Character Counter and Rules */}
+              <div className="mb-2 text-xs text-gray-500 flex items-center justify-between">
+                <span>Use 3–20 letters or numbers. No spaces or symbols.</span>
+                <span className="tabular-nums">{newUsername.length}/20</span>
+              </div>
+
+              {/* Validation Status Messages */}
+              {newUsername && (
+                <div className="mb-4 text-sm">
+                  {isCheckingUsername && (
+                    <span className="text-gray-500">Checking availability…</span>
+                  )}
+                  {!isCheckingUsername && isUsernameAvailableState === true && isValidPattern && editingProfile?.username !== newUsername && (
+                    <span className="text-green-600 flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Great! Username is available.
+                    </span>
+                  )}
+                  {!isCheckingUsername && (isUsernameAvailableState === false || !isValidPattern) && (
+                    <span className="text-red-600 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      {!isValidPattern 
+                        ? 'Please enter 3–20 valid characters.' 
+                        : 'That username is already taken'}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Note */}
+              <p className="text-gray-700 text-sm mb-6">
+                <span className="font-semibold">Note:</span> changing your username will also change your QR code and URL
+              </p>
+
+              {/* Review Button */}
+              <Button
+                onClick={handleReviewUsernameChange}
+                disabled={
+                  !newUsername.trim() || 
+                  isCheckingUsername || 
+                  isUsernameAvailableState === false || 
+                  !isValidPattern ||
+                  editingProfile?.username === newUsername
+                }
+                className={`w-full py-6 text-base font-medium rounded-full mb-3 transition-all ${
+                  !newUsername.trim() || isCheckingUsername || isUsernameAvailableState === false || !isValidPattern || editingProfile?.username === newUsername
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200'
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                }`}
+              >
+                {isCheckingUsername ? 'Checking…' : 'Review username change'}
+              </Button>
+
+              {/* Cancel Button */}
+              <Button
+                onClick={cancelUsernameChange}
+                variant="outline"
+                className="w-full py-6 text-base font-medium rounded-full border-2 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirm Change Modal - Second Modal */}
+      <AnimatePresence>
+        {showConfirmChangeModal && editingProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={cancelUsernameChange}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl p-6 w-full max-w-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={() => {
+                    setShowConfirmChangeModal(false);
+                    setShowChangeUsernameModal(true);
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Go back"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                </button>
+                <h3 className="text-xl font-semibold text-gray-900 absolute left-1/2 -translate-x-1/2">
+                  Confirm change
+                </h3>
+                <button
+                  onClick={cancelUsernameChange}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+
+              {/* Important Information Box */}
+              <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-4 mb-6">
+                <div className="flex gap-3">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Important information</h4>
+                    <p className="text-gray-700 text-sm">
+                      Once you change your username, your current QR code and URL for @{editingProfile.username} will no longer work.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* New Username and URL */}
+              <div className="mb-6 space-y-2">
+                <p className="text-gray-900">
+                  <span className="font-semibold">New username:</span> {normalizeUsername(newUsername)}
+                </p>
+                <p className="text-gray-900">
+                  <span className="font-semibold">New URL:</span> https://linktr.ee/{normalizeUsername(newUsername)}
+                </p>
+              </div>
+
+              {/* Confirm Button */}
+              <Button
+                onClick={handleConfirmUsernameChange}
+                className="w-full py-6 text-base font-medium rounded-full mb-3 bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Confirm change
+              </Button>
+
+              {/* Cancel Button */}
+              <Button
+                onClick={cancelUsernameChange}
+                variant="outline"
+                className="w-full py-6 text-base font-medium rounded-full border-2 border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
             </motion.div>
           </motion.div>
         )}

@@ -201,6 +201,15 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-slide-up {
   animation: slide-up 0.6s ease-out forwards;
 }
@@ -211,6 +220,10 @@ All colors MUST be HSL.
 
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
 } 
 
 /* ------------------------------ */

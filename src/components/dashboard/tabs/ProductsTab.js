@@ -452,7 +452,7 @@ export default function ProductsTab() {
                         </div>
                       )}
                       <div className="absolute top-3 right-3 flex gap-1">
-                        <div className="bg-background/80 backdrop-blur-sm rounded-full p-1">
+                        <div className="flex bg-background/50 backdrop-blur-xl rounded-full p-1">
                           <Switch
                             checked={product.active}
                             onCheckedChange={() => handleToggleActive(product.id)}
@@ -548,7 +548,7 @@ export default function ProductsTab() {
                               {product.title}
                             </h3>
                           </div>
-                          <div className="bg-background/80 backdrop-blur-sm rounded-full p-0.5">
+                          <div className="flex bg-background/50 backdrop-blur-xl rounded-full p-0.5">
                             <Switch
                               checked={product.active}
                               onCheckedChange={() => handleToggleActive(product.id)}

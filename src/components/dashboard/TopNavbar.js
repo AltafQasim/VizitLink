@@ -16,6 +16,7 @@ import {
   Crown,
   User
 } from 'lucide-react';
+import ProfileSwitcher from './ProfileSwitcher';
 
 export default function TopNavbar() {
   const { user, signOut } = useAuth();
@@ -69,6 +70,12 @@ export default function TopNavbar() {
           </div>
         )}
       </div>
+      
+      {/* User/Profile Switcher */}
+      <div className="border-gray-100">
+        <ProfileSwitcher />
+      </div>
+
 
       {/* Right side */}
       <div className="flex items-center space-x-4">
@@ -84,48 +91,6 @@ export default function TopNavbar() {
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
         </Button>
 
-        {/* User menu */}
-        <div className="relative">
-          <Button
-            variant="ghost"
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center space-x-2"
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-              {user?.user_metadata?.avatar_url ? (
-                <img src={user?.user_metadata?.picture} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-              ) : (
-                <span className="text-white text-sm font-medium">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
-                </span>
-              )}
-            </div>
-            <ChevronDown className="w-4 h-4" />
-          </Button>
-
-          {showUserMenu && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute right-0 mt-2 w-56 z-20 bg-white border border-gray-200 rounded-lg shadow-lg"
-            >
-              <div className="p-2">
-                <Button variant="ghost" className="w-full justify-start">
-                  <User className="w-4 h-4 mr-2" />
-                  Account Settings
-                </Button>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Button>
-                <Button variant="ghost" className="w-full justify-start" onClick={signOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </div>
       </div>
     </motion.div>
   );

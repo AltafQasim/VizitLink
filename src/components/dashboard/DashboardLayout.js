@@ -9,15 +9,20 @@ import MobilePreview from './MobilePreview';
 import LinksTab from './tabs/LinksTab';
 import ProductsTab from './tabs/ProductsTab';
 import ProfileManagementTab from './tabs/ProfileManagementTab';
+import DesignTab from './tabs/DesignTab';
+import SettingsTab from './tabs/SettingsTab';
 import { useDashboard } from '../../context/DashboardContext';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import DesignTab from './tabs/DesignTab';
 
 export default function DashboardLayout() {
   const { activeTab, setActiveTab, needsProfileCreation, isLoading } = useDashboard();
   const [isFading, setIsFading] = useState(false);
   const router = useRouter();
+
+  // Tabs that show the live preview (profile-related tabs)
+  const previewTabs = ['links', 'shop', 'design'];
+  const showLivePreview = previewTabs.includes(activeTab);
 
   // Redirect brand new users to onboarding
   useEffect(() => {
@@ -102,17 +107,7 @@ export default function DashboardLayout() {
           </div>
         );
       case 'settings':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-              <p className="text-gray-600">Account and billing settings</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <p className="text-gray-500">Settings panel coming soon...</p>
-            </div>
-          </div>
-        );
+        return <SettingsTab />;
       default:
         return <LinksTab />;
     }
@@ -132,7 +127,9 @@ export default function DashboardLayout() {
         <Sidebar />
         
         {/* Main Panel */}
-        <div className="flex-1 overflow-y-auto relative scroll-elegant scrollbar-accent">
+        <div className={`flex-1 overflow-y-auto relative scroll-elegant scrollbar-accent transition-all duration-300 ${
+          showLivePreview ? 'mr-0' : 'mr-0'
+        }`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -146,8 +143,20 @@ export default function DashboardLayout() {
           </AnimatePresence>
         </div>
         
-        {/* Live Preview */}
-        <LivePreview />
+        {/* Live Preview - Conditionally rendered */}
+        <AnimatePresence mode="wait">
+          {showLivePreview && (
+            <motion.div
+              key="live-preview"
+              initial={{ x: 20, opacity: 0, width: 0 }}
+              animate={{ x: 0, opacity: 1, width: 'auto' }}
+              exit={{ x: 20, opacity: 0, width: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <LivePreview />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       
       {/* Mobile Preview */}

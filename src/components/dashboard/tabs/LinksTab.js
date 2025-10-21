@@ -577,19 +577,29 @@ function SortableLinkItem({
     <motion.div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border border-border rounded-2xl p-3 sm:p-4 mb-3 cursor-move transition-shadow hover:shadow-sm min-h-16 ${isDragging ? 'opacity-50' : ''
-        }`}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
+      className={`bg-card border border-border rounded-2xl p-3 sm:p-4 mb-3 cursor-move transition-all duration-200 min-h-16 ${
+        isDragging ? 'opacity-50 shadow-2xl scale-105 z-50' : 'hover:shadow-md'
+      }`}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.98 }}
+      layout
+      transition={{
+        layout: { duration: 0.3, ease: 'easeInOut' },
+        opacity: { duration: 0.2 },
+        y: { duration: 0.3 }
+      }}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded flex-shrink-0"
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded flex-shrink-0 transition-colors"
           >
-            <GripVertical className="w-4 h-4 text-muted-foreground" />
+            <GripVertical className="w-4 h-4 text-muted-foreground transition-transform hover:scale-110" />
           </div>
 
           <div className="w-9 h-9 sm:w-10 sm:h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
@@ -687,9 +697,18 @@ export default function LinksTab() {
         const newIndex = socialLinks.findIndex(link => link.id === over.id);
         const newLinks = arrayMove(socialLinks, oldIndex, newIndex).map((l, idx) => ({ ...l, order: idx + 1 }));
 
-        // Update order in database
-        const orderedIds = newLinks.map(link => link.id);
-        await reorderSocialLinks(orderedIds);
+        try {
+          // Update order in database
+          const orderedIds = newLinks.map(link => link.id);
+          await reorderSocialLinks(orderedIds);
+          toast.success('Link order updated', {
+            icon: '✨',
+            duration: 2000,
+          });
+        } catch (error) {
+          console.error('Failed to reorder links:', error);
+          toast.error('Failed to update link order');
+        }
       } else {
         // For custom links: reorder in data.links (legacy)
         const oldIndex = data.links.findIndex(link => link.id === active.id);

@@ -54,9 +54,23 @@ export async function deleteCustomLinkById(profileId, id) {
 
 export async function reorderCustomLinks(profileId, orderedIds) {
   if (!profileId || !Array.isArray(orderedIds)) return;
-  const updates = orderedIds.map((id, index) => ({ id, profile_id: profileId, order: index }));
-  const { error } = await supabase.from('custom_links').upsert(updates, { onConflict: 'id' });
-  if (error) throw error;
+  
+  // Use individual updates to avoid NOT NULL constraint issues
+  const promises = orderedIds.map((id, index) => 
+    supabase
+      .from('custom_links')
+      .update({ order: index })
+      .eq('id', id)
+      .eq('profile_id', profileId)
+  );
+  
+  const results = await Promise.all(promises);
+  const errors = results.filter(r => r.error).map(r => r.error);
+  
+  if (errors.length > 0) {
+    console.error('Reorder errors:', errors);
+    throw errors[0];
+  }
 }
 
 

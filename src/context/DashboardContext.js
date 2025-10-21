@@ -406,22 +406,12 @@ export function DashboardProvider({ children }) {
     profiles,
     currentProfileId,
     currentProfile: data?.profile,
-    switchProfile,
-    createProfile,
-    updateProfile,
-    deleteProfile,
-    duplicateProfile,
     needsProfileCreation,
     setNeedsProfileCreation,
     hasUnsavedChanges,
-    isLoading,
     canUndo,
     canRedo,
-    // Profile management
-    profiles,
-    currentProfileId,
-    currentProfile: profiles.find(p => p.id === currentProfileId),
-    setActiveTab,
+    // Profile management functions
     updateData,
     updateDesignData,
     saveChanges,
@@ -481,21 +471,41 @@ export function DashboardProvider({ children }) {
     },
     reorderCustomLinks: async (orderedIds) => {
       if (!currentProfileId) return;
-      await reorderCustomLinks(currentProfileId, orderedIds);
-      // Update local order
+      
+      // Optimistic update
+      const previousLinks = customLinks;
       setCustomLinks(prev => {
         const idToLink = new Map(prev.map(l => [l.id, l]));
         return orderedIds.map((id, index) => ({ ...idToLink.get(id), order: index })).filter(Boolean);
       });
+      
+      try {
+        await reorderCustomLinks(currentProfileId, orderedIds);
+      } catch (error) {
+        // Rollback on error
+        console.error('Failed to reorder custom links:', error);
+        setCustomLinks(previousLinks);
+        throw error;
+      }
     },
     reorderSocialLinks: async (orderedIds) => {
       if (!currentProfileId) return;
-      await reorderSocialLinks(currentProfileId, orderedIds);
-      // Update local order
+      
+      // Optimistic update
+      const previousLinks = socialLinks;
       setSocialLinks(prev => {
         const idToLink = new Map(prev.map(l => [l.id, l]));
         return orderedIds.map((id, index) => ({ ...idToLink.get(id), order: index })).filter(Boolean);
       });
+      
+      try {
+        await reorderSocialLinks(currentProfileId, orderedIds);
+      } catch (error) {
+        // Rollback on error
+        console.error('Failed to reorder social links:', error);
+        setSocialLinks(previousLinks);
+        throw error;
+      }
     },
   };
 

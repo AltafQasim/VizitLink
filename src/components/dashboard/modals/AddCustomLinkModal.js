@@ -476,7 +476,6 @@ export default function AddCustomLinkModal({ isOpen, onClose, onSave }) {
                             <div className="p-3 flex gap-3">
                                 <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                                     {meta.image ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
                                         <img src={meta.image} alt={meta.title} className="w-full h-full object-cover" />
                                     ) : (
                                         <ImageIcon className="w-6 h-6 text-gray-400" />
@@ -485,7 +484,6 @@ export default function AddCustomLinkModal({ isOpen, onClose, onSave }) {
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         {meta.domain && (
-                                            // eslint-disable-next-line @next/next/no-img-element
                                             <img src={`https://www.google.com/s2/favicons?domain=${meta.domain}&sz=64`} alt="fav" className="w-4 h-4" />
                                         )}
                                         <span className="text-xs text-gray-500 truncate">{meta.domain}</span>

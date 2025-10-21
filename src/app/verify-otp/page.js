@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { OTPInput, REGEXP_ONLY_DIGITS, REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '../../components/ui/input-otp';
 
-export default function VerifyOtpPage() {
+function VerifyOtpForm() {
     const { verifyEmailOtp, resendEmailOtp } = useAuth();
     const { toast } = useToast();
     const router = useRouter();
@@ -107,7 +107,7 @@ export default function VerifyOtpPage() {
                     <ul className="list-disc pl-6 mt-3 space-y-1 text-gray-600 text-sm">
                         <li>Check your inbox and spam/junk folders.</li>
                         <li>The code expires soon. Enter it here to continue.</li>
-                        <li>If you didn’t receive it, resend a new code.</li>
+                        <li>If you didn't receive it, resend a new code.</li>
                     </ul>
                 </div>
                 <form onSubmit={handleVerify} className="space-y-4">
@@ -154,4 +154,17 @@ export default function VerifyOtpPage() {
     );
 }
 
-
+export default function VerifyOtpPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <VerifyOtpForm />
+        </Suspense>
+    );
+}

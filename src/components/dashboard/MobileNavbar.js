@@ -39,17 +39,17 @@ export default function MobileNavbar() {
 
   const menuItems = [
     // Current Profile section
-    { id: 'profile-header', label: 'Current Profile', isHeader: true },
-    { id: 'links', label: 'My VizitLink', isProfileTab: true },
+    { id: 'profile-header', label: 'My VizitLink', isHeader: true },
+    { id: 'links', label: 'Links', isProfileTab: true },
     { id: 'shop', label: 'Shop', isProfileTab: true },
     { id: 'design', label: 'Design', isProfileTab: true },
     // Separator
     { id: 'separator-1', isSeparator: true },
     // Other items
     { id: 'profiles', label: 'Profiles' },
-    { id: 'audience', label: 'Audience' },
-    { id: 'insights', label: 'Insights' },
-    { id: 'tools', label: 'Tools' },
+    // { id: 'audience', label: 'Audience' },
+    // { id: 'insights', label: 'Insights' },
+    // { id: 'tools', label: 'Tools' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -84,10 +84,10 @@ export default function MobileNavbar() {
           )}
 
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
+          {/* <Button variant="ghost" size="sm" className="relative">
             <Bell className="w-5 h-5" />
             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-          </Button>
+          </Button> */}
 
           {/* Menu button */}
           <Button
@@ -188,7 +188,7 @@ export default function MobileNavbar() {
             </div>
 
             {/* User section */}
-            <div className="px-4 py-3 border-t border-gray-100">
+            {/* <div className="px-4 py-3 border-t border-gray-100">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
@@ -225,7 +225,7 @@ export default function MobileNavbar() {
                   Sign Out
                 </button>
               </div>
-            </div>
+            </div> */}
           </motion.div>
         )}
       </AnimatePresence>

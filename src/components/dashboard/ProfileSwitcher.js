@@ -112,7 +112,7 @@ export default function ProfileSwitcher() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [showDropdown]);
-
+console.log(currentProfile)
   return (
     <>
       {/* Profile Switcher Button */}
@@ -143,7 +143,7 @@ export default function ProfileSwitcher() {
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute top-full left-[-37%] translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-[280px] overflow-hidden"
+              className="absolute top-full left-[-37%] sm:-left-[80%] translate-x-1/2 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-[280px] overflow-hidden"
             >
               {/* Current Profile Header */}
               <div className="px-4 py-3 border-b border-gray-100">
@@ -174,17 +174,19 @@ export default function ProfileSwitcher() {
               </div>
               {/* Menu Items */}
               <div className="p-2">
-                {/* Switch VizitLink */}
-                <button
-                  onClick={() => {
-                    setShowSwitchModal(true);
-                    setShowDropdown(false);
-                  }}
-                  className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
-                >
-                  <ArrowLeftRight className="w-5 h-5 text-gray-700" />
-                  <span className="text-sm font-medium text-gray-900">Switch VizitLink</span>
-                </button>
+                {/* Switch VizitLink - Only show if there are multiple profiles */}
+                {profiles.length > 1 && (
+                  <button
+                    onClick={() => {
+                      setShowSwitchModal(true);
+                      setShowDropdown(false);
+                    }}
+                    className="w-full px-4 py-2 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-3 text-left"
+                  >
+                    <ArrowLeftRight className="w-5 h-5 text-gray-700" />
+                    <span className="text-sm font-medium text-gray-900">Switch VizitLink</span>
+                  </button>
+                )}
 
                 {/* Create new VizitLink */}
                 <button
@@ -313,47 +315,75 @@ export default function ProfileSwitcher() {
 
               {/* Profiles List */}
               <div className="overflow-y-auto max-h-[calc(85vh-120px)] px-6 pb-8">
-                <div className="space-y-0">
-                  {profiles.map((profile) => (
-                    <button
-                      key={profile.id}
-                      onClick={() => {
-                        switchProfile(profile.id);
-                        setShowSwitchModal(false);
-                      }}
-                      className="w-full flex items-center justify-between px-2 py-2 hover:bg-gray-200 rounded-lg transition-colors"
-                    >
-                      <div className="flex items-center space-x-4 flex-1 min-w-0">
-                        {/* Avatar */}
-                        <div className="w-[60px] h-[60px] flex-shrink-0 bg-gray-300 rounded-full flex items-center justify-center">
-                          {profile.avatar ? (
-                            <img 
-                              src={profile.avatar} 
-                              alt={profile.username} 
-                              className="w-full h-full rounded-full object-cover" 
-                            />
-                          ) : (
-                            <User className="w-8 h-8 text-white" strokeWidth={2} />
-                          )}
+                <div className="space-y-1">
+                  {profiles.map((profile) => {
+                    const isActive = profile.id === currentProfileId;
+                    return (
+                      <button
+                        key={profile.id}
+                        onClick={() => {
+                          switchProfile(profile.id);
+                          setShowSwitchModal(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all ${
+                          isActive 
+                            ? 'bg-purple-50 border-2 border-purple-500 shadow-sm' 
+                            : 'hover:bg-gray-200 border-2 border-transparent'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          {/* Avatar with Active Ring */}
+                          <div className={`relative w-[60px] h-[60px] flex-shrink-0 rounded-full flex items-center justify-center ${
+                            isActive ? 'ring-2 ring-purple-500 ring-offset-2' : 'bg-gray-300'
+                          }`}>
+                            {profile.avatar ? (
+                              <img 
+                                src={profile.avatar} 
+                                alt={profile.username} 
+                                className="w-full h-full rounded-full object-cover" 
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
+                                <User className="w-8 h-8 text-white" strokeWidth={2} />
+                              </div>
+                            )}
+                            {/* Active Checkmark Badge */}
+                            {isActive && (
+                              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center border-2 border-white shadow-md">
+                                <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Profile Info */}
+                          <div className="flex-1 min-w-0 text-left">
+                            <div className="flex items-center gap-2">
+                              <p className={`font-semibold text-lg truncate ${
+                                isActive ? 'text-purple-700' : 'text-gray-900'
+                              }`}>
+                                @{profile.username}
+                              </p>
+                              {isActive && (
+                                <span className="px-2 py-0.5 bg-purple-600 text-white text-xs font-semibold rounded-full">
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-sm truncate mt-0.5 ${
+                              isActive ? 'text-purple-600' : 'text-gray-500'
+                            }`}>
+                              {process.env.SITE_URL}/{profile.username}
+                            </p>
+                          </div>
                         </div>
                         
-                        {/* Profile Info */}
-                        <div className="flex-1 min-w-0 text-left">
-                          <p className="font-semibold text-gray-900 text-lg truncate">
-                            @{profile.username}
-                          </p>
-                          <p className="text-sm text-gray-500 truncate mt-0.5">
-                            {process.env.SITE_URL}/{profile.username}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {/* Free Badge */}
-                      <span className="px-3 py-1.5 bg-[#E5E1D8] text-gray-700 text-xs font-medium rounded-md flex-shrink-0 ml-3">
-                        Free
-                      </span>
-                    </button>
-                  ))}
+                        {/* Free Badge */}
+                        <span className="px-3 py-1.5 bg-[#E5E1D8] text-gray-700 text-xs font-medium rounded-md flex-shrink-0 ml-3">
+                          Free
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {/* Create New VizitLink Button */}

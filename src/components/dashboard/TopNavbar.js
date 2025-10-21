@@ -78,20 +78,20 @@ export default function TopNavbar() {
 
 
       {/* Right side */}
-      <div className="flex items-center space-x-4">
+      {/* <div className="flex items-center space-x-4"> */}
         {/* Upgrade button */}
-        <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
+        {/* <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
           <Crown className="w-4 h-4 mr-2" />
           Upgrade to Pro
-        </Button>
+        </Button> */}
 
         {/* Notifications */}
-        <Button variant="ghost" size="sm" className="relative">
+        {/* <Button variant="ghost" size="sm" className="relative">
           <Bell className="w-5 h-5" />
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-        </Button>
+        </Button> */}
 
-      </div>
+      {/* </div> */}
     </motion.div>
   );
 }

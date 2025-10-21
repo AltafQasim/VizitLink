@@ -27,9 +27,9 @@ const profileMenuItems = [
 // Other top-level menu items
 const otherMenuItems = [
   { id: 'profiles', label: 'Profiles', icon: Users },
-  { id: 'audience', label: 'Audience', icon: Users },
-  { id: 'insights', label: 'Insights', icon: BarChart3 },
-  { id: 'tools', label: 'Tools', icon: Wrench },
+  // { id: 'audience', label: 'Audience', icon: Users },
+  // { id: 'insights', label: 'Insights', icon: BarChart3 },
+  // { id: 'tools', label: 'Tools', icon: Wrench },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -142,7 +142,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Quick actions */}
-      <div className="p-4 border-t border-gray-100 mt-auto">
+      {/* <div className="p-4 border-t border-gray-100 mt-auto">
         <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-3 border border-purple-100">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -174,7 +174,7 @@ export default function Sidebar() {
             Finish setup
           </button>
         </div>
-      </div>
+      </div> */}
     </motion.div>
   );
 }

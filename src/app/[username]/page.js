@@ -5,15 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import {
-  Share2,
-  Sparkles,
-  X,
-  Link as LinkIcon,
-  Facebook,
-  MessageCircle,
-  Linkedin,
-  ExternalLink,
-  Lock
+    Share2,
+    Sparkles,
+    X,
+    Link as LinkIcon,
+    Facebook,
+    MessageCircle,
+    Linkedin,
+    ExternalLink,
+    Lock
 } from 'lucide-react';
 import { loadPublicProfileByUsername } from "../../lib/dashboardStorage";
 import { socialIconsMap, socialColorsMap } from "../../lib/social";
@@ -39,7 +39,7 @@ export default function PublicProfilePage({ params }) {
     const handleSocialShare = (platform) => {
         const profileUrl = `${window.location.origin}/${data?.profile?.username || unwrappedParams?.username}`;
         const text = `Check out ${data?.profile?.displayName || unwrappedParams?.username}'s VizitLink profile!`;
-        
+
         const shareUrls = {
             facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`,
             twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(profileUrl)}&text=${encodeURIComponent(text)}`,
@@ -47,7 +47,7 @@ export default function PublicProfilePage({ params }) {
             whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + profileUrl)}`,
             messenger: `fb-messenger://share/?link=${encodeURIComponent(profileUrl)}`,
         };
-        
+
         if (shareUrls[platform]) {
             window.open(shareUrls[platform], '_blank', 'width=600,height=400');
         }
@@ -204,21 +204,20 @@ export default function PublicProfilePage({ params }) {
                                     <Sparkles className="w-3.5 h-3.5 text-white" />
                                 </div>
                             </button>
-                            
+
                             {/* Share Icon */}
                             <button
                                 onClick={() => setShowShareModal(true)}
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
-                                    currentTextColor === 'text-white' 
-                                        ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm' 
-                                        : 'bg-gray-200 hover:bg-gray-300'
-                                }`}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${currentTextColor === 'text-white'
+                                    ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                                    : 'bg-gray-200 hover:bg-gray-300'
+                                    }`}
                                 title="Share profile"
                             >
                                 <Share2 className={`w-4 h-4 ${currentTextColor}`} />
                             </button>
                         </div>
-                        
+
                         {/* Profile */}
                         <div className="text-center mb-6">
                             <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
@@ -257,9 +256,18 @@ export default function PublicProfilePage({ params }) {
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
                                             >
-                                                <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' />
+                                                {link?.thumbnail ?
+                                                    <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' /> :
+                                                    IconComponent ? (
+                                                        <IconComponent
+                                                            className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
+                                                            style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                                                        />
+                                                    ) : (
+                                                        <span className="text-lg">{link.icon}</span>
+                                                    )}
                                                 <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
-                                                <div className="flex items-center h-16 space-x-3 z-10">
+                                                <div className="flex items-center h-16 space-x-3 z-10 text-white" >
                                                     <span className="font-medium text-sm">{link.title}</span>
                                                 </div>
                                             </motion.a>
@@ -384,15 +392,32 @@ export default function PublicProfilePage({ params }) {
                         </div>
                     </div>
 
-                    {/* Hide logo notice */}
+                    {/* Premium branding footer */}
                     {!hideVizitlinkFooter && (
-                        <div className="mt-4 text-center">
-                            <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
-                                <Lock className="w-3 h-3" />
-                                <span>Hide VizitLink logo</span>
-                                <span className="text-purple-600">🔒</span>
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="relative mt-6 pb-6 z-50"
+                        >
+                            <div className='flex justify-center items-center'>
+                                <div
+                                    className="w-auto px-5 py-2.5 cursor-pointer relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] bg-white border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk flex justify-center items-center h-2xl px-md"
+                                    onClick={() => setShowBrandModal(true)}
+                                >
+                                    <span className="flex items-center justify-center">
+                                        <span className="label block font-semibold text-md">Join {data?.profile?.username} on Linktree</span>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+
+
+                            {/* Subtle branding */}
+                            <div className="mt-3 flex items-center justify-center gap-1.5">
+                                <span className="text-[10px] text-gray-400">Powered by</span>
+                                <span className="text-[10px] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">VizitLink</span>
+                            </div>
+                        </motion.div>
                     )}
                 </div>
             </div>

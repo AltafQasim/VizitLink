@@ -37,6 +37,11 @@ All colors MUST be HSL.
     --accessible-dodger-blue: 211 82% 45%; /* #1378d1 */
     --red: 8 100% 39%; /* #c41500 */
     --dce7c3: 78 44% 85%; /* #dce7c3 */
+    
+    /* Custom action colors */
+    --action-primary: 272 98% 56%; /* #7f22fe - Primary action buttons */
+    --action-primary-hover: 272 98% 50%; /* Darker purple for hover */
+    --switch-active: 135 99% 22%; /* #016e1a - Active switches/toggles */
 
     /* Design tokens mapped to brand palette */
     --background: var(--marble);

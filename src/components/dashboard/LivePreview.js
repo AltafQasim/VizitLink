@@ -275,9 +275,18 @@ export default function LivePreview() {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' />
+                          {link?.thumbnail ?
+                            <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' /> :
+                            IconComponent ? (
+                              <IconComponent
+                                className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
+                                style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                              />
+                            ) : (
+                              <span className="text-lg">{link.icon}</span>
+                            )}
                           <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
-                          <div className="flex items-center h-16 space-x-3 z-10" >
+                          <div className="flex items-center h-16 space-x-3 z-10 text-white" >
                             <span className="font-medium text-sm">{link.title}</span>
                           </div>
                         </motion.a>
@@ -402,32 +411,36 @@ export default function LivePreview() {
                     )
                   })}
               </div>
+              {/* Premium branding footer */}
+              {!hideVizitlinkFooter && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="relative mt-6 pb-6 z-50"
+                >
+                  <div className='flex justify-center items-center'>
+                    <div className="w-auto px-5 py-2.5 relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] bg-white border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk flex justify-center items-center h-2xl px-md">
+                      <span className="flex items-center justify-center">
+                        <span className="label block font-semibold text-md">Join {data?.profile?.username} on Linktree</span>
+                      </span>
+                    </div>
+                  </div>
+
+
+                  {/* Subtle branding */}
+                  <div className="mt-3 flex items-center justify-center gap-1.5">
+                    <span className="text-[10px] text-gray-400">Powered by</span>
+                    <span className="text-[10px] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">VizitLink</span>
+                  </div>
+                </motion.div>
+              )}
             </div>
 
-            {/* Hide logo notice */}
-            {!hideVizitlinkFooter && (
-              <div className="mt-4 text-center">
-                <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
-                  <Lock className="w-3 h-3" />
-                  <span>Hide VizitLink logo</span>
-                  <span className="text-purple-600">🔒</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Preview controls */}
-      {/* <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-        <div className="flex items-center space-x-2">
-          <Eye className="w-4 h-4" />
-          <span>Preview mode</span>
-        </div>
-        <button className="text-primary hover:opacity-90 font-medium">
-          View live
-        </button>
-      </div> */}
-    </motion.div>
+    </motion.div >
   );
 }

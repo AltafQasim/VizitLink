@@ -406,7 +406,7 @@ export default function PublicProfilePage({ params }) {
                                     onClick={() => setShowBrandModal(true)}
                                 >
                                     <span className="flex items-center justify-center">
-                                        <span className="label block font-semibold text-md">Join {data?.profile?.username} on Linktree</span>
+                                        <span className="label block font-semibold text-md">Join {data?.profile?.username} on VizitLink</span>
                                     </span>
                                 </div>
                             </div>

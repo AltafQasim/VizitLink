@@ -346,7 +346,7 @@ export default function MobilePreview() {
                         <div className='flex justify-center items-center'>
                           <div className="w-auto px-5 py-2.5 relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] bg-white border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk flex justify-center items-center h-2xl px-md">
                             <span className="flex items-center justify-center">
-                              <span className="label block font-semibold text-md">Join {data?.profile?.username} on Linktree</span>
+                              <span className="label block font-semibold text-md">Join {data?.profile?.username} on VizitLink</span>
                             </span>
                           </div>
                         </div>

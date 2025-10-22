@@ -9,11 +9,13 @@ import {
   Lock,
   ExternalLink,
   Sparkles,
-  ShareIcon
+  ShareIcon,
+  Share2
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { socialIconsMap, socialColorsMap } from '../../lib/social';
+import BrandLogo from '../BrandLogo';
 
 // Format helpers
 const getCurrencySymbol = (currency) => {
@@ -190,7 +192,7 @@ export default function LivePreview() {
                     }`}
                   title="Share profile"
                 >
-                  <ShareIcon className={`w-4 h-4 ${currentTextColor}`} />
+                  <Share2 className={`w-4 h-4 ${currentTextColor}`} />
                 </button>
               </div>
               {/* Profile */}
@@ -431,7 +433,7 @@ export default function LivePreview() {
                   {/* Subtle branding */}
                   <div className="mt-3 flex items-center justify-center gap-1.5">
                     <span className="text-[10px] text-gray-400">Powered by</span>
-                    <span className="text-[10px] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">VizitLink</span>
+                    <BrandLogo showText={false} />
                   </div>
                 </motion.div>
               )}

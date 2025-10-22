@@ -9,9 +9,11 @@ import {
   X,
   ExternalLink,
   Sparkles,
-  ShareIcon
+  ShareIcon,
+  Share2
 } from 'lucide-react';
 import { socialIconsMap, socialColorsMap } from '../../lib/social';
+import BrandLogo from '../BrandLogo';
 
 export default function MobilePreview() {
   const { data, customLinks } = useDashboard();
@@ -147,22 +149,22 @@ export default function MobilePreview() {
                     <div className="flex items-center justify-between mb-4">
                       {/* Brand Mini Icon */}
                       <button
-                        className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-1.5 hover:opacity-80 transition-opacity hover:scale-110 active:scale-95"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
-                          <Sparkles className="w-3.5 h-3.5 text-white" />
+                        <div className="rounded-lg p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                          <BrandLogo showText={false} />
                         </div>
                       </button>
 
                       {/* Share Icon */}
                       <button
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${currentTextColor === 'text-white'
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${currentTextColor === 'text-white'
                           ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
                           : 'bg-gray-200 hover:bg-gray-300'
                           }`}
                         title="Share profile"
                       >
-                        <ShareIcon className={`w-4 h-4 ${currentTextColor}`} />
+                        <Share2 className={`w-4 h-4 ${currentTextColor}`} />
                       </button>
                     </div>
 
@@ -355,7 +357,7 @@ export default function MobilePreview() {
                         {/* Subtle branding */}
                         <div className="mt-3 flex items-center justify-center gap-1.5">
                           <span className="text-[10px] text-gray-400">Powered by</span>
-                          <span className="text-[10px] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">VizitLink</span>
+                          <BrandLogo showText={false} />
                         </div>
                       </motion.div>
                     )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, X, Loader2 } from 'lucide-react';
+import BrandLogo from '../../components/BrandLogo';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { DashboardProvider } from '../../context/DashboardContext';
@@ -82,6 +83,11 @@ function OnboardingInner() {
           </button>
         )}
         <div className="w-full bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+          {/* Logo */}
+          <div className="flex items-center justify-center mb-6">
+            <BrandLogo size="xl" showText={false} linkToHome={false} />
+          </div>
+          
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 text-center">Choose a username</h1>
           <p className="text-gray-600 mb-6 text-center">Choose a VizitLink URL for your new profile. You can always change it later.</p>
           <form onSubmit={handleSubmit} className="space-y-6">

@@ -3,13 +3,13 @@
 import { motion } from 'framer-motion';
 import { useDashboard } from '../../context/DashboardContext';
 import ProfileSwitcher from './ProfileSwitcher';
-import { 
-  Link as LinkIcon, 
-  ShoppingBag, 
-  Palette, 
-  Users, 
-  BarChart3, 
-  Settings, 
+import {
+  Link as LinkIcon,
+  ShoppingBag,
+  Palette,
+  Users,
+  BarChart3,
+  Settings,
   Wrench,
   Folder,
   ChevronDown,
@@ -48,7 +48,7 @@ export default function Sidebar() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col overflow-y-auto scroll-elegant scrollbar-accent"
@@ -72,7 +72,7 @@ export default function Sidebar() {
               <ChevronRight className="w-3.5 h-3.5" />
             )}
           </button>
-          
+
           <motion.ul
             initial={false}
             animate={{
@@ -85,20 +85,19 @@ export default function Sidebar() {
             {profileMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
-              
+
               return (
-                <motion.li 
-                  key={item.id} 
-                  whileHover={{ x: 4 }} 
+                <motion.li
+                  key={item.id}
+                  whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   <button
                     onClick={() => handleTabChange(item.id)}
-                    className={`w-full flex items-center space-x-3 px-3 py-1 rounded-lg text-left transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-purple-100 to-blue-50 text-purple-700 font-medium shadow-sm border border-purple-200' 
+                    className={`w-full flex items-center space-x-3 px-3 py-1 rounded-lg text-left transition-all duration-200 ${isActive
+                        ? 'bg-gradient-to-r from-purple-100 to-blue-50 text-purple-700 font-medium shadow-sm border border-purple-200'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                      }`}
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-purple-600' : ''}`} />
                     <span className='text-sm'>{item.label}</span>
@@ -117,20 +116,19 @@ export default function Sidebar() {
           {otherMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-            
+
             return (
-              <motion.li 
-                key={item.id} 
-                whileHover={{ x: 4 }} 
+              <motion.li
+                key={item.id}
+                whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <button
                   onClick={() => handleTabChange(item.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-1 rounded-lg text-left transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-gradient-to-r from-purple-100 to-blue-50 text-purple-700 font-medium shadow-sm border border-purple-200' 
+                  className={`w-full flex items-center space-x-3 px-3 py-1 rounded-lg text-left transition-all duration-200 ${isActive
+                      ? 'bg-gradient-to-r from-purple-100 to-blue-50 text-purple-700 font-medium shadow-sm border border-purple-200'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-purple-600' : ''}`} />
                   <span className='text-sm'>{item.label}</span>

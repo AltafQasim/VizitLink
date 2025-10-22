@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { Input } from '../../components/ui/input';
+import BrandLogo from '../../components/BrandLogo';
 import { Button } from '../../components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
@@ -88,6 +89,11 @@ function ResetPasswordForm() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-sm p-8 space-y-6">
+        {/* Logo */}
+        <div className="flex items-center justify-center">
+          <BrandLogo size="lg" />
+        </div>
+        
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reset password</h1>
           <p className="text-gray-600 text-sm mt-1">Enter a new password for your account.</p>

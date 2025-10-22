@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import BrandLogo from './BrandLogo';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
 
@@ -48,9 +49,7 @@ const StickyNavbar = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/">
-                <h1 className="font-bold text-gray-900" style={{ fontSize: '24px' }}>VizitLink</h1>
-              </Link>
+              <BrandLogo size="md" />
             </div>
 
             {/* Navigation Links */}

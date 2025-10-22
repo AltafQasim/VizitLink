@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from './ui/button';
+import BrandLogo from './BrandLogo';
 import { Input } from './ui/input';
 import GoogleAuthButton from './SignInGoogle';
 import { useState } from 'react';
@@ -96,14 +97,7 @@ const Signup = () => {
       <div className="w-full lg:w-1/2 bg-white flex items-center justify-center px-8 py-12">
         <div className="w-full max-w-sm space-y-8">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/">
-              <h1 className="font-bold text-gray-900 text-2xl">VizitLink</h1>
-            </Link>
-            <div className="ml-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-          </div>
+          <BrandLogo size="lg" />
 
           {/* Welcome Text */}
           <div className="space-y-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import BrandLogo from '../BrandLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
 import { useAuth } from '../../context/AuthContext';
@@ -58,12 +59,7 @@ export default function MobileNavbar() {
       {/* Mobile Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <h1 className="font-bold text-gray-900 text-lg">VizitLink</h1>
-          <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-          </div>
-        </div>
+        <BrandLogo size="sm" />
 
         {/* User/Profile Switcher */}
         <div className="border-gray-100">

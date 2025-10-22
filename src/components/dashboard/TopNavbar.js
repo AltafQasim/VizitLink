@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import BrandLogo from '../BrandLogo';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { useAuth } from '../../context/AuthContext';
@@ -41,12 +42,7 @@ export default function TopNavbar() {
     >
       {/* Left side */}
       <div className="flex items-center space-x-6">
-        <div className="flex items-center space-x-2">
-          <h1 className="font-bold text-gray-900 text-xl">VizitLink</h1>
-          <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-2 h-2 bg-white rounded-full"></div>
-          </div>
-        </div>
+        <BrandLogo size="md" />
 
         {/* Profile URL */}
         {data?.profile?.username && (

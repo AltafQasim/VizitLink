@@ -180,7 +180,7 @@ export default function LivePreview() {
                   className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
                 >
                   <div className="rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-sm">
-                    <BrandLogo showText={false} />
+                    <BrandLogo showText={false} linkToHome={false} />
                   </div>
                 </button>
 
@@ -433,7 +433,7 @@ export default function LivePreview() {
                   {/* Subtle branding */}
                   <div className="mt-3 flex items-center justify-center gap-1.5">
                     <span className="text-[10px] text-gray-400">Powered by</span>
-                    <BrandLogo showText={false} />
+                    <BrandLogo showText={false} linkToHome={false} />
                   </div>
                 </motion.div>
               )}

@@ -152,7 +152,7 @@ export default function MobilePreview() {
                         className="flex items-center gap-1.5 hover:opacity-80 transition-opacity hover:scale-110 active:scale-95"
                       >
                         <div className="rounded-lg p-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-sm">
-                          <BrandLogo showText={false} />
+                          <BrandLogo showText={false} linkToHome={false} />
                         </div>
                       </button>
 
@@ -357,7 +357,7 @@ export default function MobilePreview() {
                         {/* Subtle branding */}
                         <div className="mt-3 flex items-center justify-center gap-1.5">
                           <span className="text-[10px] text-gray-400">Powered by</span>
-                          <BrandLogo showText={false} />
+                          <BrandLogo showText={false} linkToHome={false} />
                         </div>
                       </motion.div>
                     )}

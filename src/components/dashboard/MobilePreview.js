@@ -260,7 +260,7 @@ export default function MobilePreview() {
                       <div className="mt-6">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily }}>Shop</h3>
-                          <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button>
+                          {/* <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button> */}
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           {(data.products || [])

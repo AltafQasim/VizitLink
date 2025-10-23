@@ -179,8 +179,8 @@ export default function LivePreview() {
                 <button
                   className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
-                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  <div className="rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                    <BrandLogo showText={false} />
                   </div>
                 </button>
 
@@ -331,7 +331,7 @@ export default function LivePreview() {
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
-                    <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button>
+                    {/* <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button> */}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {(data.products || [])

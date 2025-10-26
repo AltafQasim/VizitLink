@@ -7,6 +7,7 @@ import { cn } from '../lib/utils';
  * 
  * A reusable component that displays the VizitLink brand logo and text.
  * Supports multiple size variants and optional linking to homepage.
+ * Automatically switches between logo variants based on background color.
  * 
  * @param {Object} props
  * @param {string} props.size - Size variant: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -15,6 +16,8 @@ import { cn } from '../lib/utils';
  * @param {string} props.className - Additional CSS classes
  * @param {string} props.textClassName - Additional CSS classes for text
  * @param {string} props.imageClassName - Additional CSS classes for image
+ * @param {'auto' | 'white' | 'black'} props.logoVariant - Logo variant to use (default: 'auto')
+ * @param {boolean} props.colorfulHover - Enable colorful hover effect (default: false)
  */
 export default function BrandLogo({ 
   size = 'md', 
@@ -22,7 +25,9 @@ export default function BrandLogo({
   linkToHome = true,
   className = '',
   textClassName = '',
-  imageClassName = ''
+  imageClassName = '',
+  logoVariant = 'auto',
+  colorfulHover = false
 }) {
   // Size configurations
   const sizeConfig = {
@@ -55,18 +60,29 @@ export default function BrandLogo({
 
   const config = sizeConfig[size] || sizeConfig.md;
 
+  // Determine which logo variant to use
+  const getLogoSrc = () => {
+    if (logoVariant === 'white') return '/brandlogowhite.svg';
+    if (logoVariant === 'black') return '/brandlogoblack.svg';
+    
+    // Auto mode - default to original logo
+    return '/brandlogo.svg';
+  };
+
+  const logoSrc = getLogoSrc();
+
   const content = (
     <div className={cn('flex items-center', config.gap, className)}>
       <Image 
-        src="/brandlogo.png" 
+        src={logoSrc} 
         alt="VizitLink Logo" 
         width={config.image.width} 
         height={config.image.height}
-        className={cn('object-contain', imageClassName)}
+        className={cn('object-contain', colorfulHover ? 'group-hover:drop-shadow-[0_0_8px_rgba(127,34,254,0.8)] transition-all duration-300' : '', imageClassName)}
         priority
       />
       {showText && (
-        <h1 className={cn('font-bold text-gray-900', config.text, textClassName)}>
+        <h1 className={cn('font-bold text-gray-900', config.text, textClassName, colorfulHover ? 'group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300' : '')}>
           VizitLink
         </h1>
       )}
@@ -75,11 +91,15 @@ export default function BrandLogo({
 
   if (linkToHome) {
     return (
-      <Link href="/" className="inline-flex">
+      <Link href="/" className={cn('inline-flex', colorfulHover ? 'group' : '')}>
         {content}
       </Link>
     );
   }
 
-  return content;
+  return (
+    <div className={cn(colorfulHover ? 'group' : '')}>
+      {content}
+    </div>
+  );
 }

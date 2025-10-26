@@ -306,7 +306,7 @@ export default function ProductsTab() {
                   onClick={() => setFilterActive('all')}
                   className={`flex-1 sm:flex-none px-4 sm:px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium transition-colors min-h-[44px] sm:min-h-0 ${
                     filterActive === 'all'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#36b1eb] text-primary-foreground'
                       : 'bg-background hover:bg-muted'
                   }`}
                 >
@@ -316,7 +316,7 @@ export default function ProductsTab() {
                   onClick={() => setFilterActive('active')}
                   className={`flex-1 sm:flex-none px-4 sm:px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium transition-colors border-l border-border min-h-[44px] sm:min-h-0 ${
                     filterActive === 'active'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#36b1eb] text-primary-foreground'
                       : 'bg-background hover:bg-muted'
                   }`}
                 >
@@ -326,7 +326,7 @@ export default function ProductsTab() {
                   onClick={() => setFilterActive('inactive')}
                   className={`flex-1 sm:flex-none px-4 sm:px-4 py-3 sm:py-2 text-sm sm:text-sm font-medium transition-colors border-l border-border min-h-[44px] sm:min-h-0 ${
                     filterActive === 'inactive'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#36b1eb] text-primary-foreground'
                       : 'bg-background hover:bg-muted'
                   }`}
                 >
@@ -340,7 +340,7 @@ export default function ProductsTab() {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 transition-colors ${
                     viewMode === 'grid'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#36b1eb] text-primary-foreground'
                       : 'bg-background hover:bg-muted'
                   }`}
                   title="Grid View"
@@ -351,7 +351,7 @@ export default function ProductsTab() {
                   onClick={() => setViewMode('list')}
                   className={`p-2 transition-colors border-l border-border ${
                     viewMode === 'list'
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-[#36b1eb] text-primary-foreground'
                       : 'bg-background hover:bg-muted'
                   }`}
                   title="List View"
@@ -487,7 +487,7 @@ export default function ProductsTab() {
                       {/* Action Buttons - Mobile Optimized (44px touch targets) */}
                       <div className="flex gap-2">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(product)}
                           className="flex-1 min-h-[44px] h-11 sm:h-9 text-sm sm:text-xs font-medium"
@@ -496,7 +496,7 @@ export default function ProductsTab() {
                           Edit
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(product)}
                           className="flex-1 min-h-[44px] h-11 sm:h-9 text-sm sm:text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"

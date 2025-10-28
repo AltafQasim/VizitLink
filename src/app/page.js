@@ -9,6 +9,7 @@ import CreatorsSection from '../components/CreatorsSection';
 import FooterSection from '../components/FooterSection';
 import ShareSection from '../components/ShareSection';
 
+// Server Component - Static Page
 export default function Home() {
   return (
     <div className="min-h-screen">
@@ -24,4 +25,20 @@ export default function Home() {
       <FooterSection />
     </div>
   );
+}
+
+// Enable static page generation
+export const dynamic = 'force-static';
+
+// You can also add generateMetadata for even better SEO
+export const metadata = {
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://vizitlink.com',
+    siteName: 'VizitLink',
+  },
 }

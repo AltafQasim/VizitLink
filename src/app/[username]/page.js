@@ -23,6 +23,7 @@ export default function PublicProfilePage({ params }) {
     // Unwrap params using React.use() to fix the Next.js warning
     const unwrappedParams = React.use(params);
     const [data, setData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isVideoLoading, setIsVideoLoading] = useState(false);
     const [showBrandModal, setShowBrandModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -57,11 +58,21 @@ export default function PublicProfilePage({ params }) {
     useEffect(() => {
         const run = async () => {
             const username = unwrappedParams?.username;
-            if (!username) return;
+            if (!username) {
+                setIsLoading(false);
+                return;
+            }
+            setIsLoading(true);
             try {
                 const loaded = await loadPublicProfileByUsername(username);
-                if (loaded) setData(loaded);
-            } catch (_) { }
+                if (loaded) {
+                    setData(loaded);
+                }
+            } catch (_) { 
+                // Error handling
+            } finally {
+                setIsLoading(false);
+            }
         };
         run();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,6 +171,55 @@ export default function PublicProfilePage({ params }) {
         };
         return map[currency] || '$';
     };
+
+    // Show loading skeleton if data is loading
+    if (isLoading) {
+        return (
+            <div className="relative min-h-screen" style={{ background: '#21232a url(/profilebg.jpg) repeat 0 0' }}>
+                <div className="relative sm:max-w-2xl mx-auto sm:px-4">
+                    <div className="relative sm:rounded-2xl overflow-hidden bg-gray-100 animate-pulse">
+                        <div className="relative bg-gradient-to-br from-gray-200 to-gray-300 h-screen">
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="w-10 h-10 bg-white/40 rounded-lg animate-pulse"></div>
+                                    <div className="w-10 h-10 bg-white/40 rounded-lg animate-pulse"></div>
+                                </div>
+                                <div className="text-center mb-6">
+                                    <div className="w-20 h-20 bg-white/40 rounded-full mx-auto mb-3 animate-pulse"></div>
+                                    <div className="h-6 w-48 bg-white/40 rounded mx-auto mb-2 animate-pulse"></div>
+                                    <div className="h-4 w-64 bg-white/40 rounded mx-auto animate-pulse"></div>
+                                </div>
+                                <div className="space-y-3">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="w-full h-16 bg-white/40 rounded-3xl animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show not found if no data after loading
+    if (!data || !data.profile) {
+        return (
+            <div className="flex items-center justify-center min-h-screen p-4" style={{ background: '#21232a url(/profilebg.jpg) repeat 0 0' }}>
+                <div className="text-center space-y-4 max-w-md bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+                    <h1 className="text-3xl font-bold text-white">Profile Not Found</h1>
+                    <p className="text-white/80">
+                        This profile doesn't exist or is currently unavailable.
+                    </p>
+                    <div className="flex gap-4 justify-center">
+                        <Link href="/" className="px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
+                            Go Home
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="relative min-h-screen" style={{ background: '#21232a url(/profilebg.jpg) repeat 0 0' }}>
@@ -478,10 +538,10 @@ export default function PublicProfilePage({ params }) {
 
                             {/* Links */}
                             <div className="space-y-2 mb-4 sm:mb-5">
-                                <a href="#" className="text-gray-800 hover:underline block text-sm sm:text-base min-h-[44px] flex items-center">
+                                <a href="#" className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]">
                                     Subscribe to @altafak01
                                 </a>
-                                <a href="#" className="text-gray-800 hover:underline block text-sm sm:text-base min-h-[44px] flex items-center">
+                                <a href="#" className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]">
                                     Learn more about VizitLink
                                 </a>
                             </div>

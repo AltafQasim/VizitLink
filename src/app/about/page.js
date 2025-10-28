@@ -1,5 +1,14 @@
 import StickyNavbar from '../../components/StickyNavbar';
 
+export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about VizitLink and our mission to help creators share everything in one simple link.',
+  openGraph: {
+    title: 'About VizitLink',
+    description: 'Learn more about VizitLink and our mission to help creators share everything in one simple link.',
+  },
+}
+
 export default function AboutPage() {
   return (
     <div>

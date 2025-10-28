@@ -1,5 +1,14 @@
 import StickyNavbar from '../../components/StickyNavbar';
 
+export const metadata = {
+  title: 'Blog',
+  description: 'Latest updates, insights, and tips from the VizitLink team. Learn how to grow your presence online.',
+  openGraph: {
+    title: 'VizitLink Blog',
+    description: 'Latest updates, insights, and tips from the VizitLink team.',
+  },
+}
+
 export default function BlogPage() {
   return (
     <div>

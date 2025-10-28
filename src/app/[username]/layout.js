@@ -1,52 +1,126 @@
 import { supabase } from '../../lib/supabase'
 
 export async function generateMetadata({ params }) {
-  const { username } = await params
+  // In Next.js 15, params might be a Promise, so we need to handle it properly
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { username } = resolvedParams;
 
   try {
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
-      .select('display_name, bio, avatar, username')
+      .select('*')
       .eq('username', username)
-      .single()
+      .eq('is_live', true)
+      .maybeSingle();
+
+    // Log for debugging
+    console.log('Profile query result:', { profile, error, username });
+
+    if (error) {
+      console.error('Error fetching profile:', error);
+    }
 
     if (!profile) {
       return {
         title: `${username} - Profile Not Found`,
         description: 'This profile does not exist on VizitLink.',
+        alternates: {
+          canonical: `https://vizitlink.com/${username}`,
+        },
+        openGraph: {
+          title: `${username} - Profile Not Found`,
+          description: 'This profile does not exist on VizitLink.',
+          url: `https://vizitlink.com/${username}`,
+          type: 'website',
+          siteName: 'VizitLink',
+        },
+        twitter: {
+          card: 'summary',
+          title: `${username} - Profile Not Found`,
+          description: 'This profile does not exist on VizitLink.',
+        },
       }
     }
 
+    const title = `${profile.display_name || profile.username} | VizitLink`
+    const description = profile.bio || `Check out ${profile.display_name || profile.username}'s VizitLink profile`
+    const profileUrl = `https://vizitlink.com/${profile.username}`
+    const imageUrl = profile.avatar_url || `https://vizitlink.com/og/image/${profile.username}.jpg`
+    const updatedTime = profile.updated_at ? new Date(profile.updated_at).getTime() : Date.now()
+    
     return {
-      title: `${profile.display_name || username} - VizitLink`,
-      description: profile.bio || `Check out ${profile.display_name || username}'s VizitLink profile`,
+      title: title,
+      description: description,
+      alternates: {
+        canonical: profileUrl,
+      },
       openGraph: {
-        title: `${profile.display_name || username}'s VizitLink`,
-        description: profile.bio || `Check out ${profile.display_name || username}'s VizitLink profile`,
-        images: profile.avatar ? [{ url: profile.avatar }] : [],
+        title: title,
+        description: description,
+        url: profileUrl,
+        images: [
+          {
+            url: imageUrl,
+            width: 600,
+            height: 600,
+            alt: `${profile.display_name || profile.username}'s profile image`,
+            type: 'image/jpg',
+          },
+        ],
         type: 'profile',
+        siteName: 'VizitLink',
+        locale: 'en_US',
+        updatedTime: updatedTime,
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${profile.display_name || username}'s VizitLink`,
-        description: profile.bio || `Check out ${profile.display_name || username}'s VizitLink profile`,
+        title: title,
+        description: description,
+        images: [imageUrl],
+        domain: 'vizitlink.com',
+      },
+      profile: {
+        username: profile.username,
       },
     }
   } catch (error) {
+    console.error('Error in generateMetadata:', error);
+    // Handle any errors gracefully
     return {
-      title: `${username} - VizitLink`,
+      title: `${username} | VizitLink`,
       description: `Check out ${username}'s VizitLink profile`,
+      alternates: {
+        canonical: `https://vizitlink.com/${username}`,
+      },
+      openGraph: {
+        title: `${username} | VizitLink`,
+        description: `Check out ${username}'s VizitLink profile`,
+        url: `https://vizitlink.com/${username}`,
+        type: 'website',
+        siteName: 'VizitLink',
+      },
+      twitter: {
+        card: 'summary',
+        title: `${username} | VizitLink`,
+        description: `Check out ${username}'s VizitLink profile`,
+        domain: 'vizitlink.com',
+      },
     }
   }
 }
 
 export async function generateStaticParams() {
   try {
-    const { data: profiles } = await supabase
+    const { data: profiles, error } = await supabase
       .from('profiles')
       .select('username')
       .not('username', 'is', null)
       .limit(100)
+
+    if (error) {
+      console.error('Error fetching profiles for static params:', error);
+      return []
+    }
 
     if (!profiles) return []
 
@@ -54,6 +128,7 @@ export async function generateStaticParams() {
       username: profile.username,
     }))
   } catch (error) {
+    console.error('Error in generateStaticParams:', error)
     return []
   }
 }
@@ -68,4 +143,3 @@ export const dynamic = 'force-dynamic'; // This page requires dynamic rendering 
 export default function UsernameLayout({ children }) {
   return children
 }
-

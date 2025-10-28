@@ -52,7 +52,7 @@ const FooterSection = () => {
       <div className="bg-white mx-4 md:mx-6 mb-12 md:mb-20 rounded-2xl md:rounded-3xl p-6 md:p-8">
         {/* Logo Section */}
         <div className="max-w-6xl mx-auto mb-8 pb-6 border-b border-gray-200">
-          <BrandLogo size="lg" logoVariant="black" colorfulHover />
+          <BrandLogo size="lg" />
           <p className="text-sm text-gray-600 mt-2">The only link in bio trusted by 70M+ people</p>
         </div>
 

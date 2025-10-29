@@ -2,6 +2,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import Link from 'next/link';
 import BrandLogo from './BrandLogo';
+import { BASE_URL } from '../lib/constants';
 import { SiThreads } from 'react-icons/si';
 
 const FooterSection = () => {
@@ -194,7 +195,7 @@ const FooterSection = () => {
 
                 {/* VizitLink */}
                 <a 
-                  href="https://vizitlink.com" 
+                  href={BASE_URL} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="group w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center hover:bg-gradient-to-br hover:from-purple-600 hover:to-blue-600 transition-all duration-300 hover:scale-110 hover:shadow-lg cursor-pointer"

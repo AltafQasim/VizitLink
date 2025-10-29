@@ -1,6 +1,7 @@
 import { Roboto } from 'next/font/google'
 import './globals.css'
 import Providers from './providers'
+import { BASE_URL } from '../lib/constants' // Add this import
 
 const roboto = Roboto({
   weight: ['400','500','700'],
@@ -24,7 +25,7 @@ export const metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://vizitlink.com'),
+  metadataBase: new URL(BASE_URL),
   alternates: {
     canonical: '/',
   },
@@ -42,7 +43,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://vizitlink.com',
+    url: BASE_URL,
     siteName: 'VizitLink',
     title: 'VizitLink - Everything you are. In one, simple link in bio.',
     description: 'Join 70M+ people using VizitLink for their link in bio. One link to help you share everything you create, curate and sell from your Instagram, TikTok, Twitter, YouTube and other social media profiles.',

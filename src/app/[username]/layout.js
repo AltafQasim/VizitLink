@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { BASE_URL } from '../../lib/constants' // Add this import
 
 export async function generateMetadata({ params }) {
   // In Next.js 15, params might be a Promise, so we need to handle it properly
@@ -25,12 +26,12 @@ export async function generateMetadata({ params }) {
         title: `${username} - Profile Not Found`,
         description: 'This profile does not exist on VizitLink.',
         alternates: {
-          canonical: `https://vizitlink.com/${username}`,
+          canonical: `${BASE_URL}/${username}`,
         },
         openGraph: {
           title: `${username} - Profile Not Found`,
           description: 'This profile does not exist on VizitLink.',
-          url: `https://vizitlink.com/${username}`,
+          url: `${BASE_URL}/${username}`,
           type: 'website',
           siteName: 'VizitLink',
         },
@@ -44,8 +45,8 @@ export async function generateMetadata({ params }) {
 
     const title = `${profile.display_name || profile.username} | VizitLink`
     const description = profile.bio || `Check out ${profile.display_name || profile.username}'s VizitLink profile`
-    const profileUrl = `https://vizitlink.com/${profile.username}`
-    const imageUrl = profile.avatar_url || `https://vizitlink.com/og/image/${profile.username}.jpg`
+    const profileUrl = `${BASE_URL}/${profile.username}`
+    const imageUrl = profile.avatar_url || `${BASE_URL}/og/image/${profile.username}.jpg`
     const updatedTime = profile.updated_at ? new Date(profile.updated_at).getTime() : Date.now()
     
     return {
@@ -77,7 +78,7 @@ export async function generateMetadata({ params }) {
         title: title,
         description: description,
         images: [imageUrl],
-        domain: 'vizitlink.com',
+        domain: new URL(BASE_URL).hostname,
       },
       profile: {
         username: profile.username,
@@ -90,12 +91,12 @@ export async function generateMetadata({ params }) {
       title: `${username} | VizitLink`,
       description: `Check out ${username}'s VizitLink profile`,
       alternates: {
-        canonical: `https://vizitlink.com/${username}`,
+        canonical: `${BASE_URL}/${username}`,
       },
       openGraph: {
         title: `${username} | VizitLink`,
         description: `Check out ${username}'s VizitLink profile`,
-        url: `https://vizitlink.com/${username}`,
+        url: `${BASE_URL}/${username}`,
         type: 'website',
         siteName: 'VizitLink',
       },
@@ -103,7 +104,7 @@ export async function generateMetadata({ params }) {
         card: 'summary',
         title: `${username} | VizitLink`,
         description: `Check out ${username}'s VizitLink profile`,
-        domain: 'vizitlink.com',
+        domain: new URL(BASE_URL).hostname,
       },
     }
   }

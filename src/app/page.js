@@ -8,6 +8,7 @@ import AnalyticsSection from '../components/AnalyticsSection';
 import CreatorsSection from '../components/CreatorsSection';
 import FooterSection from '../components/FooterSection';
 import ShareSection from '../components/ShareSection';
+import { BASE_URL } from '../lib/constants'; // Add this import
 
 // Server Component - Static Page
 export default function Home() {
@@ -38,7 +39,7 @@ export const metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://vizitlink.com',
+    url: BASE_URL,
     siteName: 'VizitLink',
   },
 }

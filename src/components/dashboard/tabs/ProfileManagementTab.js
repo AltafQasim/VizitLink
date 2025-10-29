@@ -26,6 +26,7 @@ import {
   Loader2,
   Check
 } from 'lucide-react';
+import { BASE_URL } from '../../../lib/constants';
 
 export default function ProfileManagementTab() {
   const {
@@ -363,12 +364,12 @@ export default function ProfileManagementTab() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">Profile URL</span>
                     <a
-                      href={`https://vizitlink.com/${profile.username}`}
+                      href={`${BASE_URL}/${profile.username}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-purple-600 hover:text-purple-700 flex items-center"
                     >
-                      vizitlink.com/{profile.username}
+                      {new URL(BASE_URL).hostname}/{profile.username}
                       <ExternalLink className="w-3 h-3 ml-1" />
                     </a>
                   </div>
@@ -530,7 +531,7 @@ export default function ProfileManagementTab() {
                           : 'border-gray-300'
                   }`}>
                     <span className="px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r text-base">
-                      VizitLink.com/
+                      {new URL(BASE_URL).hostname}/
                     </span>
                     <input
                       type="text"

@@ -1,3 +1,5 @@
+import { BASE_URL } from '../lib/constants'; // Add this import
+
 export default function robots() {
   return {
     rules: [
@@ -7,7 +9,6 @@ export default function robots() {
         disallow: ['/dashboard/', '/api/', '/onboarding/'],
       },
     ],
-    sitemap: 'https://vizitlink.com/sitemap.xml',
+    sitemap: `${BASE_URL}/sitemap.xml`,
   }
 }
-

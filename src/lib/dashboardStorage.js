@@ -1,3 +1,4 @@
+import { BASE_URL } from './constants';
 import { supabase } from './supabase';
 
 const STORAGE_KEY = 'vizitlink_dashboard_data';
@@ -11,7 +12,7 @@ const defaultData = {
     displayName: 'Your Name',
     bio: 'Add your bio here',
     avatar: '',
-    customUrl: 'vizitlink.com/user',
+    customUrl: `${new URL(BASE_URL).hostname}/user`,
     isLive: true,
   },
   links: [
@@ -79,7 +80,7 @@ const defaultProfiles = [
     displayName: 'Your Name',
     bio: 'Add your bio here',
     avatar: '',
-    customUrl: 'vizitlink.com/user',
+    customUrl: `${new URL(BASE_URL).hostname}/user`,
     isLive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -509,8 +510,12 @@ export const loadProfilesFromBackend = async () => {
 };
 
 export const getProfileUrl = (username) => {
-  return `https://vizitlink.com/${username}`;
+  return `${BASE_URL}/${username}`;
 };
+
+export function getPublicProfileUrl(username) {
+  return `${BASE_URL}/${username}`;
+}
 
 // Check if a username is available (fast, head request with count)
 export const isUsernameAvailable = async (username) => {

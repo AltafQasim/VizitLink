@@ -1,7 +1,8 @@
 import { supabase } from '../lib/supabase'
+import { BASE_URL } from '../lib/constants' // Add this import
 
 export default async function sitemap() {
-  const baseUrl = 'https://vizitlink.com'
+  const baseUrl = BASE_URL
 
   // Static routes
   const staticRoutes = [
@@ -72,4 +73,3 @@ export default async function sitemap() {
 
   return [...staticRoutes, ...dynamicRoutes]
 }
-

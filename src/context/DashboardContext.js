@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, useCallback, useRef } f
 import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId, saveProductsForProfile, saveLinksForProfile, saveDesignByProfileId, saveProfileById } from '../lib/dashboardStorage';
 import { getCustomLinksByProfile, upsertCustomLinkForProfile, deleteCustomLinkById, reorderCustomLinks } from '../lib/customLinks';
 import { getSocialLinksByProfile, upsertSocialLinkForProfile, deleteSocialLinkById, reorderSocialLinks } from '../lib/socialLinks';
+import { supabase } from '../lib/supabase';
+import { BASE_URL } from '../lib/constants';
 
 const DashboardContext = createContext(undefined);
 
@@ -138,7 +140,7 @@ export function DashboardProvider({ children }) {
         displayName: profileData.displayName,
         bio: profileData.bio || '',
         avatar: profileData.avatar || '',
-        customUrl: `vizitlink.com/${profileData.username}`,
+        customUrl: `${new URL(BASE_URL).hostname}/${profileData.username}`,
         isLive: true,
       },
     ]);

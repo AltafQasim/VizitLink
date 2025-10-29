@@ -8,6 +8,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { DashboardProvider } from '../../context/DashboardContext';
 import { isUsernameAvailable, getUsernameSuggestions } from '../../lib/dashboardStorage';
 import { useDashboard } from '../../context/DashboardContext';
+import { BASE_URL } from '../../lib/constants';
 
 function OnboardingInner() {
   const { createProfile, needsProfileCreation, setNeedsProfileCreation, isLoading, profiles } = useDashboard();
@@ -102,7 +103,7 @@ function OnboardingInner() {
                         ? 'border-red-300'
                         : 'border-gray-300'
                 }`}>
-                  <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">vizitlink.com/</span>
+                  <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">{new URL(BASE_URL).hostname}/</span>
                   <input
                     type="text"
                     value={username}

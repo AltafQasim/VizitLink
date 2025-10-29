@@ -19,6 +19,7 @@ import { loadPublicProfileByUsername } from "../../lib/dashboardStorage";
 import { socialIconsMap, socialColorsMap } from "../../lib/social";
 import BrandLogo from "../../components/BrandLogo";
 import { SiFacebook, SiLinkedin, SiMessenger, SiWhatsapp } from "react-icons/si";
+import { BASE_URL } from "../../lib/constants";
 
 export default function PublicProfilePage({ params }) {
     // Unwrap params using React.use() to fix the Next.js warning
@@ -531,7 +532,7 @@ export default function PublicProfilePage({ params }) {
                             {/* Username Input */}
                             <div className="bg-white rounded-xl px-4 py-3 sm:py-3.5 mb-4 shadow-sm">
                                 <div className="flex items-center">
-                                    <span className="text-gray-500 text-sm sm:text-base mr-1">vizitlink.com/</span>
+                                    <span className="text-gray-500 text-sm sm:text-base mr-1">{new URL(BASE_URL).hostname}/</span>
                                     <input
                                         type="text"
                                         value={usernameInput}

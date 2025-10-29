@@ -18,6 +18,7 @@ import {
 import { loadPublicProfileByUsername } from "../../lib/dashboardStorage";
 import { socialIconsMap, socialColorsMap } from "../../lib/social";
 import BrandLogo from "../../components/BrandLogo";
+import { SiFacebook, SiLinkedin, SiMessenger, SiWhatsapp } from "react-icons/si";
 
 export default function PublicProfilePage({ params }) {
     // Unwrap params using React.use() to fix the Next.js warning
@@ -28,6 +29,7 @@ export default function PublicProfilePage({ params }) {
     const [showBrandModal, setShowBrandModal] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [usernameInput, setUsernameInput] = useState(''); // Add this state for username input
 
     // Handle copy to clipboard
     const handleCopyLink = () => {
@@ -68,7 +70,7 @@ export default function PublicProfilePage({ params }) {
                 if (loaded) {
                     setData(loaded);
                 }
-            } catch (_) { 
+            } catch (_) {
                 // Error handling
             } finally {
                 setIsLoading(false);
@@ -489,61 +491,86 @@ export default function PublicProfilePage({ params }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 sm:p-6"
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
                     onClick={() => setShowBrandModal(false)}
                 >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="bg-[#c4f241] rounded-3xl p-6 sm:p-8 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
+                        className="bg-[#c4f241] rounded-3xl p-6 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close Button */}
-                        <button
-                            onClick={() => setShowBrandModal(false)}
-                            className="sticky top-0 float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:opacity-70 transition-opacity bg-[#c4f241] rounded-full z-10 -mr-2 -mt-2 sm:-mr-4 sm:-mt-4"
-                            aria-label="Close modal"
-                        >
-                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
-                        </button>
+                        <div className="flex items-center justify-between relative">
+                            {/* Brand Icon */}
+                            <div className="w-10 h-10 sm:w-12 sm:h-12">
+                                <BrandLogo showText={false} linkToHome={false} className="w-10 h-10 sm:w-12 sm:h-12 text-gray-800" />
+                            </div>
+                            <button
+                                onClick={() => setShowBrandModal(false)}
+                                className="float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:opacity-70 transition-opacity bg-[#c4f241] rounded-full z-10"
+                                aria-label="Close modal"
+                            >
+                                <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+                            </button>
+                        </div>
 
                         {/* Content */}
                         <div className="flex flex-col clear-both">
-                            {/* Brand Icon */}
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 mb-4 sm:mb-5">
-                                <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-gray-800" />
-                            </div>
-
                             {/* Heading */}
                             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
                                 Join the only link in bio trusted by <span className="text-blue-600">70M+</span>
                             </h2>
 
                             {/* Subheading */}
-                            <p className="text-sm sm:text-base text-gray-800 mb-4 sm:mb-5">
+                            <p className="text-sm sm:text-base text-gray-800 mb-4">
                                 One link to share everything you create, curate and sell across IG, TikTok and more.
                             </p>
 
-                            {/* URL Input */}
-                            <div className="bg-white rounded-xl px-4 py-3 sm:py-3.5 mb-4 sm:mb-5 shadow-sm">
-                                <span className="text-gray-500 text-sm sm:text-base">vizitlink/</span>
-                                <span className="text-gray-400 text-sm sm:text-base">yourname</span>
+                            {/* Username Input */}
+                            <div className="bg-white rounded-xl px-4 py-3 sm:py-3.5 mb-4 shadow-sm">
+                                <div className="flex items-center">
+                                    <span className="text-gray-500 text-sm sm:text-base mr-1">vizitlink.com/</span>
+                                    <input
+                                        type="text"
+                                        value={usernameInput}
+                                        onChange={(e) => setUsernameInput(e.target.value)}
+                                        placeholder="yourname"
+                                        className="flex-1 text-sm sm:text-base text-gray-900 placeholder-gray-400 bg-transparent border-none focus:outline-none focus:ring-0"
+                                    />
+                                </div>
                             </div>
 
                             {/* Claim Button */}
-                            <button className="w-full bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-bold py-3 sm:py-3.5 px-6 rounded-full mb-4 sm:mb-5 transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                            <button
+                                className="w-full bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-bold py-3 sm:py-3.5 px-6 rounded-full mb-4 sm:mb-5 transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]"
+                                onClick={() => {
+                                    // Redirect to signup page with username as query parameter
+                                    window.location.href = `/signup${usernameInput ? `?username=${encodeURIComponent(usernameInput)}` : ''}`;
+                                }}
+                            >
                                 Claim your VizitLink
                             </button>
 
                             {/* Links */}
-                            <div className="space-y-2 mb-4 sm:mb-5">
-                                <a href="#" className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]">
-                                    Subscribe to @altafak01
-                                </a>
-                                <a href="#" className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]">
+                            <div className="mb-4">
+                                <Link
+                                    href="https://instagram.com/vizitlink"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]"
+                                >
+                                    Follow on Instagram @vizitlink
+                                </Link>
+                                <Link
+                                    href="/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-800 hover:underline flex items-center text-sm sm:text-base min-h-[44px]"
+                                >
                                     Learn more about VizitLink
-                                </a>
+                                </Link>
                             </div>
 
                             {/* Bottom CTA */}
@@ -553,12 +580,18 @@ export default function PublicProfilePage({ params }) {
                                     Get your own free VizitLink. The only link in bio trusted by 70M+ people.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-3">
-                                    <button className="flex-1 bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                    <Link
+                                        className="flex-1 text-center bg-gray-800 hover:bg-gray-900 text-[#c4f241] font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]"
+                                        href="/signup"
+                                    >
                                         Sign up free
-                                    </button>
-                                    <button className="flex-1 border-2 border-gray-800 text-gray-800 font-semibold py-3 sm:py-3.5 px-6 rounded-full hover:bg-gray-800 hover:text-[#c4f241] transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                    </Link>
+                                    <Link
+                                        className="flex-1 text-center border-2 border-gray-800 text-gray-800 font-semibold py-3 sm:py-3.5 px-6 rounded-full hover:bg-gray-800 hover:text-[#c4f241] transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]"
+                                        href="/"
+                                    >
                                         Find out more
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -572,27 +605,28 @@ export default function PublicProfilePage({ params }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 sm:p-6"
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
                     onClick={() => setShowShareModal(false)}
                 >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
+                        className="bg-white rounded-3xl p-6 max-w-md w-full relative overflow-y-auto max-h-[90vh] sm:max-h-[85vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Close Button */}
-                        <button
-                            onClick={() => setShowShareModal(false)}
-                            className="sticky top-0 float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors z-10 -mr-2 -mt-2 sm:-mr-4 sm:-mt-4"
-                            aria-label="Close modal"
-                        >
-                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
-                        </button>
-
-                        {/* Title */}
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-7 text-center clear-both">Share VizitLink</h3>
+                        <div className="flex items-center justify-between relative mb-3">
+                            {/* Title */}
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 text-center clear-both">Share VizitLink</h3>
+                            <button
+                                onClick={() => setShowShareModal(false)}
+                                className="float-right w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center hover:opacity-70 transition-opacity rounded-full z-10"
+                                aria-label="Close modal"
+                            >
+                                <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
+                            </button>
+                        </div>
 
                         {/* Profile Card */}
                         <div className="bg-gradient-to-br from-teal-400 to-teal-500 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-7 text-center">
@@ -645,7 +679,7 @@ export default function PublicProfilePage({ params }) {
                                 aria-label="Share on Facebook"
                             >
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#1877f2] hover:bg-[#0d65d9] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
-                                    <Facebook className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
+                                    <SiFacebook className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
                                 </div>
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">Facebook</span>
                             </button>
@@ -657,7 +691,7 @@ export default function PublicProfilePage({ params }) {
                                 aria-label="Share on WhatsApp"
                             >
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#25d366] hover:bg-[#1fb855] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
-                                    <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
+                                    <SiWhatsapp className="w-6 h-6 sm:w-7 sm:h-7 text-white fill-current" />
                                 </div>
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">WhatsApp</span>
                             </button>
@@ -669,7 +703,7 @@ export default function PublicProfilePage({ params }) {
                                 aria-label="Share on LinkedIn"
                             >
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#0a66c2] hover:bg-[#004182] rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
-                                    <Linkedin className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
+                                    <SiLinkedin className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
                                 </div>
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">LinkedIn</span>
                             </button>
@@ -681,7 +715,7 @@ export default function PublicProfilePage({ params }) {
                                 aria-label="Share on Messenger"
                             >
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#00b2ff] to-[#006aff] hover:opacity-90 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-sm">
-                                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
+                                    <SiMessenger className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-current" />
                                 </div>
                                 <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight text-center">Messenger</span>
                             </button>
@@ -694,12 +728,18 @@ export default function PublicProfilePage({ params }) {
                                 Get your own free VizitLink. The only link in bio trusted by 70M+ people.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <button className="flex-1 bg-black hover:bg-gray-800 text-white font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                <Link
+                                    className="flex-1 text-center text-white bg-gray-800 hover:bg-gray-900 font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]"
+                                    href="/signup"
+                                >
                                     Sign up free
-                                </button>
-                                <button className="flex-1 border-2 border-gray-300 hover:border-gray-400 text-gray-900 font-semibold py-3 sm:py-3.5 px-6 rounded-full transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]">
+                                </Link>
+                                <Link
+                                    className="flex-1 text-center border-2 border-gray-800 text-gray-800 font-semibold py-3 sm:py-3.5 px-6 rounded-full hover:bg-gray-800 hover:text-white transition-all hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base min-h-[48px]"
+                                    href="/"
+                                >
                                     Find out more
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     </motion.div>

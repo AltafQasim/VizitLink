@@ -537,7 +537,7 @@ export default function ProfileManagementTab() {
                       type="text"
                       value={newUsername}
                       onChange={handleUsernameChange}
-                      className="flex-1 px-4 py-4 outline-none text-base focus:outline-none focus:border-0"
+                      className="flex-1 px-3 sm:px-4 py-3 sm:py-4 focus:outline-none focus:border-transparent focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none !outline-none !border-0 !ring-0 !ring-offset-0"
                       placeholder="username"
                       autoFocus
                     />
@@ -680,7 +680,7 @@ export default function ProfileManagementTab() {
                   <span className="font-semibold">New username:</span> {normalizeUsername(newUsername)}
                 </p>
                 <p className="text-gray-900">
-                  <span className="font-semibold">New URL:</span> https://linktr.ee/{normalizeUsername(newUsername)}
+                  <span className="font-semibold">New URL:</span> {new URL(BASE_URL).hostname}/{normalizeUsername(newUsername)}
                 </p>
               </div>
 

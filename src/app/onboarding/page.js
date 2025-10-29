@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, ArrowBigLeft, ArrowLeft } from 'lucide-react';
 import BrandLogo from '../../components/BrandLogo';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../components/ProtectedRoute';
@@ -80,7 +80,7 @@ function OnboardingInner() {
       <div className="px-6 sm:px-10 lg:px-16 py-8 flex flex-col items-center justify-center">
         {Array.isArray(profiles) && profiles.length > 0 && (
           <button onClick={() => router.push('/dashboard')} className="self-start text-sm text-gray-600 mb-8 inline-flex items-center gap-2">
-            <span>←</span> Back to admin
+            <ArrowLeft /> Back to Dashboard
           </button>
         )}
         <div className="w-full bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
@@ -108,7 +108,7 @@ function OnboardingInner() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(normalized(e.target.value))}
-                    className="flex-1 px-3 sm:px-4 py-3 sm:py-4 outline-none"
+                    className="flex-1 px-3 sm:px-4 py-3 sm:py-4 focus:outline-none focus:border-transparent focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none !outline-none !border-0 !ring-0 !ring-offset-0"
                     placeholder="yourname"
                     required
                     autoFocus
@@ -153,7 +153,7 @@ function OnboardingInner() {
             <button
               type="submit"
               disabled={submitting || username.trim().length === 0 || available === false || checking || !isValidPattern}
-              className="w-full py-4 rounded-xl bg-gray-900 text-white disabled:bg-gray-200 disabled:text-gray-500"
+              className="w-full py-4 rounded-full bg-gray-900 text-white disabled:bg-gray-200 disabled:text-gray-500"
             >
               {submitting ? 'Creating…' : 'Continue'}
             </button>

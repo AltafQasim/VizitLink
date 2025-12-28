@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, ArrowBigLeft, ArrowLeft } from 'lucide-react';
+import BrandLogo from '../../components/BrandLogo';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { DashboardProvider } from '../../context/DashboardContext';
 import { isUsernameAvailable, getUsernameSuggestions } from '../../lib/dashboardStorage';
 import { useDashboard } from '../../context/DashboardContext';
+import { BASE_URL } from '../../lib/constants';
 
 function OnboardingInner() {
   const { createProfile, needsProfileCreation, setNeedsProfileCreation, isLoading, profiles } = useDashboard();
@@ -78,32 +80,43 @@ function OnboardingInner() {
       <div className="px-6 sm:px-10 lg:px-16 py-8 flex flex-col items-center justify-center">
         {Array.isArray(profiles) && profiles.length > 0 && (
           <button onClick={() => router.push('/dashboard')} className="self-start text-sm text-gray-600 mb-8 inline-flex items-center gap-2">
-            <span>←</span> Back to admin
+            <ArrowLeft /> Back to Dashboard
           </button>
         )}
         <div className="w-full bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+          {/* Logo */}
+          <div className="flex items-center justify-center mb-6">
+            <BrandLogo size="xl" showText={false} linkToHome={false} />
+          </div>
+          
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 text-center">Choose a username</h1>
           <p className="text-gray-600 mb-6 text-center">Choose a VizitLink URL for your new profile. You can always change it later.</p>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <div className="relative">
                 <div className={`flex items-stretch border rounded-xl bg-white overflow-hidden transition-colors ${
-                  checking ? 'border-gray-300' : (available === true && isValidPattern) ? 'border-green-400' : ((available === false || !isValidPattern) ? 'border-red-300' : 'border-gray-300')
+                  checking
+                    ? 'border-gray-300'
+                    : (username && available === true && isValidPattern)
+                      ? 'border-green-400'
+                      : (username && (available === false || !isValidPattern))
+                        ? 'border-red-300'
+                        : 'border-gray-300'
                 }`}>
-                  <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">vizitlink.com/</span>
+                  <span className="px-3 sm:px-4 inline-flex items-center text-gray-500 bg-gray-50 border-r">{new URL(BASE_URL).hostname}/</span>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(normalized(e.target.value))}
-                    className="flex-1 px-3 sm:px-4 py-3 sm:py-4 outline-none"
+                    className="flex-1 px-3 sm:px-4 py-3 sm:py-4 focus:outline-none focus:border-transparent focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none !outline-none !border-0 !ring-0 !ring-offset-0"
                     placeholder="yourname"
                     required
                     autoFocus
                   />
                   <span className="w-12 flex items-center justify-center">
                     {checking && <Loader2 className="h-5 w-5 animate-spin text-gray-400" />}
-                    {!checking && available === true && isValidPattern && <Check className="h-5 w-5 text-green-600" />}
-                    {!checking && (available === false || !isValidPattern) && <X className="h-5 w-5 text-red-500" />}
+                    {!checking && username && available === true && isValidPattern && <Check className="h-5 w-5 text-green-600" />}
+                    {!checking && username && (available === false || !isValidPattern) && <X className="h-5 w-5 text-red-500" />}
                   </span>
                 </div>
                 <div className="mt-2 text-xs sm:text-sm text-gray-500 flex items-center justify-between">
@@ -140,7 +153,7 @@ function OnboardingInner() {
             <button
               type="submit"
               disabled={submitting || username.trim().length === 0 || available === false || checking || !isValidPattern}
-              className="w-full py-4 rounded-xl bg-gray-900 text-white disabled:bg-gray-200 disabled:text-gray-500"
+              className="w-full py-4 rounded-full bg-gray-900 text-white disabled:bg-gray-200 disabled:text-gray-500"
             >
               {submitting ? 'Creating…' : 'Continue'}
             </button>

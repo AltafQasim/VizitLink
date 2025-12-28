@@ -1,5 +1,14 @@
 import StickyNavbar from '../../components/StickyNavbar';
 
+export const metadata = {
+  title: 'Pricing',
+  description: 'Choose the perfect VizitLink plan for your needs. Free, Pro, and Premium plans available.',
+  openGraph: {
+    title: 'VizitLink Pricing',
+    description: 'Choose the perfect VizitLink plan for your needs. Free, Pro, and Premium plans available.',
+  },
+}
+
 export default function PricingPage() {
   return (
     <div>

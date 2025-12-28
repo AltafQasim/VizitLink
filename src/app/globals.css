@@ -8,94 +8,121 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand palette (HSL components from provided hex colors) */
+    --hydrangea: 219 70% 49%; /* #2665d6 */
+    --marble: 60 6% 95%; /* #f3f3f1 */
+    --forest: 105 51% 21%; /* #254f1a */
+    --currant: 350 100% 24%; /* #780016 */
+    --lavender: 300 46% 84%; /* #e9c0e9 */
+    --goldenrod: 42 62% 53%; /* #d6a336 */
+    --iris: 231 94% 30%; /* #061492 */
+    --chartreuse: 70 81% 53%; /* #d2e823 */
+    --orange-red: 355 97% 62%; /* #fc3e4b */
+    --white: 0 0% 100%;
+    --lichen: 80 10% 96%; /* #f6f7f5 */
+    --light-green: 80 48% 88%; /* #e8efd6 */
+    --poppy: 32 100% 53%; /* #ff9313 */
+    --black: 0 0% 0%;
+    --dahlia: 271 41% 24%; /* #502274 */
+    --shade: 223 23% 16%; /* #1e2330 */
+    --root: 35 88% 16%; /* #4c2e05 */
+    --light-blue: 188 98% 39%; /* #02acc4 */
+    --canopy: 137 75% 59%; /* #43e660 */
+    --orchid: 295 99% 43%; /* #cc01dd */
+    --sky: 188 98% 39%; /* #02acc4 */
+    --concrete: 85 6% 40%; /* #676b5f */
+    --heather: 0 0% 50%; /* grey */
+    --grey: 75 12% 86%; /* #e0e2d9 */
+    --light-grey: 0 0% 91%; /* #e9e9e9 */
+    --accessible-dodger-blue: 211 82% 45%; /* #1378d1 */
+    --red: 8 100% 39%; /* #c41500 */
+    --dce7c3: 78 44% 85%; /* #dce7c3 */
+    
+    /* Custom action colors */
+    --action-primary: 272 98% 56%; /* #7f22fe - Primary action buttons */
+    --action-primary-hover: 272 98% 50%; /* Darker purple for hover */
+    --switch-active: 135 99% 22%; /* #016e1a - Active switches/toggles */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Design tokens mapped to brand palette */
+    --background: var(--marble);
+    --foreground: var(--shade);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --card: var(--white);
+    --card-foreground: var(--shade);
 
-    --primary: 129 89% 89%;
-    --primary-foreground: 129 100% 15%;
+    --popover: var(--white);
+    --popover-foreground: var(--shade);
 
-    --secondary: 129 100% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --primary: var(--hydrangea);
+    --primary-foreground: var(--white);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --secondary: var(--lavender);
+    --secondary-foreground: var(--shade);
 
-    --accent: 73 100% 70%;
-    --accent-foreground: 129 100% 15%;
+    --muted: var(--grey);
+    --muted-foreground: 223 10% 35%; /* slightly muted text on grey */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: var(--chartreuse);
+    --accent-foreground: var(--shade);
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive: var(--red);
+    --destructive-foreground: var(--white);
 
-    --radius: 0.5rem;
+    --border: var(--light-grey);
+    --input: var(--light-grey);
+    --ring: var(--accessible-dodger-blue);
 
-    /* Custom VizitLink colors */
-    --lime-green: 73 100% 70%;
-    --dark-green: 129 100% 15%;
-    --hero-bg: 129 100% 15%;
-    --banner-bg: 73 100% 70%;
+    --radius: 0.625rem;
 
+    /* Sidebar tokens aligned to palette */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 223 23% 16%;
+    --sidebar-primary: var(--hydrangea);
+    --sidebar-primary-foreground: var(--white);
+    --sidebar-accent: var(--grey);
+    --sidebar-accent-foreground: 223 23% 16%;
+    --sidebar-border: var(--light-grey);
+    --sidebar-ring: var(--accessible-dodger-blue);
   }
 
   .dark {
-    --background: 129 100% 15%;
-    --foreground: 210 40% 98%;
+    --background: 223 23% 10%; /* deepen shade for backgrounds */
+    --foreground: 0 0% 98%;
 
-    --card: 129 100% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 223 23% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 129 100% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 223 23% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 73 100% 70%;
-    --primary-foreground: 129 100% 15%;
+    --primary: var(--hydrangea);
+    --primary-foreground: var(--white);
 
-    --secondary: 129 89% 89%;
-    --secondary-foreground: 129 100% 15%;
+    --secondary: 300 24% 24%; /* muted lavender base */
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 223 15% 18%;
+    --muted-foreground: 223 12% 70%;
 
-    --accent: 73 100% 70%;
-    --accent-foreground: 129 100% 15%;
+    --accent: var(--chartreuse);
+    --accent-foreground: 223 23% 16%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: var(--red);
+    --destructive-foreground: var(--white);
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 223 15% 20%;
+    --input: 223 15% 20%;
+    --ring: var(--hydrangea);
 
-    /* Custom VizitLink colors for dark mode */
-    --lime-green: 73 100% 70%;
-    --dark-green: 129 100% 15%;
-    --hero-bg: 129 100% 15%;
-    --banner-bg: 73 100% 70%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Sidebar (dark) */
+    --sidebar-background: 223 23% 12%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: var(--hydrangea);
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 223 15% 18%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 223 15% 18%;
+    --sidebar-ring: var(--hydrangea);
   }
 }
 
@@ -104,35 +131,46 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    /* Prevent font size scaling on orientation change and browser zoom */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Set base font size */
+    font-size: 16px;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    /* Maintain consistent font size */
+    font-size: 1rem;
   }
   
   .hero-title {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 800;
-    font-size: 96px;
+    font-size: clamp(40px, 6vw, 96px);
     line-height: 1.1;
     letter-spacing: -0.02em;
   }
-  
-  @media (max-width: 1024px) {
-    .hero-title {
-      font-size: 72px;
-    }
+
+  h1, h2, h3 {
+    letter-spacing: -0.01em;
   }
-  
-  @media (max-width: 768px) {
-    .hero-title {
-      font-size: 56px;
-    }
+
+  p {
+    margin-block: 0.5rem;
   }
-  
-  @media (max-width: 640px) {
-    .hero-title {
-      font-size: 48px;
-    }
+
+  /* Improved focus outline for accessibility */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3), 0 0 0 1.5px hsl(var(--ring));
+    border-radius: 8px;
   }
 }
 
@@ -168,6 +206,15 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-slide-up {
   animation: slide-up 0.6s ease-out forwards;
 }
@@ -178,6 +225,34 @@ All colors MUST be HSL.
 
 .animate-fade-in {
   animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 } 
 
 /* ------------------------------ */

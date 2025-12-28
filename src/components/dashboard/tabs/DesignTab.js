@@ -381,18 +381,18 @@ const DesignTab = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Sticky Design Controls Header */}
+            {/* Sticky Design Controls Header - Mobile optimized */}
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm transform-gpu">
-                <div className="max-w-4xl mx-auto px-0 sm:px-4 py-2.5 sm:py-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        <div className="flex items-center space-x-2 sm:space-x-3">
-                            <div className="flex items-center space-x-2">
+                <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2">
+                        <div className="flex items-center justify-between sm:justify-start space-x-2 sm:space-x-3">
+                            <div className="flex items-center space-x-1 sm:space-x-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={handleUndo}
                                     disabled={!canUndo}
-                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200 h-9"
+                                    className="flex items-center gap-1 sm:gap-2 hover:bg-gray-50 transition-all duration-200 h-10 w-10 sm:h-9 sm:w-auto sm:px-3"
                                 >
                                     <Undo2 className="w-4 h-4" />
                                     <span className="hidden sm:inline">Undo</span>
@@ -402,14 +402,14 @@ const DesignTab = () => {
                                     size="sm"
                                     onClick={handleRedo}
                                     disabled={!canRedo}
-                                    className="flex items-center gap-2 hover:bg-gray-50 transition-all duration-200 h-9"
+                                    className="flex items-center gap-1 sm:gap-2 hover:bg-gray-50 transition-all duration-200 h-10 w-10 sm:h-9 sm:w-auto sm:px-3"
                                 >
                                     <Redo2 className="w-4 h-4" />
                                     <span className="hidden sm:inline">Redo</span>
                                 </Button>
                             </div>
 
-                            {/* Status indicator */}
+                            {/* Status indicator - Mobile optimized */}
                             <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
                                 <div className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`}></div>
                                 <span className="hidden sm:inline">
@@ -423,20 +423,18 @@ const DesignTab = () => {
                                 <Button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md h-9 px-3"
+                                    className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md h-10 sm:h-9 px-4 sm:px-3 w-full sm:w-auto"
                                 >
                                     {isSaving ? (
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                     ) : (
                                         <Save className="w-4 h-4" />
                                     )}
-                                    <span className="hidden sm:inline">
+                                    <span className="text-sm sm:text-base">
                                         {isSaving ? "Saving..." : "Save Changes"}
                                     </span>
                                 </Button>
                             )}
-
-
                         </div>
                     </div>
                 </div>
@@ -562,13 +560,13 @@ const DesignTab = () => {
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                             {activeTab === "Customizable" && (
                                 <>
                                     {themes.map((theme) => (
                                         <Card
                                             key={theme.name}
-                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                            className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden min-h-[120px] sm:min-h-[140px] ${theme.selected ? "ring-2 ring-purple-500 shadow-lg" : ""
                                                 }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
@@ -577,7 +575,7 @@ const DesignTab = () => {
                                                 {theme.type === "gradient" && (
                                                     <div className="absolute inset-0 bg-black/10" />
                                                 )}
-                                                <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                                                <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl">
                                                     {theme.name === "Air" && <span>💨</span>}
                                                     {theme.name === "Blocks" && <span>🧱</span>}
                                                     {theme.name === "Bloom" && <span>🌸</span>}
@@ -591,23 +589,23 @@ const DesignTab = () => {
                                                     {theme.name === "Summer" && <span>☀️</span>}
                                                     {theme.name === "Autumn" && <span>🍂</span>}
                                                 </div>
-                                                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                                <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 right-1 sm:right-2 flex items-center justify-between">
                                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
                                             </div>
 
-                                            {/* Pro Badge */}
+                                            {/* Pro Badge - Mobile optimized */}
                                             {theme.isPro && (
-                                                <div className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                                                <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 shadow-lg">
                                                     <Zap className="h-3 w-3" />
-                                                    Pro
+                                                    <span className="hidden sm:inline">Pro</span>
                                                 </div>
                                             )}
 
-                                            {/* Selected Indicator */}
+                                            {/* Selected Indicator - Mobile optimized */}
                                             {theme.selected && (
-                                                <div className="absolute top-2 right-2 w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                                <div className="absolute top-1 sm:top-2 right-1 sm:right-2 w-5 h-5 sm:w-6 sm:h-6 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                                                 </div>
                                             )}
                                         </Card>
@@ -677,11 +675,11 @@ const DesignTab = () => {
                     </div>
 
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
                             {wallpapers.map((wallpaper) => (
                                 <Card
                                     key={wallpaper.name}
-                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden ${selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                    className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-lg overflow-hidden min-h-[120px] sm:min-h-[140px] ${selectedWallpaper === wallpaper.name ? "ring-2 ring-purple-500 shadow-lg" : ""
                                         }`}
                                     onClick={() => handleWallpaperChange(wallpaper.name)}
                                 >
@@ -724,24 +722,22 @@ const DesignTab = () => {
                                         {(wallpaper.type === 'image' || wallpaper.type === 'video') && (
                                             <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(data?.design?.wallpaperTint || 0)) / 100})` }} />
                                         )}
-                                        {/* Bottom labels */}
-                                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                        {/* Bottom labels - Mobile optimized */}
+                                        <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 right-1 sm:right-2 flex items-center justify-between">
                                             <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{wallpaper.name}</span>
                                         </div>
                                     </div>
 
-                                    {/* Pro Badge */}
+                                    {/* Pro Badge - Mobile optimized */}
                                     {wallpaper.isPro && (
                                         <div className="absolute top-1 right-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full shadow-lg">
-                                            Pro
+                                            <span className="hidden sm:inline">Pro</span>
                                         </div>
                                     )}
 
-
-
-                                    {/* Selected Indicator */}
+                                    {/* Selected Indicator - Mobile optimized */}
                                     {selectedWallpaper === wallpaper.name && (
-                                        <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                                        <div className="absolute top-1 sm:top-2 right-1 sm:right-2 w-4 h-4 sm:w-4 sm:h-4 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
                                             <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                                         </div>
                                     )}
@@ -753,8 +749,20 @@ const DesignTab = () => {
                         <Dialog open={isWallpaperModalOpen} onOpenChange={setIsWallpaperModalOpen}>
                             <DialogContent className="max-w-xl">
                                 <DialogHeader>
+                                    <div className="flex items-center justify-between">
+                                        <div>
                                     <DialogTitle>Choose an image</DialogTitle>
                                     <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setIsWallpaperModalOpen(false)}
+                                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </DialogHeader>
 
                                 {wallpaperModalStep === 'menu' && (
@@ -912,8 +920,20 @@ const DesignTab = () => {
                         <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
                             <DialogContent className="max-w-xl">
                                 <DialogHeader>
+                                    <div className="flex items-center justify-between">
+                                        <div>
                                     <DialogTitle>Choose a video</DialogTitle>
                                     <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setIsVideoModalOpen(false)}
+                                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </DialogHeader>
 
                                 {videoModalStep === 'menu' && (
@@ -1071,8 +1091,20 @@ const DesignTab = () => {
                         <Dialog open={isTintModalOpen} onOpenChange={setIsTintModalOpen}>
                             <DialogContent className="max-w-xl">
                                 <DialogHeader>
+                                    <div className="flex items-center justify-between">
+                                        <div>
                                     <DialogTitle>Adjust Tint</DialogTitle>
                                     <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setIsTintModalOpen(false)}
+                                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </DialogHeader>
 
                                 <div className="mt-4">
@@ -1176,25 +1208,20 @@ const DesignTab = () => {
                         {activeStyleTab === "Presets" && (
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">Button and font</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                     {buttonStyles.map((style) => (
                                         <Card
                                             key={style.name}
-                                            className={`cursor-pointer transition-all hover:scale-105 ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
+                                                className={`cursor-pointer transition-all hover:scale-105 min-h-[100px] sm:min-h-[120px] ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
                                                 }`}
                                             onClick={() => handleStyleChange(style.name)}
                                         >
-                                            <div className="p-4 flex flex-col items-center gap-3">
-                                                <div className={`px-4 py-2 text-sm ${style.style}`}>
+                                                <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
+                                                    <div className={`px-3 sm:px-4 py-2 text-sm ${style.style}`}>
                                                     Button
                                                 </div>
                                                 <p className="text-sm font-medium text-center">{style.name}</p>
                                             </div>
-                                            {/* {(style.name === "Retro" || style.name === "Modern") && (
-                                                <div className="absolute top-2 right-2 w-5 h-5 bg-gray-400 rounded-full flex items-center justify-center">
-                                                    <span className="text-white text-xs">?</span>
-                                                </div>
-                                            )} */}
                                         </Card>
                                     ))}
                                 </div>
@@ -1206,19 +1233,19 @@ const DesignTab = () => {
                                 {/* Font Selection */}
                                 <div>
                                     <h3 className="text-lg font-semibold mb-4">Font Family</h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                         {fonts.map((font) => (
                                             <Card
                                                 key={font.name}
-                                                className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
+                                                className={`cursor-pointer transition-all hover:scale-105 hover:shadow-lg min-h-[120px] sm:min-h-[140px] ${selectedFont === font.name ? "ring-2 ring-purple-500 shadow-lg" : ""
                                                     }`}
                                                 onClick={() => handleFontChange(font.name)}
                                             >
-                                                <div className="p-4 flex flex-col items-center gap-3">
-                                                    {/* Font Preview */}
-                                                    <div className="w-full h-16 bg-gray-50 rounded-lg flex items-center justify-center p-2">
+                                                <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
+                                                    {/* Font Preview - Mobile optimized */}
+                                                    <div className="w-full h-12 sm:h-16 bg-gray-50 rounded-lg flex items-center justify-center p-2">
                                                         <span
-                                                            className="text-lg font-medium text-gray-800"
+                                                            className="text-base sm:text-lg font-medium text-gray-800"
                                                             style={{
                                                                 fontFamily: font.family,
                                                                 fontWeight: font.weight
@@ -1235,9 +1262,9 @@ const DesignTab = () => {
                                                     <span className="text-xs text-gray-500">{font.weight}</span>
                                                 </div>
 
-                                                {/* Selected Indicator */}
+                                                {/* Selected Indicator - Mobile optimized */}
                                                 {selectedFont === font.name && (
-                                                    <div className="absolute top-2 right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                                                    <div className="absolute top-1 sm:top-2 right-1 sm:right-2 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
                                                         <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                                                     </div>
                                                 )}

@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from 'react';
+import BrandLogo from '../BrandLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
 import { useAuth } from '../../context/AuthContext';
 import { useDashboard } from '../../context/DashboardContext';
 import { getProfileUrl } from '../../lib/dashboardStorage';
-import { 
-  Menu, 
-  X, 
-  Copy, 
-  Check, 
-  Settings, 
+import {
+  Menu,
+  X,
+  Copy,
+  Check,
+  Settings,
   LogOut,
   Crown,
   User,
   Bell,
   Save
 } from 'lucide-react';
+import ProfileSwitcher from './ProfileSwitcher';
 
 export default function MobileNavbar() {
   const { user, signOut } = useAuth();
@@ -37,13 +39,18 @@ export default function MobileNavbar() {
   };
 
   const menuItems = [
-    { id: 'links', label: 'My VizitLink' },
-    { id: 'shop', label: 'Shop' },
-    { id: 'design', label: 'Design' },
+    // Current Profile section
+    { id: 'profile-header', label: 'My VizitLink', isHeader: true },
+    { id: 'links', label: 'Links', isProfileTab: true },
+    { id: 'shop', label: 'Shop', isProfileTab: true },
+    { id: 'design', label: 'Design', isProfileTab: true },
+    // Separator
+    { id: 'separator-1', isSeparator: true },
+    // Other items
     { id: 'profiles', label: 'Profiles' },
-    { id: 'audience', label: 'Audience' },
-    { id: 'insights', label: 'Insights' },
-    { id: 'tools', label: 'Tools' },
+    // { id: 'audience', label: 'Audience' },
+    // { id: 'insights', label: 'Insights' },
+    // { id: 'tools', label: 'Tools' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -52,11 +59,11 @@ export default function MobileNavbar() {
       {/* Mobile Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <h1 className="font-bold text-gray-900 text-lg">VizitLink</h1>
-          <div className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-          </div>
+        <BrandLogo size="sm" />
+
+        {/* User/Profile Switcher */}
+        <div className="border-gray-100">
+          <ProfileSwitcher />
         </div>
 
         {/* Right side */}
@@ -73,10 +80,10 @@ export default function MobileNavbar() {
           )}
 
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
+          {/* <Button variant="ghost" size="sm" className="relative">
             <Bell className="w-5 h-5" />
             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-          </Button>
+          </Button> */}
 
           {/* Menu button */}
           <Button
@@ -114,7 +121,7 @@ export default function MobileNavbar() {
                   {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
                 </Button>
               </div>
-              
+
               {data.profile.isLive && (
                 <div className="flex items-center space-x-1 text-green-600 text-sm mt-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -126,33 +133,58 @@ export default function MobileNavbar() {
             {/* Navigation */}
             <div className="px-4 py-2">
               <div className="space-y-1">
-                {menuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id);
-                      if (typeof window !== 'undefined') {
-                        const url = new URL(window.location.href);
-                        url.pathname = `/dashboard/${item.id}`;
-                        url.searchParams.delete('tab');
-                        window.history.pushState({}, '', url.toString());
-                      }
-                      setShowMenu(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      activeTab === item.id
-                        ? 'bg-purple-100 text-purple-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+                {menuItems.map((item) => {
+                  // Render header
+                  if (item.isHeader) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-2"
+                      >
+                        {item.label}
+                      </div>
+                    );
+                  }
+
+                  // Render separator
+                  if (item.isSeparator) {
+                    return (
+                      <div
+                        key={item.id}
+                        className="border-t border-gray-200 my-2"
+                      />
+                    );
+                  }
+
+                  // Render regular menu item
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        if (typeof window !== 'undefined') {
+                          const url = new URL(window.location.href);
+                          url.pathname = `/dashboard/${item.id}`;
+                          url.searchParams.delete('tab');
+                          window.history.pushState({}, '', url.toString());
+                        }
+                        setShowMenu(false);
+                      }}
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${item.isProfileTab ? 'pl-6' : ''
+                        } ${activeTab === item.id
+                          ? 'bg-gradient-to-r from-purple-100 to-blue-50 text-purple-700 font-medium border border-purple-200'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* User section */}
-            <div className="px-4 py-3 border-t border-gray-100">
+            {/* <div className="px-4 py-3 border-t border-gray-100">
               <div className="flex items-center space-x-3 mb-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
@@ -170,18 +202,18 @@ export default function MobileNavbar() {
                   <User className="w-4 h-4 mr-2" />
                   Account Settings
                 </button>
-                
+
                 <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
                   <Crown className="w-4 h-4 mr-2" />
                   Upgrade to Pro
                 </button>
-                
+
                 <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center">
                   <Settings className="w-4 h-4 mr-2" />
                   Preferences
                 </button>
-                
-                <button 
+
+                <button
                   onClick={signOut}
                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center text-red-600"
                 >
@@ -189,7 +221,7 @@ export default function MobileNavbar() {
                   Sign Out
                 </button>
               </div>
-            </div>
+            </div> */}
           </motion.div>
         )}
       </AnimatePresence>

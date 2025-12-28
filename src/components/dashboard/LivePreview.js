@@ -7,11 +7,15 @@ import {
   Eye,
   EyeOff,
   Lock,
-  ExternalLink
+  ExternalLink,
+  Sparkles,
+  ShareIcon,
+  Share2
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { socialIconsMap, socialColorsMap } from '../../lib/social';
+import BrandLogo from '../BrandLogo';
 
 // Format helpers
 const getCurrencySymbol = (currency) => {
@@ -28,7 +32,7 @@ const getCurrencySymbol = (currency) => {
 };
 
 export default function LivePreview() {
-  const { data } = useDashboard();
+  const { data, customLinks } = useDashboard();
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   // Get design settings
@@ -38,7 +42,7 @@ export default function LivePreview() {
   const buttonStyle = design.buttonStyle || 'Minimal';
   const fontFamily = design.fontFamily || 'Inter';
   const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
-  
+
   useEffect(() => {
     if (wallpaper === 'Video' && design.wallpaperVideo) {
       setIsVideoLoading(true);
@@ -127,16 +131,17 @@ export default function LivePreview() {
     <motion.div
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="hidden lg:flex w-[420px] bg-gray-50 border-l border-gray-200 py-6 px-4 flex-col"
+      className="hidden lg:flex w-[300px] xl:w-[340px] 2xl:w-[380px] bg-background border-l border-border py-4 px-3 flex-col min-h-0 max-h-full h-full overflow-hidden flex-shrink-0"
     >
-      <div className="mb-6">
-        <h3 className="font-semibold text-gray-900 mb-2">Live Preview</h3>
-        <p className="text-sm text-gray-500">See how your VizitLink looks to visitors</p>
+      <div className="mb-3">
+        <h3 className="font-semibold text-foreground">Live Preview</h3>
+        <p className="text-xs text-muted-foreground m-0">See how your VizitLink looks</p>
       </div>
 
-      {/* Mobile mockup */}
-      <div className="flex items-center justify-center">
-        <div className="bg-black rounded-3xl shadow-2xl p-1 w-full h-full max-w-sm">
+      {/* Scrollable panel content */}
+      <div className="flex-1 min-h-0 max-h-[calc(100dvh-120px)] lg:max-h-[calc(100dvh-140px)] xl:max-h-[calc(100dvh-160px)] overflow-y-auto scroll-elegant scrollbar-accent">
+        {/* Mobile mockup */}
+        <div className="bg-black rounded-3xl shadow-2xl p-1 w-full max-w-sm">
 
           {/* Content */}
           <div className={`relative rounded-2xl overflow-hidden ${currentBackground}`}>
@@ -165,9 +170,31 @@ export default function LivePreview() {
               </>
             )}
             {(wallpaper === 'Image' || wallpaper === 'Video') && (
-              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint||0))/100})` }} />
+              <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
             )}
-            <div className="relative z-10 p-6 min-h-[400px] max-h-[550px] overflow-y-auto">
+            <div className="relative z-10 p-6 pb-0 min-h-[320px] max-h-[60dvh] lg:max-h-[65dvh] xl:max-h-[70dvh] overflow-y-auto scroll-elegant scrollbar-accent">
+              {/* Top Icons - Brand and Share */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Brand Mini Icon */}
+                <button
+                  className="flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+                >
+                  <div className="rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                    <BrandLogo showText={false} linkToHome={false} />
+                  </div>
+                </button>
+
+                {/* Share Icon */}
+                <button
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${currentTextColor === 'text-white'
+                    ? 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                    : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
+                  title="Share profile"
+                >
+                  <Share2 className={`w-4 h-4 ${currentTextColor}`} />
+                </button>
+              </div>
               {/* Profile */}
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto mb-3 flex items-center justify-center overflow-hidden">
@@ -199,22 +226,24 @@ export default function LivePreview() {
 
               {/* Links */}
               <div className="space-y-3">
-                {data?.links
+                {/* Social Links */}
+                {/* {data?.links
                   ?.filter(link => link.active)
                   .sort((a, b) => a.order - b.order)
                   .map((link) => {
                     const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
 
-                    return (
-                      <motion.a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
+                  const redirectHref = `/api/redirect?id=${link.id}`;
+                  return (
+                    <motion.a
+                      key={link.id}
+                      href={redirectHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`w-full rounded-lg p-3 flex items-center justify-between transition-colors ${currentButtonStyle}`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
                         <div className="flex items-center space-x-3">
                           {IconComponent ? (
                             <IconComponent
@@ -229,6 +258,71 @@ export default function LivePreview() {
                         <ExternalLink className="w-4 h-4 text-gray-400" />
                       </motion.a>
                     );
+                  })} */}
+
+                {/* Custom Links */}
+                {customLinks
+                  ?.filter(link => link.active && link.url && link.url.trim() !== '')
+                  .map((link) => {
+                    const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;
+
+                    if (link.layout === 'featured') {
+                      return (
+                        <motion.a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`w-full h-40 p-3 relative flex items-center justify-center transition-colors ${currentButtonStyle} !rounded-3xl`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          {link?.thumbnail ?
+                            <img src={link?.thumbnail} alt='thumbnail' className='absolute top-0 left-0 w-full h-full object-cover rounded-3xl' /> :
+                            IconComponent ? (
+                              <IconComponent
+                                className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
+                                style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                              />
+                            ) : (
+                              <span className="text-lg">{link.icon}</span>
+                            )}
+                          <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
+                          <div className="flex items-center h-16 space-x-3 z-10 text-white" >
+                            <span className="font-medium text-sm">{link.title}</span>
+                          </div>
+                        </motion.a>
+                      );
+                    } else {
+                      return (
+                        <motion.a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`w-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle} !rounded-3xl`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            {link?.thumbnail ?
+                              <img src={link.thumbnail} className='w-10 h-10 rounded-full object-cover' /> :
+                              IconComponent ? (
+                                <IconComponent
+                                  className="w-5 h-5"
+                                  style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
+                                />
+                              ) : (
+                                <span className="text-lg">{link.icon}</span>
+                              )}
+                            <span className="font-medium text-sm">{link.title}</span>
+                          </div>
+                          <ExternalLink className="w-4 h-4 text-gray-400" />
+                        </motion.a>
+                      );
+                    }
+
+
                   })}
               </div>
 
@@ -237,7 +331,7 @@ export default function LivePreview() {
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className={`font-semibold text-lg ${currentTextColor}`} style={{ fontFamily: fontFamily }}>Shop</h3>
-                    <button className={`text-sm px-3 py-1 rounded-full ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'} transition-colors`}>View all</button>
+                    {/* <button className={`text-sm px-3 py-1 rounded-full transition-colors ${currentTextColor === 'text-white' ? 'bg-white/20 text-white/90 hover:bg-white/30' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>View all</button> */}
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {(data.products || [])
@@ -248,7 +342,7 @@ export default function LivePreview() {
                           href={product.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`group block rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-white shadow-sm border border-gray-100'}`}
+                          className={`group block rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card shadow-sm border border-border'}`}
                           whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -262,6 +356,11 @@ export default function LivePreview() {
                                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                                   sizes="(max-width: 640px) 50vw, 25vw"
                                 />
+                                {Number(product.price) > 0 && (
+                                  <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-primary text-primary-foreground shadow-sm">
+                                    {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
+                                  </div>
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute top-2 right-2 w-6 h-6 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                   <ExternalLink className="w-3 h-3 text-gray-700" />
@@ -277,15 +376,11 @@ export default function LivePreview() {
                             <h4 className={`font-semibold text-sm truncate ${currentTextColor}`} style={{ fontFamily: fontFamily }}>
                               {product.title}
                             </h4>
-                            <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-gray-500'}`}>
+                            <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>
                               {product.brand || 'Unknown Brand'}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              {Number(product.price) > 0 ? (
-                                <span className="text-sm font-bold text-purple-600">
-                                  {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
-                                </span>
-                              ) : <span />}
+                              <span />
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                             </div>
                           </div>
@@ -318,32 +413,36 @@ export default function LivePreview() {
                     )
                   })}
               </div>
+              {/* Premium branding footer */}
+              {!hideVizitlinkFooter && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="relative mt-6 pb-6 z-50"
+                >
+                  <div className='flex justify-center items-center'>
+                    <div className="w-auto px-5 py-2.5 relative rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] bg-white border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk flex justify-center items-center h-2xl px-md">
+                      <span className="flex items-center justify-center">
+                        <span className="label block font-semibold text-md">Join {data?.profile?.username} on VizitLink</span>
+                      </span>
+                    </div>
+                  </div>
+
+
+                  {/* Subtle branding */}
+                  <div className="mt-3 flex items-center justify-center gap-1.5">
+                    <span className="text-[10px] text-gray-400">Powered by</span>
+                    <BrandLogo showText={false} linkToHome={false} />
+                  </div>
+                </motion.div>
+              )}
             </div>
 
-            {/* Hide logo notice */}
-            {!hideVizitlinkFooter && (
-              <div className="mt-4 text-center">
-                <div className="flex items-center justify-center space-x-1 text-xs text-gray-400">
-                  <Lock className="w-3 h-3" />
-                  <span>Hide VizitLink logo</span>
-                  <span className="text-purple-600">🔒</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Preview controls */}
-      <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-        <div className="flex items-center space-x-2">
-          <Eye className="w-4 h-4" />
-          <span>Preview mode</span>
-        </div>
-        <button className="text-purple-600 hover:text-purple-700 font-medium">
-          View live
-        </button>
-      </div>
-    </motion.div>
+    </motion.div >
   );
 }

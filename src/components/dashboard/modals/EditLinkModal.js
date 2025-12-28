@@ -10,7 +10,7 @@ import {
 } from 'react-icons/fa';
 import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad } from 'react-icons/si';
 import { MdEmail } from 'react-icons/md';
-import { CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle, AlertCircle, ExternalLink, X } from 'lucide-react';
 
 const socialPlatforms = [
   { 
@@ -411,12 +411,24 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
     <Dialog open={isOpen} onOpenChange={resetModal}>
       <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-2xl h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
         <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <DialogTitle className="text-xl font-semibold">
-            Edit Link
-          </DialogTitle>
-          <DialogDescription>
-            Update your {selectedPlatform.name} profile URL
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold">
+                Edit Link
+              </DialogTitle>
+              <DialogDescription>
+                Update your {selectedPlatform.name} profile URL
+              </DialogDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetModal}
+              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="p-4 sm:p-6 max-h-[calc(100dvh-120px)] sm:max-h-none overflow-y-auto">

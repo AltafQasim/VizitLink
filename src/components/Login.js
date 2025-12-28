@@ -2,14 +2,55 @@
 
 import Link from 'next/link';
 import { Button } from './ui/button';
+import BrandLogo from './BrandLogo';
 import { Input } from './ui/input';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useToast } from './ui/use-toast';
+import GoogleIcon from './GoogleIcon';
 
 const Login = () => {
-  const { user, signInWithGoogle, loading } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, loading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [touched, setTouched] = useState({ email: false, password: false });
+  const emailRegex = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+  const validate = (field, value) => {
+    switch (field) {
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        return emailRegex.test(value.trim()) ? '' : 'Enter a valid email';
+      case 'password':
+        if (!value.trim()) return 'Password is required';
+        return value.trim().length >= 6 ? '' : 'At least 6 characters';
+      default:
+        return '';
+    }
+  };
+
+  const onEmailChange = (v) => {
+    setEmail(v);
+    setErrors(prev => ({ ...prev, email: validate('email', v) }));
+  };
+  const onPasswordChange = (v) => {
+    setPassword(v);
+    setErrors(prev => ({ ...prev, password: validate('password', v) }));
+  };
+
+  const markTouched = (field) => setTouched(prev => ({ ...prev, [field]: true }));
+  const inputClass = (field, base) => {
+    const hasError = touched[field] && !!errors[field];
+    const isValid = touched[field] && !errors[field];
+    if (hasError) return base + ' border-red-400 focus:ring-red-500 focus:border-red-500';
+    if (isValid) return base + ' border-green-400 focus:ring-green-500 focus:border-green-500';
+    return base;
+  };
 
   useEffect(() => {
     if (user && !loading) {
@@ -21,6 +62,33 @@ const Login = () => {
     await signInWithGoogle();
   };
 
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    if (submitting) return;
+
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    const nextErrors = {
+      email: validate('email', trimmedEmail),
+      password: validate('password', trimmedPassword),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    try {
+      setSubmitting(true);
+      const { error } = await signInWithEmail(trimmedEmail, trimmedPassword);
+      if (error) throw error;
+      toast({ title: 'Logged in', description: 'Redirecting to dashboard...' });
+      router.push('/dashboard');
+    } catch (err) {
+      toast({ title: 'Login failed', description: err?.message || 'Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -30,97 +98,125 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 bg-white flex items-center justify-center px-8 py-12">
-        <div className="w-full max-w-sm space-y-8">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/">
-              <h1 className="font-bold text-gray-900 text-2xl">VizitLink</h1>
-            </Link>
-            <div className="ml-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
-          </div>
+    // Fixed height container to enable scrolling behavior
+    <div className="h-screen flex overflow-hidden">
+      {/* Left Side - Login Form (Scrollable) */}
+      <div className="w-full lg:w-1/2 bg-white flex flex-col overflow-y-auto">
+        <div className="flex-1 flex items-center justify-center px-8 py-12">
+          <div className="w-full max-w-sm space-y-8">
+            {/* Logo */}
+            <BrandLogo size="lg" />
 
-          {/* Welcome Text */}
-          <div className="space-y-1">
-            <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-            <p className="text-gray-600 text-base">Log in to your VizitLink</p>
-          </div>
-
-          {/* Login Form */}
-          <div className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <Input 
-                type="email"
-                placeholder="Email or username"
-                className="w-full h-12 bg-gray-50 border-gray-200 rounded-lg px-4 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            {/* Welcome Text */}
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+              <p className="text-gray-600 text-base">Log in to your VizitLink</p>
             </div>
 
-            {/* Continue Button */}
-            <Button className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-lg font-semibold text-base transition-colors duration-200">
-              Continue
-            </Button>
+            {/* Login Form */}
+            <div className="space-y-6">
+              <form onSubmit={handleEmailLogin} className="space-y-4">
+                <div>
+                  <Input 
+                    type="email"
+                    value={email}
+                    onChange={(e) => onEmailChange(e.target.value)}
+                    onBlur={() => markTouched('email')}
+                    placeholder="Email"
+                    className={inputClass('email', "w-full h-12 bg-gray-50 border-gray-200 rounded-lg px-4 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+                  />
+                  {touched.email && errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+                  {touched.email && !errors.email && <p className="mt-1 text-xs text-green-600">Looks good</p>}
+                </div>
+                <div>
+                  <div className="relative">
+                    <Input 
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => onPasswordChange(e.target.value)}
+                      onBlur={() => markTouched('password')}
+                      placeholder="Password"
+                      className={inputClass('password', "w-full h-12 bg-gray-50 border-gray-200 rounded-lg pl-4 pr-12 text-gray-900 text-base placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(v => !v)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M2 2l20 20"/><path d="M10.58 10.58a2 2 0 102.83 2.83"/><path d="M16.72 16.72A10.94 10.94 0 0112 18c-5 0-9-4-10-6a11.74 11.74 0 013.21-3.88"/><path d="M9.88 5.09A10.94 10.94 0 0112 6c5 0 9 4 10 6a11.67 11.67 0 01-1.67 2.52"/></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      )}
+                    </button>
+                  </div>
+                  {touched.password && errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+                  {touched.password && !errors.password && <p className="mt-1 text-xs text-green-600">Strong enough</p>}
+                </div>
 
-            {/* OR Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
+                <Button disabled={submitting || Object.values(errors).some(Boolean) || !email || !password} className="w-full h-12 bg-black text-white hover:bg-gray-800 rounded-full font-semibold text-base transition-colors duration-200">
+                  {submitting ? 'Signing in...' : 'Sign in'}
+                </Button>
+              </form>
+
+              {/* OR Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">OR</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">OR</span>
+
+              {/* Social Login Buttons */}
+              <div className="space-y-3">
+                {/* Google */}
+                <Button 
+                  onClick={handleGoogleSignIn}
+                  variant="outline" 
+                  className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-3xl flex items-center justify-center gap-3 transition-colors duration-200"
+                >
+                  <GoogleIcon className="w-5 h-5" />
+                  <span className="text-gray-700 font-medium text-base">Continue with Google</span>
+                </Button>
+
+                {/* Apple 
+                <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
+                  <div className="w-5 h-5 bg-black rounded-sm flex items-center justify-center text-white text-xs font-bold">🍎</div>
+                  <span className="text-gray-700 font-medium text-base">Continue with Apple</span>
+                </Button>*/}
+
+                {/* Phone 
+                <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
+                  <div className="w-5 h-5 bg-gray-600 rounded-sm flex items-center justify-center text-white text-xs">📱</div>
+                  <span className="text-gray-700 font-medium text-base">Continue with phone number</span>
+                </Button>*/}
+              </div>
+
+              {/* Links */}
+              <div className="space-y-3 text-center">
+                <div className="flex justify-center gap-4 text-sm">
+                  <Link href="/forgot-password" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot password?</Link>
+                  <span className="text-gray-400">|</span>
+                  <Link href="/signup" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Create account</Link>
+                </div>
+                <p className="text-gray-600 text-sm">
+                  Don't have an account? <Link href="/signup" className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200">Sign up</Link>
+                </p>
               </div>
             </div>
-
-            {/* Social Login Buttons */}
-            <div className="space-y-3">
-              {/* Google */}
-              <Button 
-                onClick={handleGoogleSignIn}
-                variant="outline" 
-                className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200"
-              >
-                <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold">G</div>
-                <span className="text-gray-700 font-medium text-base">Continue with Google</span>
-              </Button>
-
-              {/* Apple 
-              <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
-                <div className="w-5 h-5 bg-black rounded-sm flex items-center justify-center text-white text-xs font-bold">🍎</div>
-                <span className="text-gray-700 font-medium text-base">Continue with Apple</span>
-              </Button>*/}
-
-              {/* Phone 
-              <Button variant="outline" className="w-full h-12 border-gray-200 hover:bg-gray-50 rounded-lg flex items-center justify-center gap-3 transition-colors duration-200">
-                <div className="w-5 h-5 bg-gray-600 rounded-sm flex items-center justify-center text-white text-xs">📱</div>
-                <span className="text-gray-700 font-medium text-base">Continue with phone number</span>
-              </Button>*/}
-            </div>
-
-            {/* Links */}
-            <div className="space-y-3 text-center">
-              <div className="flex justify-center gap-4 text-sm">
-                <a href="#" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot password?</a>
-                <a href="#" className="text-purple-600 hover:text-purple-700 transition-colors duration-200">Forgot username?</a>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Don't have an account? <Link href="/signup" className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200">Sign up</Link>
-              </p>
-            </div>
           </div>
+        </div>
 
-          {/* Footer */}
-          <div className="pt-6">
-            <a href="#" className="text-gray-500 text-xs hover:text-gray-600 transition-colors duration-200">Cookie preferences</a>
-          </div>
+        {/* Footer */}
+        <div className="py-6 px-8">
+          <a href="#" className="text-gray-500 text-xs hover:text-gray-600 transition-colors duration-200">Cookie preferences</a>
         </div>
       </div>
 
-      {/* Right Side - Visual Content */}
+      {/* Right Side - Visual Content (Fixed) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-green-400 relative overflow-hidden">
         {/* Background Shapes */}
         <div className="absolute inset-0">

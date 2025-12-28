@@ -2,6 +2,10 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { saveToBackend, loadFromBackend, saveProfileToBackend, loadProfilesFromBackend, migrateToMultipleProfiles, loadLinksForProfile, loadProductsForProfile, loadDesignForProfile, loadProfileForId, saveProductsForProfile, saveLinksForProfile, saveDesignByProfileId, saveProfileById } from '../lib/dashboardStorage';
+import { getCustomLinksByProfile, upsertCustomLinkForProfile, deleteCustomLinkById, reorderCustomLinks } from '../lib/customLinks';
+import { getSocialLinksByProfile, upsertSocialLinkForProfile, deleteSocialLinkById, reorderSocialLinks } from '../lib/socialLinks';
+import { supabase } from '../lib/supabase';
+import { BASE_URL } from '../lib/constants';
 
 const DashboardContext = createContext(undefined);
 
@@ -11,6 +15,8 @@ export function DashboardProvider({ children }) {
   const [activeTab, setActiveTab] = useState('links');
   const lastFetchedRef = useRef({ links: null, products: null, design: null });
   const [isLoading, setIsLoading] = useState(true);
+  const [customLinks, setCustomLinks] = useState([]);
+  const [socialLinks, setSocialLinks] = useState([]);
   
   // Multiple profiles support
   const [profiles, setProfiles] = useState([]);
@@ -50,6 +56,18 @@ export function DashboardProvider({ children }) {
           setHistory([loadedData]);
           setHistoryIndex(0);
           setNeedsProfileCreation(false);
+
+          // Load custom links and social links for the profile from Supabase
+          try {
+            const [customLinksData, socialLinksData] = await Promise.all([
+              getCustomLinksByProfile(profileToUse),
+              getSocialLinksByProfile(profileToUse)
+            ]);
+            setCustomLinks(customLinksData);
+            setSocialLinks(socialLinksData);
+          } catch (e) {
+            console.error('Failed to load links:', e);
+          }
         } else {
           // User has no profiles, show profile creation form
           setNeedsProfileCreation(true);
@@ -77,6 +95,17 @@ export function DashboardProvider({ children }) {
             setData(prev => ({ ...prev, links: fresh }));
           }
           lastFetchedRef.current.links = Date.now();
+          // Also refresh custom links and social links
+          try {
+            const [customLinksData, socialLinksData] = await Promise.all([
+              getCustomLinksByProfile(currentProfileId),
+              getSocialLinksByProfile(currentProfileId)
+            ]);
+            setCustomLinks(customLinksData);
+            setSocialLinks(socialLinksData);
+          } catch (e) {
+            console.error('Refresh links failed:', e);
+          }
         } else if (activeTab === 'shop') {
           const fresh = await loadProductsForProfile(currentProfileId);
           if (JSON.stringify(fresh) !== JSON.stringify(data.products)) {
@@ -111,7 +140,7 @@ export function DashboardProvider({ children }) {
         displayName: profileData.displayName,
         bio: profileData.bio || '',
         avatar: profileData.avatar || '',
-        customUrl: `vizitlink.com/${profileData.username}`,
+        customUrl: `${new URL(BASE_URL).hostname}/${profileData.username}`,
         isLive: true,
       },
     ]);
@@ -379,22 +408,12 @@ export function DashboardProvider({ children }) {
     profiles,
     currentProfileId,
     currentProfile: data?.profile,
-    switchProfile,
-    createProfile,
-    updateProfile,
-    deleteProfile,
-    duplicateProfile,
     needsProfileCreation,
     setNeedsProfileCreation,
     hasUnsavedChanges,
-    isLoading,
     canUndo,
     canRedo,
-    // Profile management
-    profiles,
-    currentProfileId,
-    currentProfile: profiles.find(p => p.id === currentProfileId),
-    setActiveTab,
+    // Profile management functions
     updateData,
     updateDesignData,
     saveChanges,
@@ -410,6 +429,86 @@ export function DashboardProvider({ children }) {
     updateProfile,
     deleteProfile,
     duplicateProfile,
+    // Custom links
+    customLinks,
+    setCustomLinks,
+    upsertCustomLink: async (link) => {
+      if (!currentProfileId) return null;
+      const saved = await upsertCustomLinkForProfile(currentProfileId, link);
+      // Merge into state
+      setCustomLinks(prev => {
+        const idx = prev.findIndex(l => l.id === saved.id);
+        if (idx === -1) return [...prev, saved];
+        const next = [...prev];
+        next[idx] = saved;
+        return next;
+      });
+      return saved;
+    },
+    // Social links
+    socialLinks,
+    setSocialLinks,
+    upsertSocialLink: async (link) => {
+      if (!currentProfileId) return null;
+      const saved = await upsertSocialLinkForProfile(currentProfileId, link);
+      // Merge into state
+      setSocialLinks(prev => {
+        const idx = prev.findIndex(l => l.id === saved.id);
+        if (idx === -1) return [...prev, saved];
+        const next = [...prev];
+        next[idx] = saved;
+        return next;
+      });
+      return saved;
+    },
+    deleteCustomLink: async (id) => {
+      if (!currentProfileId) return;
+      await deleteCustomLinkById(currentProfileId, id);
+      setCustomLinks(prev => prev.filter(l => l.id !== id));
+    },
+    deleteSocialLink: async (id) => {
+      if (!currentProfileId) return;
+      await deleteSocialLinkById(currentProfileId, id);
+      setSocialLinks(prev => prev.filter(l => l.id !== id));
+    },
+    reorderCustomLinks: async (orderedIds) => {
+      if (!currentProfileId) return;
+      
+      // Optimistic update
+      const previousLinks = customLinks;
+      setCustomLinks(prev => {
+        const idToLink = new Map(prev.map(l => [l.id, l]));
+        return orderedIds.map((id, index) => ({ ...idToLink.get(id), order: index })).filter(Boolean);
+      });
+      
+      try {
+        await reorderCustomLinks(currentProfileId, orderedIds);
+      } catch (error) {
+        // Rollback on error
+        console.error('Failed to reorder custom links:', error);
+        setCustomLinks(previousLinks);
+        throw error;
+      }
+    },
+    reorderSocialLinks: async (orderedIds) => {
+      if (!currentProfileId) return;
+      
+      // Optimistic update
+      const previousLinks = socialLinks;
+      setSocialLinks(prev => {
+        const idToLink = new Map(prev.map(l => [l.id, l]));
+        return orderedIds.map((id, index) => ({ ...idToLink.get(id), order: index })).filter(Boolean);
+      });
+      
+      try {
+        await reorderSocialLinks(currentProfileId, orderedIds);
+      } catch (error) {
+        // Rollback on error
+        console.error('Failed to reorder social links:', error);
+        setSocialLinks(previousLinks);
+        throw error;
+      }
+    },
   };
 
   return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;

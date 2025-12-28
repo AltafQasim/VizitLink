@@ -1,39 +1,89 @@
-"use client";
-
-import { Inter, Roboto } from 'next/font/google'
+import { Roboto } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '../components/ui/toaster'
-import { Toaster as Sonner } from '../components/ui/sonner'
-import { TooltipProvider } from '../components/ui/tooltip'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from '../context/AuthContext'
+import Providers from './providers'
+import { BASE_URL } from '../lib/constants' // Add this import
 
 const roboto = Roboto({
-  weight: '400',
+  weight: ['400','500','700'],
   subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
 })
 
-const queryClient = new QueryClient()
+export const metadata = {
+  title: {
+    default: 'VizitLink - Everything you are. In one, simple link in bio.',
+    template: '%s | VizitLink'
+  },
+  description: 'Join 70M+ people using VizitLink for their link in bio. One link to help you share everything you create, curate and sell from your Instagram, TikTok, Twitter, YouTube and other social media profiles.',
+  keywords: ['link in bio', 'social media', 'bio link', 'linktree alternative', 'creator tools', 'social links'],
+  authors: [{ name: 'VizitLink' }],
+  creator: 'VizitLink',
+  publisher: 'VizitLink',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(BASE_URL),
+  alternates: {
+    canonical: '/',
+  },
+  manifest: '/manifest.json',
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: BASE_URL,
+    siteName: 'VizitLink',
+    title: 'VizitLink - Everything you are. In one, simple link in bio.',
+    description: 'Join 70M+ people using VizitLink for their link in bio. One link to help you share everything you create, curate and sell from your Instagram, TikTok, Twitter, YouTube and other social media profiles.',
+    images: [
+      {
+        url: '/sharecontent.avif',
+        width: 1200,
+        height: 630,
+        alt: 'VizitLink - Link in Bio',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VizitLink - Everything you are. In one, simple link in bio.',
+    description: 'Join 70M+ people using VizitLink for their link in bio.',
+    images: ['/sharecontent.avif'],
+    creator: '@vizitlink',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+  },
+}
 
-export default function RootLayout({
-  children,
-}) {
+export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <head>
-        <title>VizitLink - Everything you are. In one, simple link in bio.</title>
-        <meta name="description" content="Join 70M+ people using VizitLink for their link in bio. One link to help you share everything you create, curate and sell from your Instagram, TikTok, Twitter, YouTube and other social media profiles." />
-      </head>
+    <html lang="en" className={roboto.variable}>
       <body className={roboto.className}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              {children}
-            </TooltipProvider>
-          </AuthProvider>
-        </QueryClientProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )

@@ -30,6 +30,81 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signUpWithEmail = async (email, password, fullName) => {
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard`,
+          data: fullName ? { full_name: fullName } : undefined,
+        },
+      });
+      if (error) throw error;
+      return { user };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signInWithEmail = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const sendPasswordReset = async (email) => {
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/reset-password`,
+      });
+      if (error) throw error;
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const updatePassword = async (newPassword) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const resendEmailOtp = async (email, type = 'signup') => {
+    try {
+      const { data, error } = await supabase.auth.resend({ type, email });
+      if (error) throw error;
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const verifyEmailOtp = async (email, token, type = 'signup') => {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({ email, token, type });
+      if (error) throw error;
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -57,6 +132,12 @@ export function AuthProvider({ children }) {
     user,
     session,
     loading,
+    signUpWithEmail,
+    signInWithEmail,
+    sendPasswordReset,
+    updatePassword,
+    resendEmailOtp,
+    verifyEmailOtp,
     signInWithGoogle,
     signOut,
   };

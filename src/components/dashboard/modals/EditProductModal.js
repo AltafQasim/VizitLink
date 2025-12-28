@@ -161,6 +161,14 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
             <DialogTitle className="text-xl font-semibold">
               Edit product
             </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetModal}
+              className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </DialogHeader>
 
@@ -171,7 +179,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
             transition={{ duration: 0.2 }}
             className="space-y-6"
           >
-            <div className="flex space-x-6">
+            <div className="flex flex-col-reverse space-x-6">
               {/* Left Column - Form Fields */}
               <div className="flex-1 space-y-4">
                 {/* URL Field */}
@@ -208,51 +216,54 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                   </div>
                 </div>
 
-                {/* Price Field */}
-                <div className="space-y-2">
-                  <label htmlFor="price" className="text-sm font-medium text-gray-700">
-                    Price (optional)
-                  </label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
-                    placeholder="0.00"
-                    className="w-full"
-                  />
-                </div>
+                <div className="flex space-x-3 w-full">
 
-                {/* Currency Field */}
-                <div className="space-y-2">
-                  <label htmlFor="currency" className="text-sm font-medium text-gray-700">
-                    Currency
-                  </label>
-                  <select
-                    id="currency"
-                    value={formData.currency}
-                    onChange={(e) => handleInputChange('currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.name}
-                      </option>
-                    ))}
-                  </select>
+                  {/* Price Field */}
+                  <div className="space-y-2 w-full">
+                    <label htmlFor="price" className="text-sm font-medium text-gray-700">
+                      Price (optional)
+                    </label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => handleInputChange('price', e.target.value)}
+                      placeholder="0.00"
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Currency Field */}
+                  <div className="space-y-2 w-full">
+                    <label htmlFor="currency" className="text-sm font-medium text-gray-700">
+                      Currency
+                    </label>
+                    <select
+                      id="currency"
+                      value={formData.currency}
+                      onChange={(e) => handleInputChange('currency', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      {currencies.map((currency) => (
+                        <option key={currency.code} value={currency.code}>
+                          {currency.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
               </div>
 
               {/* Right Column - Product Image (same behavior as wallpaper image upload) */}
-              <div className="w-32 flex-shrink-0">
+              <div className="w-full flex justify-center !m-0">
                 <div className="relative">
                   <img
                     src={previewUrl || product.image}
                     alt={product.title}
-                    className="w-32 h-32 rounded-lg object-cover border border-gray-200"
+                    className="w-36 h-36 rounded-lg object-cover border border-gray-200"
                   />
                   <input
                     ref={fileInputRef}
@@ -281,7 +292,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
               >
                 Save changes
               </Button>
-              
+
               <Button
                 variant="outline"
                 onClick={handleShare}
@@ -290,15 +301,15 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                 <Share2 className="w-4 h-4" />
                 <span>Share</span>
               </Button>
-              
-              <Button
+
+              {/* <Button
                 variant="outline"
                 onClick={handleDelete}
                 className="flex items-center space-x-2 text-red-600 hover:text-red-700"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete</span>
-              </Button>
+              </Button> */}
             </div>
           </motion.div>
         </div>

@@ -1,6 +1,38 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 
+async function safeFetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeoutMs = options.timeout || 10000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return res;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    throw e;
+  }
+}
+
+function absolutizeUrl(maybeUrl, base) {
+  if (!maybeUrl) return '';
+  try {
+    if (maybeUrl.startsWith('//')) return 'https:' + maybeUrl;
+    if (maybeUrl.startsWith('http://') || maybeUrl.startsWith('https://')) return maybeUrl;
+    return new URL(maybeUrl, base).href;
+  } catch {
+    return maybeUrl;
+  }
+}
+
+function uniq(arr) {
+  return Array.from(new Set(arr.filter(Boolean)));
+}
+
 export async function POST(request) {
   try {
     const { url } = await request.json();
@@ -24,19 +56,27 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
-    // Fetch the webpage with better error handling
+    // Fetch the webpage with better error handling and retries
     let response;
     try {
-      response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate',
-          'Connection': 'keep-alive',
-        },
-        timeout: 10000, // 10 second timeout
-      });
+      const headersReq = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive',
+      };
+      const attempts = 2;
+      let lastErr;
+      for (let i = 0; i < attempts; i++) {
+        try {
+          response = await safeFetch(url, { headers: headersReq, timeout: 12000 });
+          if (response?.ok) break;
+        } catch (e) {
+          lastErr = e;
+          if (i === attempts - 1) throw e;
+        }
+      }
+      if (!response) throw lastErr || new Error('Failed to fetch');
     } catch (fetchError) {
       console.error('Fetch error:', fetchError);
       return NextResponse.json({ 
@@ -55,21 +95,23 @@ export async function POST(request) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Extract metadata
-    const title = $('meta[property="og:title"]').attr('content') || 
-                  $('meta[name="twitter:title"]').attr('content') || 
-                  $('title').text() || 
+    // Extract basic metadata (OG, Twitter, standard)
+    const title = $('meta[property="og:title"]').attr('content') ||
+                  $('meta[name="twitter:title"]').attr('content') ||
+                  $('title').text() ||
                   'Untitled';
 
-    const description = $('meta[property="og:description"]').attr('content') || 
-                       $('meta[name="twitter:description"]').attr('content') || 
-                       $('meta[name="description"]').attr('content') || 
-                       '';
+    const description = $('meta[property="og:description"]').attr('content') ||
+                        $('meta[name="twitter:description"]').attr('content') ||
+                        $('meta[name="description"]').attr('content') ||
+                        '';
 
-    let image = $('meta[property="og:image"]').attr('content') || 
-                $('meta[name="twitter:image"]').attr('content') || 
-                $('meta[name="twitter:image:src"]').attr('content') || 
-                '';
+    const ogImages = [
+      $('meta[property="og:image"]').attr('content'),
+      $('meta[name="twitter:image"]').attr('content'),
+      $('meta[name="twitter:image:src"]').attr('content'),
+    ].filter(Boolean);
+    let image = ogImages[0] || '';
 
     // If no image found in meta tags, try specific selectors
     if (!image) {
@@ -479,6 +521,86 @@ export async function POST(request) {
       currency = 'JPY';
     }
 
+    // Try oEmbed discovery
+    let oembedData = null;
+    try {
+      const oembedLink = $('link[type="application/json+oembed"]').attr('href') || $('link[type="text/json+oembed"]').attr('href');
+      if (oembedLink) {
+        const oembedRes = await safeFetch(absolutizeUrl(oembedLink, validUrl.origin), { timeout: 8000 });
+        if (oembedRes.ok) {
+          oembedData = await oembedRes.json();
+        }
+      }
+    } catch {}
+
+    // Try JSON-LD structured data
+    const jsonLd = [];
+    $('script[type="application/ld+json"]').each((_, el) => {
+      try {
+        const text = $(el).contents().text();
+        const parsed = JSON.parse(text);
+        jsonLd.push(parsed);
+      } catch {}
+    });
+
+    // Favicon discovery
+    const favicon = absolutizeUrl(
+      $('link[rel="icon"]').attr('href') ||
+      $('link[rel="shortcut icon"]').attr('href') ||
+      $('link[rel="apple-touch-icon"]').attr('href') ||
+      '/favicon.ico',
+      validUrl.origin
+    );
+
+    // Media discovery (images, videos, audio)
+    const images = uniq([
+      ...ogImages.map(u => absolutizeUrl(u, validUrl.origin)),
+      ...$('img').map((_, el) => $(el).attr('src')).get().map(u => absolutizeUrl(u, validUrl.origin)),
+    ]).slice(0, 20);
+
+    const videos = uniq([
+      $('meta[property="og:video"]').attr('content'),
+      $('meta[name="twitter:player"]').attr('content'),
+      ...$('video source').map((_, el) => $(el).attr('src')).get(),
+      ...$('video').map((_, el) => $(el).attr('src')).get(),
+    ].map(u => absolutizeUrl(u, validUrl.origin))).slice(0, 10);
+
+    const audios = uniq([
+      $('meta[property="og:audio"]').attr('content'),
+      ...$('audio source').map((_, el) => $(el).attr('src')).get(),
+      ...$('audio').map((_, el) => $(el).attr('src')).get(),
+    ].map(u => absolutizeUrl(u, validUrl.origin))).slice(0, 10);
+
+    // Provider-specific fallbacks (Instagram reels/posts)
+    const embeds = [];
+    try {
+      const isInstagram = hostname.includes('instagram.com');
+      const looksLikeIgMedia = /\/reel\/|\/p\//.test(validUrl.pathname);
+      if (isInstagram && looksLikeIgMedia && videos.length === 0) {
+        // Prefer Graph API oEmbed if token provided
+        const igToken = process.env.IG_OEMBED_TOKEN || process.env.FACEBOOK_ACCESS_TOKEN;
+        let igOembedUrl = null;
+        if (igToken) {
+          igOembedUrl = `https://graph.facebook.com/v17.0/instagram_oembed?url=${encodeURIComponent(url)}&access_token=${encodeURIComponent(igToken)}&omitscript=true&maxwidth=640`;
+        } else {
+          // Legacy endpoint (may be rate-limited or require token in some regions)
+          igOembedUrl = `https://www.instagram.com/oembed/?url=${encodeURIComponent(url)}&omitscript=true&maxwidth=640`;
+        }
+        try {
+          const igRes = await safeFetch(igOembedUrl, { timeout: 8000 });
+          if (igRes.ok) {
+            const igJson = await igRes.json();
+            if (igJson?.thumbnail_url) {
+              images.unshift(absolutizeUrl(igJson.thumbnail_url, validUrl.origin));
+            }
+            if (igJson?.html) {
+              embeds.push({ provider: 'instagram', html: igJson.html });
+            }
+          }
+        } catch {}
+      }
+    } catch {}
+
     // Clean up title
     const cleanTitle = title.trim().replace(/\s+/g, ' ');
 
@@ -486,14 +608,7 @@ export async function POST(request) {
     const cleanDescription = description.trim().replace(/\s+/g, ' ').substring(0, 200);
 
     // Make image URL absolute if it's relative
-    let absoluteImageUrl = image;
-    if (image && !image.startsWith('http')) {
-      try {
-        absoluteImageUrl = new URL(image, validUrl.origin).href;
-      } catch {
-        absoluteImageUrl = image;
-      }
-    }
+    let absoluteImageUrl = absolutizeUrl(image, validUrl.origin);
 
     return NextResponse.json({
       success: true,
@@ -501,11 +616,18 @@ export async function POST(request) {
         title: cleanTitle,
         description: cleanDescription,
         image: absoluteImageUrl,
+        images,
+        videos,
+        audios,
+        oembed: oembedData || undefined,
+        jsonLd: jsonLd.length ? jsonLd : undefined,
+        favicon,
+        embeds: embeds.length ? embeds : undefined,
         price: price,
         currency: currency,
         brand: brand,
         url: url,
-        domain: validUrl.hostname
+        domain: validUrl.hostname,
       }
     }, { headers });
 

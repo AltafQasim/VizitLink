@@ -10,6 +10,7 @@ const nextConfig = {
       'localhost',
       'hhnlsawagpxafcyplsuj.supabase.co',
       'images.unsplash.com',
+      'images.meesho.com',
       'picsum.photos',
       'merlenorman.com',
       'ancientnutrition.com',
@@ -23,14 +24,19 @@ const nextConfig = {
       'img.youtube.com',
       'yt3.ggpht.com',
       'ytimg.com',
-      // E-commerce domains
+      // E-commerce domains - Amazon
       'm.media-amazon.com',
       'images-na.ssl-images-amazon.com',
       'images-eu.ssl-images-amazon.com',
+      'amazon.com',
+      // E-commerce domains - Flipkart
       'flipkart.com',
       'static-assets-web.flixcart.com',
-      'rukminim2.flixcart.com',
       'rukminim1.flixcart.com',
+      'rukminim2.flixcart.com',
+      // E-commerce domains - Meesho
+      'meesho.com',
+      // Other e-commerce platforms
       'assets.myntassets.com',
       'static.myntassets.com',
       'ii1.pepperfry.com',
@@ -154,4 +160,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

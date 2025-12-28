@@ -45,6 +45,8 @@ export default function ProfileManagementTab() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showChangeUsernameModal, setShowChangeUsernameModal] = useState(false);
   const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false); // Add this state
+  const [profileToDelete, setProfileToDelete] = useState(null); // Add this state
   const [editingProfile, setEditingProfile] = useState(null);
   const [newUsername, setNewUsername] = useState('');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
@@ -216,13 +218,29 @@ export default function ProfileManagementTab() {
   };
 
   const handleDeleteProfile = async (profileId) => {
-    if (window.confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
-      try {
-        await deleteProfile(profileId);
-      } catch (error) {
-        console.error('Error deleting profile:', error);
-      }
+    // Instead of using window.confirm, we'll show our custom modal
+    const profile = profiles.find(p => p.id === profileId);
+    setProfileToDelete(profile);
+    setShowDeleteConfirmModal(true);
+  };
+
+  const confirmDeleteProfile = async () => {
+    if (!profileToDelete) return;
+    
+    try {
+      await deleteProfile(profileToDelete.id);
+      setShowDeleteConfirmModal(false);
+      setProfileToDelete(null);
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      setShowDeleteConfirmModal(false);
+      setProfileToDelete(null);
     }
+  };
+
+  const cancelDeleteProfile = () => {
+    setShowDeleteConfirmModal(false);
+    setProfileToDelete(null);
   };
 
   const getProfileStats = (profile) => {
@@ -308,7 +326,7 @@ export default function ProfileManagementTab() {
               </div>
               <div>
                 {/* Profile Stats */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="text-center p-2 bg-gray-50 rounded">
                     <p className="text-xs text-gray-500">Views</p>
                     <p className="font-semibold text-gray-900">{stats.views.toLocaleString()}</p>
@@ -317,7 +335,7 @@ export default function ProfileManagementTab() {
                     <p className="text-xs text-gray-500">Clicks</p>
                     <p className="font-semibold text-gray-900">{stats.clicks.toLocaleString()}</p>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Profile Actions */}
                 <div className="flex items-center justify-between">
@@ -700,6 +718,90 @@ export default function ProfileManagementTab() {
               >
                 Cancel
               </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirmModal && profileToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={cancelDeleteProfile}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10"></div> {/* Spacer for alignment */}
+                <h3 className="text-xl font-bold text-gray-900">Delete Profile</h3>
+                <button
+                  onClick={cancelDeleteProfile}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
+
+              {/* Warning Icon and Message */}
+              <div className="text-center py-4">
+                <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                  <Trash2 className="w-8 h-8 text-red-600" />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Are you sure?</h4>
+                <p className="text-gray-600 mb-1">
+                  This will permanently delete the profile for <span className="font-semibold">@{profileToDelete.username}</span>.
+                </p>
+                <p className="text-gray-600 text-sm">
+                  This action cannot be reversed.
+                </p>
+              </div>
+
+              {/* Profile Preview */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    {profileToDelete.avatar ? (
+                      <img src={profileToDelete.avatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <span className="text-white font-medium">
+                        {profileToDelete.displayName?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900">{profileToDelete.displayName}</p>
+                    <p className="text-sm text-gray-500">@{profileToDelete.username}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <Button
+                  onClick={confirmDeleteProfile}
+                  className="flex-1 py-3 rounded-full bg-red-50 text-red-600 hover:text-red-700 hover:bg-red-100 font-medium transition-all"
+                >
+                  Delete Profile
+                </Button>
+                <Button
+                  onClick={cancelDeleteProfile}
+                  variant="outline"
+                  className="flex-1 py-3 rounded-full border-2 bg-white border-gray-300 hover:text-white hover:bg-black font-medium transition-all"
+                >
+                  Cancel
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}

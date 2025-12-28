@@ -8,10 +8,55 @@ import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
 import { Search, X, Link, Loader2, ExternalLink } from 'lucide-react';
 
+// Image component with fallback handling
+const ImageWithFallback = ({ src, alt, fill, className, sizes, priority = false }) => {
+  const [imgSrc, setImgSrc] = useState(src);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setImgSrc(src);
+    setHasError(false);
+    setIsLoading(true);
+  }, [src]);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      setImgSrc('/placeholder.svg');
+      setHasError(true);
+      setIsLoading(false);
+    }
+  };
+
+  const handleImageLoad = () => {
+    setIsLoading(false);
+  };
+
+  return (
+    <div className={`relative w-full h-full ${className || ''}`}>
+      <Image
+        src={imgSrc}
+        alt={alt}
+        fill={'fill'}
+        className={`${className || ''} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300 w-full h-full object-cover`}
+        sizes={sizes}
+        priority={priority}
+        onError={handleImageError}
+        onLoad={handleImageLoad}
+      />
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-purple-500 rounded-full animate-spin"></div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Format price with currency symbol
 const formatPrice = (price, currency) => {
   if (!price || price <= 0) return 'Price not available';
-  
+
   const symbols = {
     'INR': '₹',
     'USD': '$',
@@ -21,518 +66,248 @@ const formatPrice = (price, currency) => {
     'AUD': 'A$',
     'JPY': '¥'
   };
-  
+
   const symbol = symbols[currency] || '$';
   return `${symbol}${price.toFixed(2)}`;
 };
 
 // Mock suggested products (will be replaced with Supabase search later)
 const mockProducts = [
+  // Perfumes - Amazon
   {
-    "id": "1",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 77.98,
+    "id": "p1",
+    "title": "Vera Wang Eau de Parfum for Women",
+    "brand": "Vera Wang",
+    "price": 69.99,
     "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/1/150/150"
+    "url": "https://www.amazon.com/Vera-Wang-Parfum-Women-Floral/dp/B07Z4Z6Z6Z",
+    "image": "https://m.media-amazon.com/images/I/61X8G0dZh5L._AC_SL1500_.jpg"
   },
   {
-    "id": "2",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 73.2,
+    "id": "p2",
+    "title": "Dolce & Gabbana Light Blue Eau Intense",
+    "brand": "Dolce & Gabbana",
+    "price": 89.50,
     "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/2/150/150"
+    "url": "https://www.amazon.com/Dolce-Gabbana-Light-Blue-Intense/dp/B07X5Z6Z6Z",
+    "image": "https://m.media-amazon.com/images/I/71hNlrAHWBL._AC_SL1500_.jpg"
   },
   {
-    "id": "3",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 72.66,
+    "id": "p3",
+    "title": "Versace Eros Eau de Parfum",
+    "brand": "Versace",
+    "price": 72.95,
     "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/3/150/150"
+    "url": "https://www.amazon.com/Versace-Eros-Parfum-Men-Ounce/dp/B07X5Z6Z6Z",
+    "image": "https://m.media-amazon.com/images/I/61t07i32GCL._AC_SL1500_.jpg"
   },
   {
-    "id": "4",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 62.39,
+    "id": "p4",
+    "title": "Yves Saint Laurent Black Opium",
+    "brand": "Yves Saint Laurent",
+    "price": 98.00,
     "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/4/150/150"
+    "url": "https://www.amazon.com/Yves-Saint-Laurent-Black-Opium/dp/B07X5Z6Z6Z",
+    "image": "https://m.media-amazon.com/images/I/61Aapx9WXGL._AC_SL1500_.jpg"
   },
   {
-    "id": "5",
-    "title": "Dramatically Different Moisturizing Lotion",
-    "brand": "Clinique",
-    "price": 19.86,
+    "id": "p5",
+    "title": "Tom Ford Oud Wood Eau de Parfum",
+    "brand": "Tom Ford",
+    "price": 145.00,
     "currency": "USD",
-    "url": "https://clinique.com/products/dramatically-different-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/5/150/150"
+    "url": "https://www.amazon.com/Tom-Ford-Oud-Wood-Parfum/dp/B07X5Z6Z6Z",
+    "image": "https://m.media-amazon.com/images/I/61i5bJr8BmL._AC_SL1500_.jpg"
   },
+  
+  // Mobile Phones - Flipkart
   {
-    "id": "6",
-    "title": "Revitalift Hyaluronic Acid Serum",
-    "brand": "L'Oreal",
-    "price": 79.64,
+    "id": "m1",
+    "title": "Apple iPhone 15 Pro Max",
+    "brand": "Apple",
+    "price": 1199.00,
     "currency": "USD",
-    "url": "https://loreal.com/products/revitalift-hyaluronic-acid-serum",
-    "image": "https://picsum.photos/seed/6/150/150"
+    "url": "https://www.flipkart.com/apple-iphone-15-pro-max/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/c/4/d/-original-imagtc5fz9sprrnk.jpeg"
   },
   {
-    "id": "7",
-    "title": "Dramatically Different Moisturizing Lotion",
-    "brand": "Clinique",
-    "price": 79.02,
+    "id": "m2",
+    "title": "Samsung Galaxy S24 Ultra 5G",
+    "brand": "Samsung",
+    "price": 1299.99,
     "currency": "USD",
-    "url": "https://clinique.com/products/dramatically-different-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/7/150/150"
+    "url": "https://www.flipkart.com/samsung-galaxy-s24-ultra-5g/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/n/9/e/-original-imagtc2fvydzh6gh.jpeg"
   },
   {
-    "id": "8",
-    "title": "Advanced Repair Cream",
-    "brand": "Eucerin",
-    "price": 10.0,
+    "id": "m3",
+    "title": "Google Pixel 8 Pro",
+    "brand": "Google",
+    "price": 899.00,
     "currency": "USD",
-    "url": "https://eucerin.com/products/advanced-repair-cream",
-    "image": "https://picsum.photos/seed/8/150/150"
+    "url": "https://www.flipkart.com/google-pixel-8-pro/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/d/z/t/-original-imagkc5hf2bg4gzh.jpeg"
   },
   {
-    "id": "9",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 70.89,
+    "id": "m4",
+    "title": "OnePlus 12 5G",
+    "brand": "OnePlus",
+    "price": 749.00,
     "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/9/150/150"
+    "url": "https://www.flipkart.com/oneplus-12-5g/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/f/6/9/-original-imagkc5hf2bg4gzh.jpeg"
   },
   {
-    "id": "10",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 60.48,
+    "id": "m5",
+    "title": "Xiaomi 14 Pro 5G",
+    "brand": "Xiaomi",
+    "price": 699.99,
     "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/10/150/150"
+    "url": "https://www.flipkart.com/xiaomi-14-pro-5g/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/n/9/e/-original-imagtc2fvydzh6gh.jpeg"
   },
+  
+  // Mobile Accessories - Amazon
   {
-    "id": "11",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 63.34,
+    "id": "a1",
+    "title": "Apple AirPods Pro (2nd Generation)",
+    "brand": "Apple",
+    "price": 249.00,
     "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/11/150/150"
+    "url": "https://www.amazon.com/Apple-AirPods-Pro-2nd-Generation/dp/B09JQWJN5Z",
+    "image": "https://m.media-amazon.com/images/I/71bhWgQK-cL._AC_SL1500_.jpg"
   },
   {
-    "id": "12",
-    "title": "Regenerist Micro-Sculpting Cream",
-    "brand": "Olay",
-    "price": 53.01,
+    "id": "a2",
+    "title": "Anker PowerCore 10000 PD Redux",
+    "brand": "Anker",
+    "price": 29.99,
     "currency": "USD",
-    "url": "https://olay.com/products/regenerist-micro-sculpting-cream",
-    "image": "https://picsum.photos/seed/12/150/150"
+    "url": "https://www.amazon.com/Anker-PowerCore-10000-Redux-Portable/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/713X9-5WhSL._AC_SL1500_.jpg"
   },
   {
-    "id": "13",
-    "title": "Regenerist Micro-Sculpting Cream",
-    "brand": "Olay",
-    "price": 61.45,
+    "id": "a3",
+    "title": "Belkin BoostCharge Pro MagSafe",
+    "brand": "Belkin",
+    "price": 39.99,
     "currency": "USD",
-    "url": "https://olay.com/products/regenerist-micro-sculpting-cream",
-    "image": "https://picsum.photos/seed/13/150/150"
+    "url": "https://www.amazon.com/Belkin-BoostCharge-Wireless-Charger-MagSafe/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/71J2dZOWkIL._AC_SL1500_.jpg"
   },
   {
-    "id": "14",
-    "title": "Revitalift Hyaluronic Acid Serum",
-    "brand": "L'Oreal",
-    "price": 15.22,
+    "id": "a4",
+    "title": "Samsung Galaxy Buds2 Pro",
+    "brand": "Samsung",
+    "price": 199.99,
     "currency": "USD",
-    "url": "https://loreal.com/products/revitalift-hyaluronic-acid-serum",
-    "image": "https://picsum.photos/seed/14/150/150"
+    "url": "https://www.amazon.com/Samsung-Galaxy-Buds2-Pro-SM-R510NZKAXAR/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/61L5qiJ34YL._AC_SL1500_.jpg"
   },
   {
-    "id": "15",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 21.22,
+    "id": "a5",
+    "title": "OtterBox Defender Series Pro Case",
+    "brand": "OtterBox",
+    "price": 49.99,
     "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/15/150/150"
+    "url": "https://www.amazon.com/OtterBox-Defender-Pro-iPhone-Cases/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/81BmjcZQ-QL._AC_SL1500_.jpg"
   },
+  
+  // Fashion Items - Meesho
   {
-    "id": "16",
-    "title": "Advanced Repair Cream",
-    "brand": "Eucerin",
-    "price": 66.04,
+    "id": "f1",
+    "title": "Men's Casual T-Shirt",
+    "brand": "Roadster",
+    "price": 19.99,
     "currency": "USD",
-    "url": "https://eucerin.com/products/advanced-repair-cream",
-    "image": "https://picsum.photos/seed/16/150/150"
+    "url": "https://www.meesho.com/mens-casual-t-shirt/p/123456789",
+    "image": "https://images.meesho.com/images/products/146741161/fgxih_512.webp"
   },
   {
-    "id": "17",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 14.91,
+    "id": "f2",
+    "title": "Aviator Sunglasses for Men",
+    "brand": "John Jacobs",
+    "price": 29.99,
     "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/17/150/150"
+    "url": "https://www.meesho.com/aviator-sunglasses-men/p/123456789",
+    "image": "https://images.meesho.com/images/products/21786582/62db0_512.webp"
   },
   {
-    "id": "18",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 16.68,
+    "id": "f3",
+    "title": "Analog Watch for Men",
+    "brand": "Fastrack",
+    "price": 39.99,
     "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/18/150/150"
+    "url": "https://www.meesho.com/analog-watch-men/p/123456789",
+    "image": "https://images.meesho.com/images/products/3498005/15031190_512.webp"
   },
   {
-    "id": "19",
-    "title": "Niacinamide 10% + Zinc 1%",
-    "brand": "The Ordinary",
-    "price": 66.16,
+    "id": "f4",
+    "title": "Men's Sports Shoes",
+    "brand": "Campus",
+    "price": 49.99,
     "currency": "USD",
-    "url": "https://theordinary.com/products/niacinamide-10%-+-zinc-1%",
-    "image": "https://picsum.photos/seed/19/150/150"
+    "url": "https://www.meesho.com/mens-sports-shoes/p/123456789",
+    "image": "https://images.meesho.com/images/products/101684867/khali_512.webp"
   },
   {
-    "id": "20",
-    "title": "Regenerist Micro-Sculpting Cream",
-    "brand": "Olay",
-    "price": 45.13,
+    "id": "f5",
+    "title": "Women's Handbag",
+    "brand": "Lavie",
+    "price": 34.99,
     "currency": "USD",
-    "url": "https://olay.com/products/regenerist-micro-sculpting-cream",
-    "image": "https://picsum.photos/seed/20/150/150"
+    "url": "https://www.meesho.com/womens-handbag/p/123456789",
+    "image": "https://images.meesho.com/images/products/90685102/vw2up_512.webp"
   },
+  
+  // Other Relevant Categories - Mix of platforms
   {
-    "id": "21",
-    "title": "Dramatically Different Moisturizing Lotion",
-    "brand": "Clinique",
-    "price": 50.73,
+    "id": "o1",
+    "title": "Instant Pot Duo 7-in-1 Electric Pressure Cooker",
+    "brand": "Instant Pot",
+    "price": 89.99,
     "currency": "USD",
-    "url": "https://clinique.com/products/dramatically-different-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/21/150/150"
+    "url": "https://www.amazon.com/Instant-Pot-Duo-Electric-Pressure/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/71W5fXJzJ5L._AC_SL1500_.jpg"
   },
   {
-    "id": "22",
-    "title": "Moisturizing Cream",
-    "brand": "CeraVe",
-    "price": 29.17,
+    "id": "o2",
+    "title": "Kindle Paperwhite (8 GB) – Black",
+    "brand": "Amazon",
+    "price": 109.99,
     "currency": "USD",
-    "url": "https://cerave.com/products/moisturizing-cream",
-    "image": "https://picsum.photos/seed/22/150/150"
+    "url": "https://www.amazon.com/Kindle-Paperwhite-8-GB-Black/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/61K454miqwL._AC_SL1500_.jpg"
   },
   {
-    "id": "23",
-    "title": "Soft Moisturizing Cream",
-    "brand": "Nivea",
-    "price": 67.47,
+    "id": "o3",
+    "title": "Sony WH-1000XM5 Wireless Noise Canceling Headphones",
+    "brand": "Sony",
+    "price": 349.99,
     "currency": "USD",
-    "url": "https://nivea.com/products/soft-moisturizing-cream",
-    "image": "https://picsum.photos/seed/23/150/150"
+    "url": "https://www.amazon.com/Sony-WH-1000XM5-Wireless-Canceling-Headphones/dp/B09VCS6N5Q",
+    "image": "https://m.media-amazon.com/images/I/61JL30HHBBL._AC_SL1500_.jpg"
   },
   {
-    "id": "24",
-    "title": "Dramatically Different Moisturizing Lotion",
-    "brand": "Clinique",
-    "price": 48.37,
+    "id": "o4",
+    "title": "Nike Air Force 1 '07 Sneakers",
+    "brand": "Nike",
+    "price": 99.99,
     "currency": "USD",
-    "url": "https://clinique.com/products/dramatically-different-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/24/150/150"
+    "url": "https://www.flipkart.com/nike-air-force-1-07-sneakers/p/itm123456789",
+    "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/shoe/n/i/k/123456789_400.jpg"
   },
   {
-    "id": "25",
-    "title": "Moisturizing Cream",
-    "brand": "CeraVe",
-    "price": 16.17,
+    "id": "o5",
+    "title": "Women's Ethnic Kurti Set",
+    "brand": "Libas",
+    "price": 29.99,
     "currency": "USD",
-    "url": "https://cerave.com/products/moisturizing-cream",
-    "image": "https://picsum.photos/seed/25/150/150"
-  },
-  {
-    "id": "26",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 59.11,
-    "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/26/150/150"
-  },
-  {
-    "id": "27",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 35.09,
-    "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/27/150/150"
-  },
-  {
-    "id": "28",
-    "title": "Moisturizing Cream",
-    "brand": "CeraVe",
-    "price": 24.49,
-    "currency": "USD",
-    "url": "https://cerave.com/products/moisturizing-cream",
-    "image": "https://picsum.photos/seed/28/150/150"
-  },
-  {
-    "id": "29",
-    "title": "Soft Moisturizing Cream",
-    "brand": "Nivea",
-    "price": 40.8,
-    "currency": "USD",
-    "url": "https://nivea.com/products/soft-moisturizing-cream",
-    "image": "https://picsum.photos/seed/29/150/150"
-  },
-  {
-    "id": "30",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 29.96,
-    "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/30/150/150"
-  },
-  {
-    "id": "31",
-    "title": "Niacinamide 10% + Zinc 1%",
-    "brand": "The Ordinary",
-    "price": 73.22,
-    "currency": "USD",
-    "url": "https://theordinary.com/products/niacinamide-10%-+-zinc-1%",
-    "image": "https://picsum.photos/seed/31/150/150"
-  },
-  {
-    "id": "32",
-    "title": "Regenerist Micro-Sculpting Cream",
-    "brand": "Olay",
-    "price": 10.85,
-    "currency": "USD",
-    "url": "https://olay.com/products/regenerist-micro-sculpting-cream",
-    "image": "https://picsum.photos/seed/32/150/150"
-  },
-  {
-    "id": "33",
-    "title": "Soft Moisturizing Cream",
-    "brand": "Nivea",
-    "price": 79.42,
-    "currency": "USD",
-    "url": "https://nivea.com/products/soft-moisturizing-cream",
-    "image": "https://picsum.photos/seed/33/150/150"
-  },
-  {
-    "id": "34",
-    "title": "Advanced Repair Cream",
-    "brand": "Eucerin",
-    "price": 26.3,
-    "currency": "USD",
-    "url": "https://eucerin.com/products/advanced-repair-cream",
-    "image": "https://picsum.photos/seed/34/150/150"
-  },
-  {
-    "id": "35",
-    "title": "Revitalift Hyaluronic Acid Serum",
-    "brand": "L'Oreal",
-    "price": 23.85,
-    "currency": "USD",
-    "url": "https://loreal.com/products/revitalift-hyaluronic-acid-serum",
-    "image": "https://picsum.photos/seed/35/150/150"
-  },
-  {
-    "id": "36",
-    "title": "Regenerist Micro-Sculpting Cream",
-    "brand": "Olay",
-    "price": 69.6,
-    "currency": "USD",
-    "url": "https://olay.com/products/regenerist-micro-sculpting-cream",
-    "image": "https://picsum.photos/seed/36/150/150"
-  },
-  {
-    "id": "37",
-    "title": "Moisturizing Cream",
-    "brand": "CeraVe",
-    "price": 11.81,
-    "currency": "USD",
-    "url": "https://cerave.com/products/moisturizing-cream",
-    "image": "https://picsum.photos/seed/37/150/150"
-  },
-  {
-    "id": "38",
-    "title": "Dramatically Different Moisturizing Lotion",
-    "brand": "Clinique",
-    "price": 58.4,
-    "currency": "USD",
-    "url": "https://clinique.com/products/dramatically-different-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/38/150/150"
-  },
-  {
-    "id": "39",
-    "title": "Anthelios Sunscreen SPF 60",
-    "brand": "La Roche-Posay",
-    "price": 65.23,
-    "currency": "USD",
-    "url": "https://larocheposay.com/products/anthelios-sunscreen-spf-60",
-    "image": "https://picsum.photos/seed/39/150/150"
-  },
-  {
-    "id": "40",
-    "title": "Moisturizing Cream",
-    "brand": "CeraVe",
-    "price": 71.25,
-    "currency": "USD",
-    "url": "https://cerave.com/products/moisturizing-cream",
-    "image": "https://picsum.photos/seed/40/150/150"
-  },
-  {
-    "id": "41",
-    "title": "Niacinamide 10% + Zinc 1%",
-    "brand": "The Ordinary",
-    "price": 22.6,
-    "currency": "USD",
-    "url": "https://theordinary.com/products/niacinamide-10%-+-zinc-1%",
-    "image": "https://picsum.photos/seed/41/150/150"
-  },
-  {
-    "id": "42",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 53.36,
-    "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/42/150/150"
-  },
-  {
-    "id": "43",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 31.25,
-    "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/43/150/150"
-  },
-  {
-    "id": "44",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 22.41,
-    "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/44/150/150"
-  },
-  {
-    "id": "45",
-    "title": "Advanced Repair Cream",
-    "brand": "Eucerin",
-    "price": 23.69,
-    "currency": "USD",
-    "url": "https://eucerin.com/products/advanced-repair-cream",
-    "image": "https://picsum.photos/seed/45/150/150"
-  },
-  {
-    "id": "46",
-    "title": "Revitalift Hyaluronic Acid Serum",
-    "brand": "L'Oreal",
-    "price": 10.52,
-    "currency": "USD",
-    "url": "https://loreal.com/products/revitalift-hyaluronic-acid-serum",
-    "image": "https://picsum.photos/seed/46/150/150"
-  },
-  {
-    "id": "47",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 53.32,
-    "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/47/150/150"
-  },
-  {
-    "id": "48",
-    "title": "Niacinamide 10% + Zinc 1%",
-    "brand": "The Ordinary",
-    "price": 17.55,
-    "currency": "USD",
-    "url": "https://theordinary.com/products/niacinamide-10%-+-zinc-1%",
-    "image": "https://picsum.photos/seed/48/150/150"
-  },
-  {
-    "id": "49",
-    "title": "Retinol Night Cream",
-    "brand": "Neutrogena",
-    "price": 31.43,
-    "currency": "USD",
-    "url": "https://neutrogena.com/products/retinol-night-cream",
-    "image": "https://picsum.photos/seed/49/150/150"
-  },
-  {
-    "id": "50",
-    "title": "Daily Moisturizing Lotion",
-    "brand": "Aveeno",
-    "price": 23.02,
-    "currency": "USD",
-    "url": "https://aveeno.com/products/daily-moisturizing-lotion",
-    "image": "https://picsum.photos/seed/50/150/150"
-  },
-  {
-    id: '51',
-    title: 'Wrinkle Smoother Lift & Firm Serum',
-    brand: 'Merle Norman',
-    price: 73.00,
-    currency: 'USD',
-    url: 'https://merlenorman.com/products/wrinkle-smoother-serum',
-    image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=150&h=150&fit=crop&crop=center',
-  },
-  {
-    id: '52',
-    title: 'Ancient Multivitamin Women\'s Once Daily',
-    brand: 'Ancient Nutrition',
-    price: 29.95,
-    currency: 'USD',
-    url: 'https://ancientnutrition.com/products/multivitamin-womens',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=150&h=150&fit=crop&crop=center',
-  },
-  {
-    id: '53',
-    title: 'Double Hydration Boost Gel',
-    brand: 'JTDcosmetics',
-    price: 17.40,
-    currency: 'USD',
-    url: 'https://jtdluxe.com/products/double-hydration-boost-gel',
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=150&h=150&fit=crop&crop=center',
-  },
-  {
-    id: '54',
-    title: 'Vitamin C Brightening Serum',
-    brand: 'The Ordinary',
-    price: 12.90,
-    currency: 'USD',
-    url: 'https://theordinary.com/products/vitamin-c-serum',
-    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=150&h=150&fit=crop&crop=center',
-  },
-  {
-    id: '55',
-    title: 'Hyaluronic Acid Moisturizer',
-    brand: 'CeraVe',
-    price: 19.99,
-    currency: 'USD',
-    url: 'https://cerave.com/products/hyaluronic-acid-moisturizer',
-    image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=150&h=150&fit=crop&crop=center',
-  },
-  {
-    id: '56',
-    title: 'Retinol Night Cream',
-    brand: 'Neutrogena',
-    price: 24.99,
-    currency: 'USD',
-    url: 'https://neutrogena.com/products/retinol-cream',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=150&h=150&fit=crop&crop=center',
+    "url": "https://www.meesho.com/womens-ethnic-kurti-set/p/123456789",
+    "image": "https://images.meesho.com/images/products/124805107/pu7pz_512.webp"
   }
-]
+];
 
 
 export default function AddProductModal({ isOpen, onClose, onSave }) {
@@ -598,10 +373,10 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
       }
     } catch (error) {
       console.error('Error extracting product:', error);
-      
+
       // Provide user-friendly error messages
       let errorMessage = 'Sorry, we had trouble finding this. Please try a new URL.';
-      
+
       if (error.message.includes('Network error')) {
         errorMessage = 'Network error: Please check your internet connection and try again.';
       } else if (error.message.includes('Failed to fetch URL')) {
@@ -611,7 +386,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
       } else if (error.message.includes('timeout')) {
         errorMessage = 'Request timed out. Please try again with a different URL.';
       }
-      
+
       setLinkError(errorMessage);
     } finally {
       setIsLoadingLink(false);
@@ -659,15 +434,15 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
       }, 1000);
     }
   };
-  
+
   const handleAddSelected = () => {
     const payload = selectedProducts.map((product) => ({
-        title: product.title,
-        brand: product.brand,
-        price: product.price,
-        currency: product.currency,
-        url: product.url,
-        image: product.image,
+      title: product.title,
+      brand: product.brand,
+      price: product.price,
+      currency: product.currency,
+      url: product.url,
+      image: product.image,
     }));
     onSave(payload);
     resetModal();
@@ -687,7 +462,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     // Clear extracted product if user is typing (not a complete URL)
     if (extractedProduct && !isUrl(value)) {
       setExtractedProduct(null);
@@ -714,7 +489,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
           </div>
         </DialogHeader>
 
-        <div className="px-4 pt-4 sm:px-8 sm:pt-8 overflow-y-auto flex-1 scroll-elegant scrollbar-accent" aria-describedby="add-products-desc">
+        <div className="px-4 pt-4 sm:px-8 overflow-y-auto flex-1 scroll-elegant scrollbar-accent" aria-describedby="add-products-desc">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -728,22 +503,22 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
             </div>
 
             {/* Search Input */}
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 py-2 border-b border-gray-100">
-              <div className="w-full bg-gray-100 rounded-full px-5 py-4 flex items-center">
+            <div className="sticky top-0 z-10">
+              <div className="w-full bg-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk rounded-full px-5 py-4 flex items-center">
                 {isUrl(searchTerm) ? (
                   <Link className="w-5 h-5 text-purple-500 mr-3" />
                 ) : (
-                <Search className="w-5 h-5 text-gray-500 mr-3" />
+                  <Search className="w-5 h-5 text-gray-500 mr-3" />
                 )}
                 <input
                   type="text"
                   placeholder="Search products or paste a link (e.g., https://amazon.com/dp/...)"
-                value={searchTerm}
+                  value={searchTerm}
                   onChange={handleSearchChange}
                   className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-gray-500"
-              />
+                />
               </div>
-              
+
               {/* Link Error */}
               {linkError && (
                 <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -766,14 +541,14 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                   <div className="w-20 h-24 bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
                     <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
                   </div>
-                  
+
                   {/* Loading Content */}
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
                     <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
                     <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
                   </div>
-                  
+
                   {/* Loading Button */}
                   <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
                 </div>
@@ -790,13 +565,13 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                 <div className="flex items-center space-x-4 p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                   {/* Product Image */}
                   <div className="w-20 h-24 rounded-lg overflow-hidden bg-gray-50 relative flex-shrink-0">
-                    <img
+                    <ImageWithFallback
                       src={extractedProduct.image || '/placeholder.svg'}
                       alt={extractedProduct.title}
-                      className="w-full h-full object-cover"
+                      className="object-cover rounded-lg"
                     />
                   </div>
-                  
+
                   {/* Product Details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
@@ -815,16 +590,15 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                       {formatPrice(extractedProduct.price, extractedProduct.currency)}
                     </p>
                   </div>
-                  
+
                   {/* Add Button */}
                   <Button
                     onClick={handleAddExtractedProduct}
                     disabled={isAddingProduct}
-                    className={`w-20 h-10 text-sm font-medium transition-all duration-200 ${
-                      isAddingProduct 
-                        ? 'bg-gray-400 cursor-not-allowed' 
+                    className={`w-20 h-10 text-sm font-medium transition-all duration-200 ${isAddingProduct
+                        ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-purple-600 hover:bg-purple-700'
-                    } text-white`}
+                      } text-white`}
                   >
                     {isAddingProduct ? (
                       <div className="flex items-center">
@@ -841,83 +615,80 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
 
             {/* Products Grid - Only show when not extracting from URL */}
             {!isUrl(searchTerm) && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pr-1">
-              {filteredProducts.map((product) => {
-                const isSelected = selectedProducts.find(p => p.id === product.id);
-                return (
-                  <motion.div
-                    key={product.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`relative cursor-pointer rounded-2xl transition-all duration-200 shadow-sm ${
-                      isSelected 
-                        ? 'ring-2 ring-purple-500 bg-purple-50 border border-purple-200' 
-                        : 'border border-gray-200 hover:shadow-md bg-white'
-                    }`}
-                    onClick={() => handleProductSelect(product)}
-                  >
-                    {/* Product Image */}
-                    <div className="aspect-[4/5] rounded-t-2xl overflow-hidden bg-gray-50 relative">
-                      <Image
-                        src={product.image || '/placeholder.svg'}
-                        alt={product.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        priority={false}
-                      />
-                    </div>
-                    
-                    {/* Product Details */}
-                    <div className="p-3">
-                      <p className="text-sm text-gray-600 font-medium mb-1">{product.brand}</p>
-                      <h3 className="font-semibold text-gray-900 text-[14px] leading-snug mb-1.5 line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <p className="text-[14px] font-semibold text-gray-900">
-                        ${product.price.toFixed(2)}
-                      </p>
-                    </div>
-
-                    {/* Selection Indicator */}
-                    {isSelected && (
-                      <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center shadow">
-                        <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pr-1">
+                {filteredProducts.map((product) => {
+                  const isSelected = selectedProducts.find(p => p.id === product.id);
+                  return (
+                    <motion.div
+                      key={product.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`relative cursor-pointer rounded-2xl transition-all duration-200 shadow-sm ${isSelected
+                          ? 'ring-2 ring-purple-500 bg-purple-50 border border-purple-200'
+                          : 'border border-gray-200 hover:shadow-md bg-white'
+                        }`}
+                      onClick={() => handleProductSelect(product)}
+                    >
+                      {/* Product Image */}
+                      <div className="aspect-[14/12] rounded-t-2xl overflow-hidden bg-gray-50 relative">
+                        <ImageWithFallback
+                          src={product.image || '/placeholder.svg'}
+                          alt={product.title}
+                          className="object-cover rounded-t-2xl"
+                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        />
                       </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
+
+                      {/* Product Details */}
+                      <div className="p-3">
+                        <p className="text-sm text-gray-600 font-medium mb-1">{product.brand}</p>
+                        <h3 className="font-semibold text-gray-900 text-[14px] leading-snug mb-1.5 line-clamp-2">
+                          {product.title}
+                        </h3>
+                        <p className="text-[14px] font-semibold text-gray-900">
+                          ${product.price.toFixed(2)}
+                        </p>
+                      </div>
+
+                      {/* Selection Indicator */}
+                      {isSelected && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center shadow">
+                          <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
             )}
 
-            {/* Action Buttons - Hide when loading link or when URL is being processed */}
-            {!isLoadingLink && !isUrl(searchTerm) && !extractedProduct && (
-            <div className="flex justify-between items-center pt-5 border-t border-gray-200 sticky bottom-0 bg-white py-4">
-              <div className="text-sm text-gray-600">
-                {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
-              </div>
-              <div className="flex space-x-3">
-                <Button
-                  variant="outline"
-                  onClick={resetModal}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddSelected}
-                  disabled={selectedProducts.length === 0}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  Add {selectedProducts.length} Product{selectedProducts.length !== 1 ? 's' : ''}
-                </Button>
-              </div>
-            </div>
-            )}
           </motion.div>
         </div>
+        {/* Action Buttons - Hide when loading link or when URL is being processed */}
+        {!isLoadingLink && !isUrl(searchTerm) && !extractedProduct && (
+          <div className="flex justify-between items-center border-t border-gray-200 sticky bottom-0 bg-white p-4 sm:px-8">
+            <div className="text-sm text-gray-600">
+              {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={resetModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddSelected}
+                disabled={selectedProducts.length === 0}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Add {selectedProducts.length} Product{selectedProducts.length !== 1 ? 's' : ''}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

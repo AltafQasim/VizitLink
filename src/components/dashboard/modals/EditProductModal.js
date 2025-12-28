@@ -302,14 +302,14 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                 <span>Share</span>
               </Button>
 
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={handleDelete}
                 className="flex items-center space-x-2 text-red-600 hover:text-red-700"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Delete</span>
-              </Button>
+              </Button> */}
             </div>
           </motion.div>
         </div>

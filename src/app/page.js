@@ -9,11 +9,14 @@ import CreatorsSection from '../components/CreatorsSection';
 import FooterSection from '../components/FooterSection';
 import ShareSection from '../components/ShareSection';
 import { BASE_URL } from '../lib/constants'; // Add this import
+import { Analytics } from "@vercel/analytics/next"
+
 
 // Server Component - Static Page
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <Analytics />
       <TopBanner />
       <StickyNavbar />
       <HeroSection />

@@ -641,8 +641,8 @@ export default function PublicProfilePage({ params }) {
                                 )}
                             </div>
                             <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">@{data?.profile?.username || unwrappedParams?.username}</h4>
-                            <p className="text-sm sm:text-base text-gray-800 flex items-center justify-center gap-1">
-                                <Sparkles className="w-4 h-4" />
+                            <p className="text-sm sm:text-base text-gray-800 flex items-center justify-center">
+                                <BrandLogo showText={false} linkToHome={false} logoVariant="black" className="w-6 h-6" />
                                 /{data?.profile?.username || unwrappedParams?.username}
                             </p>
                         </div>

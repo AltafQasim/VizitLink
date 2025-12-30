@@ -1,6 +1,5 @@
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import PhoneMockup from './PhoneMockup';
 import Link from 'next/link';
 import ProfileCard from './reactbit/ProfileCard/Profilecard';
 
@@ -37,7 +36,7 @@ const HeroSection = () => {
             <Link href="/signup">
               <Button
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 md:px-8 py-6 font-semibold text-base md:text-lg w-auto"
+                className="bg-lime-400 hover:bg-lime-500 text-black rounded-full px-6 md:px-8 sm:py-6 py-5 font-semibold text-base md:text-lg w-auto"
               >
                 Claim your VizitLink
               </Button>

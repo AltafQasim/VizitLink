@@ -32,7 +32,7 @@ const getCurrencySymbol = (currency) => {
 };
 
 export default function LivePreview() {
-  const { data, customLinks } = useDashboard();
+  const { data, customLinks, socialLinks } = useDashboard();
   const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   // Get design settings
@@ -288,8 +288,8 @@ export default function LivePreview() {
                               <span className="text-lg">{link.icon}</span>
                             )}
                           <div className="absolute inset-0 rounded-3xl" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
-                          <div className="flex items-center h-16 space-x-3 z-10 text-white" >
-                            <span className="font-medium text-sm">{link.title}</span>
+                          <div className="flex items-center justify-center h-16 space-x-3 z-10 text-white px-4 w-full" >
+                            <span className="font-medium text-sm truncate max-w-full">{link.title}</span>
                           </div>
                         </motion.a>
                       );
@@ -304,18 +304,18 @@ export default function LivePreview() {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
                             {link?.thumbnail ?
-                              <img src={link.thumbnail} className='w-10 h-10 rounded-full object-cover' /> :
+                              <img src={link.thumbnail} className='w-10 h-10 rounded-full object-cover flex-shrink-0' /> :
                               IconComponent ? (
                                 <IconComponent
-                                  className="w-5 h-5"
+                                  className="w-5 h-5 flex-shrink-0"
                                   style={{ color: socialColorsMap[link.icon] || socialColorsMap.default }}
                                 />
                               ) : (
-                                <span className="text-lg">{link.icon}</span>
+                                <span className="text-lg flex-shrink-0">{link.icon}</span>
                               )}
-                            <span className="font-medium text-sm">{link.title}</span>
+                            <span className="font-medium text-sm truncate min-w-0">{link.title}</span>
                           </div>
                           <ExternalLink className="w-4 h-4 text-gray-400" />
                         </motion.a>
@@ -392,8 +392,8 @@ export default function LivePreview() {
 
               {/* Social icons */}
               <div className="mt-6 flex justify-center space-x-4">
-                {data?.links
-                  ?.filter(link => link.active)
+                {socialLinks
+                  ?.filter(link => link.active && link.url)
                   .slice(0, 5)
                   .map((link) => {
                     const IconComponent = socialIconsMap[link.icon] || socialIconsMap.default;

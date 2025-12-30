@@ -11,16 +11,10 @@ import {
   Plus,
   Edit,
   Trash2,
-  MoreVertical,
-  Share2,
-  Upload,
   AlertTriangle,
   Search,
-  Filter,
   Grid3x3,
   List,
-  TrendingUp,
-  DollarSign,
   Eye,
   Package
 } from 'lucide-react';
@@ -78,6 +72,19 @@ const mockProducts = [
   }
 ];
 
+const getCurrencySymbol = (currency) => {
+  const map = {
+    INR: '₹',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    CAD: 'C$',
+    AUD: 'A$',
+    JPY: '¥',
+  };
+  return map[currency] || '$';
+};
+
 export default function ProductsTab() {
   const { data, updateData, saveChanges, currentProfileId, saveProducts } = useDashboard();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -107,19 +114,25 @@ export default function ProductsTab() {
     try {
       // Save only products slice
       await saveProducts(snapshot.products);
-      toast.success('Product saved successfully');
     } catch (e) {
-      toast.error(e?.message || 'Failed to save product');
+      throw e; // Re-throw to let calling function handle error
     }
   };
 
   const handleToggleActive = async (id) => {
-    const updatedProducts = data.products.map(product =>
-      product.id === id ? { ...product, active: !product.active } : product
-    );
-    const snapshot = { ...data, products: updatedProducts };
-    updateData({ products: updatedProducts });
-    await persist(snapshot);
+    const loadingToast = toast.loading('Updating product...');
+    try {
+      const updatedProducts = data.products.map(product =>
+        product.id === id ? { ...product, active: !product.active } : product
+      );
+      const snapshot = { ...data, products: updatedProducts };
+      updateData({ products: updatedProducts });
+      await persist(snapshot);
+      toast.dismiss(loadingToast);
+    } catch (e) {
+      toast.dismiss(loadingToast);
+      toast.error(e?.message || 'Failed to update product');
+    }
   };
 
   const handleEdit = (product) => {
@@ -135,12 +148,20 @@ export default function ProductsTab() {
   const confirmDelete = async () => {
     if (!deletingProduct) return;
 
-    const updatedProducts = data.products.filter(product => product.id !== deletingProduct.id);
-    const snapshot = { ...data, products: updatedProducts };
-    updateData({ products: updatedProducts });
-    await persist(snapshot);
-    setShowDeleteModal(false);
-    setDeletingProduct(null);
+    const loadingToast = toast.loading('Deleting product...');
+    try {
+      const updatedProducts = data.products.filter(product => product.id !== deletingProduct.id);
+      const snapshot = { ...data, products: updatedProducts };
+      updateData({ products: updatedProducts });
+      await persist(snapshot);
+      toast.dismiss(loadingToast);
+      toast.success('Product deleted successfully');
+      setShowDeleteModal(false);
+      setDeletingProduct(null);
+    } catch (e) {
+      toast.dismiss(loadingToast);
+      toast.error(e?.message || 'Failed to delete product');
+    }
   };
 
 
@@ -161,24 +182,38 @@ export default function ProductsTab() {
   });
 
   const handleAddProduct = async (newProductOrArray) => {
-    const items = Array.isArray(newProductOrArray) ? newProductOrArray : [newProductOrArray];
-    const normalized = items.map(normalizeProduct);
-    const updatedProducts = [...data.products, ...normalized];
-    const snapshot = { ...data, products: updatedProducts };
-    updateData({ products: updatedProducts });
-    await persist(snapshot);
-    setShowAddModal(false);
+    const loadingToast = toast.loading('Adding product...');
+    try {
+      const items = Array.isArray(newProductOrArray) ? newProductOrArray : [newProductOrArray];
+      const normalized = items.map(normalizeProduct);
+      const updatedProducts = [...data.products, ...normalized];
+      const snapshot = { ...data, products: updatedProducts };
+      updateData({ products: updatedProducts });
+      await persist(snapshot);
+      toast.dismiss(loadingToast);
+      setShowAddModal(false);
+    } catch (e) {
+      toast.dismiss(loadingToast);
+      toast.error(e?.message || 'Failed to add product');
+    }
   };
 
   const handleUpdateProduct = async (updatedProduct) => {
-    const updatedProducts = data.products.map(product =>
-      product.id === updatedProduct.id ? updatedProduct : product
-    );
-    const snapshot = { ...data, products: updatedProducts };
-    updateData({ products: updatedProducts });
-    await persist(snapshot);
-    setShowEditModal(false);
-    setEditingProduct(null);
+    const loadingToast = toast.loading('Updating product...');
+    try {
+      const updatedProducts = data.products.map(product =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      );
+      const snapshot = { ...data, products: updatedProducts };
+      updateData({ products: updatedProducts });
+      await persist(snapshot);
+      toast.dismiss(loadingToast);
+      setShowEditModal(false);
+      setEditingProduct(null);
+    } catch (e) {
+      toast.dismiss(loadingToast);
+      toast.error(e?.message || 'Failed to update product');
+    }
   };
 
   // Filter and search products
@@ -474,7 +509,7 @@ export default function ProductsTab() {
                       {/* Price and Stats - Mobile Optimized */}
                       <div className="flex items-center justify-between mb-4">
                         <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-3.5 py-1.5 text-base sm:text-sm font-bold">
-                          ${product.price.toFixed(2)}
+                          {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
                         </span>
                         <div className="flex items-center gap-1.5 text-sm sm:text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">

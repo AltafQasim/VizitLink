@@ -130,6 +130,8 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
     setMetadataError(null);
     lastFetchedUrlRef.current = trimmedUrl;
     
+    const loadingToast = toast.loading('Fetching link metadata...');
+    
     try {
       const response = await fetch('/api/extract-metadata', {
         method: 'POST',
@@ -169,6 +171,7 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
 
         await onUpdate(updatedLink);
 
+        toast.dismiss(loadingToast);
         // Auto-save after successful metadata fetch
         setTimeout(() => {
           onSave(updatedLink);
@@ -177,6 +180,7 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
         }, 500);
       } else {
         // Handle unsuccessful metadata extraction
+        toast.dismiss(loadingToast);
         setMetadataError(data.error || 'Could not extract metadata from URL');
         toast.warning('Limited metadata available for this URL');
         
@@ -192,10 +196,12 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
     } catch (error) {
       // Handle abort separately from other errors
       if (error.name === 'AbortError') {
+        toast.dismiss(loadingToast);
         console.log('Metadata fetch aborted');
         return;
       }
       
+      toast.dismiss(loadingToast);
       console.error('Error fetching metadata:', error);
       setMetadataError(error.message || 'Failed to fetch metadata');
       toast.error('Failed to fetch link metadata');
@@ -726,7 +732,13 @@ export default function LinksTab() {
       const link = socialLinks.find(l => l.id === id);
       if (!link) return;
       const updatedLink = { ...link, active: !link.active };
-      await upsertSocialLink(updatedLink);
+      try {
+        await upsertSocialLink(updatedLink);
+        toast.success(updatedLink.active ? 'Link activated' : 'Link deactivated');
+      } catch (error) {
+        console.error('Failed to toggle link:', error);
+        toast.error('Failed to update link');
+      }
     } else {
       const updatedLinks = data.links.map(link =>
         link.id === id ? { ...link, active: !link.active } : link
@@ -750,16 +762,26 @@ export default function LinksTab() {
   const confirmDelete = async () => {
     if (!deletingLink) return;
 
-    if (activeSection === 'social') {
-      await deleteSocialLink(deletingLink.id);
-    } else {
-      const updatedLinks = data.links.filter(link => link.id !== deletingLink.id);
-      const snapshot = { ...data, links: updatedLinks };
-      updateData({ links: updatedLinks });
-      await persist(snapshot);
+    const loadingToast = toast.loading('Deleting link...');
+
+    try {
+      if (activeSection === 'social') {
+        await deleteSocialLink(deletingLink.id);
+      } else {
+        const updatedLinks = data.links.filter(link => link.id !== deletingLink.id);
+        const snapshot = { ...data, links: updatedLinks };
+        updateData({ links: updatedLinks });
+        await persist(snapshot);
+      }
+      toast.dismiss(loadingToast);
+      toast.success('Link deleted successfully');
+      setShowDeleteModal(false);
+      setDeletingLink(null);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      console.error('Failed to delete link:', error);
+      toast.error('Failed to delete link');
     }
-    setShowDeleteModal(false);
-    setDeletingLink(null);
   };
 
 
@@ -820,13 +842,15 @@ export default function LinksTab() {
       : payloadOrId;
     if (!linkToSave) return;
 
-    console.log('saveLayoutDraft called with:', linkToSave);
+    const loadingToast = toast.loading('Saving custom link...');
     try {
       await upsertCustomLink(linkToSave);
+      toast.dismiss(loadingToast);
       toast.success('Custom link saved');
       // Remove draft frame after saving (only if it exists as draft)
       setLayoutLinks(prev => prev.filter(link => link.id !== linkToSave.id));
     } catch (e) {
+      toast.dismiss(loadingToast);
       console.error('Failed to save custom link:', e);
       toast.error(e?.message || 'Failed to save custom link');
     }
@@ -853,12 +877,17 @@ export default function LinksTab() {
     if (timers[linkId]) {
       clearTimeout(timers[linkId]);
     }
+    
+    // Track loading state per link
+    let loadingToast = null;
     timers[linkId] = setTimeout(async () => {
+      loadingToast = toast.loading('Updating link...');
       try {
         const latestExisting = customLinksRef.current.find(l => l.id === linkId) || existing;
         const latestLocal = savedEditsRef.current[linkId] || {};
         const payload = { ...latestExisting, ...latestLocal };
         const saved = await upsertCustomLink(payload);
+        toast.dismiss(loadingToast);
         // Clear local edits for this id after successful save
         setSavedEdits(prev => {
           const { [linkId]: _omit, ...rest } = prev;
@@ -867,6 +896,7 @@ export default function LinksTab() {
         // Optionally, ensure local reflects any server-generated fields
         setSavedEdits(prev => prev); // no-op to trigger re-render if needed
       } catch (e) {
+        toast.dismiss(loadingToast);
         console.error('Failed to update custom link:', e);
         toast.error(e?.message || 'Failed to update');
       }
@@ -874,9 +904,11 @@ export default function LinksTab() {
   };
 
   const deleteSavedCustom = async (linkId) => {
+    const loadingToast = toast.loading('Deleting link...');
     try {
       await deleteCustomLink(linkId);
-      toast.success('Deleted');
+      toast.dismiss(loadingToast);
+      toast.success('Link deleted successfully');
       // Clear any pending debounce and local edits
       const timers = savedDebounceTimersRef.current;
       if (timers[linkId]) {
@@ -888,6 +920,7 @@ export default function LinksTab() {
         return rest;
       });
     } catch (e) {
+      toast.dismiss(loadingToast);
       console.error('Failed to delete custom link:', e);
       toast.error(e?.message || 'Failed to delete');
     }

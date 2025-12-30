@@ -42,7 +42,7 @@ export default function TopNavbar() {
     >
       {/* Left side */}
       <div className="flex items-center space-x-6">
-        <BrandLogo size="md" />
+        <BrandLogo size="md" linkToHome={false} />
 
         {/* Profile URL */}
         {data?.profile?.username && (

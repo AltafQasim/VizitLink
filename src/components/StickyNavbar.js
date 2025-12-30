@@ -5,6 +5,10 @@ import Link from 'next/link';
 import BrandLogo from './BrandLogo';
 import { Button } from './ui/button';
 import { useAuth } from '../context/AuthContext';
+import { IoMdLogIn, IoMdLogOut } from 'react-icons/io';
+import { MdSpaceDashboard } from "react-icons/md";
+import { FaUserPlus } from "react-icons/fa6";
+
 
 const StickyNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -76,30 +80,34 @@ const StickyNavbar = () => {
               {user ? (
                 <>
                   <Link href="/dashboard">
-                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
+                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 sm:block hidden" style={{ fontSize: '16px' }}>
                       Dashboard
                     </Button>
+                    <MdSpaceDashboard color='#36b1eb' size={24} className='sm:hidden block' />
                   </Link>
                   <Button
                     onClick={signOut}
                     variant="ghost"
-                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                    className="sm:block hidden text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                     style={{ fontSize: '16px' }}
                   >
                     Log out
                   </Button>
+                  <IoMdLogOut color='#c41500' size={24} className='sm:hidden block' onClick={signOut} />
                 </>
               ) : (
                 <>
                   <Link href="/login">
-                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
+                    <Button variant="ghost" className="sm:block hidden text-gray-700 hover:text-gray-900 hover:bg-gray-100" style={{ fontSize: '16px' }}>
                       Log in
                     </Button>
+                    <IoMdLogIn color='#36b1eb' size={24} className='sm:hidden block' />
                   </Link>
                   <Link href="/signup">
-                    <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6" style={{ fontSize: '16px' }}>
+                    <Button className="sm:block hidden bg-gray-900 text-white hover:bg-gray-800 rounded-full sm:px-6" style={{ fontSize: '16px' }}>
                       Sign up
                     </Button>
+                    <FaUserPlus size={24} color='#7d23cc' className='sm:hidden block' />
                   </Link>
                 </>
               )}

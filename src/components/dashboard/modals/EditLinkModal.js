@@ -12,12 +12,301 @@ import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, S
 import { MdEmail } from 'react-icons/md';
 import { CheckCircle, AlertCircle, ExternalLink, X } from 'lucide-react';
 
+// Helper function to generate URL from input
+const generateUrl = (platformId, input) => {
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+  
+  // Remove @ if present
+  const cleanInput = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+  
+  switch (platformId) {
+    case 'instagram':
+      return `https://instagram.com/${cleanInput}`;
+    case 'youtube':
+      return `https://youtube.com/@${cleanInput}`;
+    case 'twitter':
+      return `https://twitter.com/${cleanInput}`;
+    case 'facebook':
+      return `https://facebook.com/${cleanInput}`;
+    case 'linkedin':
+      return `https://linkedin.com/in/${cleanInput}`;
+    case 'threads':
+      return `https://threads.net/@${cleanInput}`;
+    case 'tiktok':
+      return `https://tiktok.com/@${cleanInput}`;
+    case 'whatsapp':
+      // Remove all non-digits
+      const phoneNumber = cleanInput.replace(/\D/g, '');
+      return phoneNumber ? `https://wa.me/${phoneNumber}` : '';
+    case 'snapchat':
+      return `https://snapchat.com/add/${cleanInput}`;
+    case 'pinterest':
+      return `https://pinterest.com/${cleanInput}`;
+    case 'reddit':
+      return `https://reddit.com/user/${cleanInput}`;
+    case 'github':
+      return `https://github.com/${cleanInput}`;
+    case 'dribbble':
+      return `https://dribbble.com/${cleanInput}`;
+    case 'behance':
+      return `https://behance.net/${cleanInput}`;
+    case 'medium':
+      return `https://medium.com/@${cleanInput}`;
+    case 'spotify':
+      return `https://open.spotify.com/user/${cleanInput}`;
+    case 'soundcloud':
+      return `https://soundcloud.com/${cleanInput}`;
+    case 'twitch':
+      return `https://twitch.tv/${cleanInput}`;
+    case 'discord':
+      return `https://discord.gg/${cleanInput}`;
+    case 'telegram':
+      return `https://t.me/${cleanInput}`;
+    case 'email':
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(trimmed) ? `mailto:${trimmed}` : '';
+    case 'onlyfans':
+      return `https://onlyfans.com/${cleanInput}`;
+    case 'substack':
+      return `https://substack.com/@${cleanInput}`;
+    case 'buymeacoffee':
+      return `https://buymeacoffee.com/${cleanInput}`;
+    case 'patreon':
+      return `https://patreon.com/${cleanInput}`;
+    case 'etsy':
+      return `https://etsy.com/shop/${cleanInput}`;
+    case 'amazon':
+      return `https://amazon.com/author/${cleanInput}`;
+    case 'shopify':
+      return `https://shopify.com/store/${cleanInput}`;
+    case 'gumroad':
+      return `https://gumroad.com/${cleanInput}`;
+    case 'website':
+      // Website accepts full URL
+      return trimmed.startsWith('http://') || trimmed.startsWith('https://') 
+        ? trimmed 
+        : `https://${trimmed}`;
+    default:
+      return trimmed;
+  }
+};
+
+// Helper function to extract username from URL
+const extractUsernameFromUrl = (platformId, url) => {
+  if (!url) return '';
+  
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    
+    switch (platformId) {
+      case 'instagram':
+        return pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'youtube':
+        // Handle @channelname format
+        const match = pathname.match(/@([a-zA-Z0-9._-]+)/);
+        if (match) return match[1];
+        // Handle /channel/ or /c/ or /user/ format
+        const parts = pathname.split('/').filter(p => p);
+        return parts[parts.length - 1] || '';
+      case 'twitter':
+        return pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'facebook':
+        return pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'linkedin':
+        return pathname.replace(/^\/in\//, '').replace(/\/$/, '');
+      case 'threads':
+      case 'tiktok':
+      case 'substack':
+        const atMatch = pathname.match(/@([a-zA-Z0-9._-]+)/);
+        return atMatch ? atMatch[1] : pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'whatsapp':
+        return pathname.replace(/^\/wa\.me\//, '').replace(/\/$/, '').replace(/\//g, '');
+      case 'snapchat':
+        return pathname.replace(/^\/add\//, '').replace(/\/$/, '');
+      case 'reddit':
+        return pathname.replace(/^\/user\//, '').replace(/\/$/, '');
+      case 'github':
+      case 'dribbble':
+      case 'behance':
+      case 'soundcloud':
+      case 'twitch':
+      case 'telegram':
+      case 'onlyfans':
+      case 'buymeacoffee':
+      case 'patreon':
+      case 'gumroad':
+        return pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'medium':
+        const mediumMatch = pathname.match(/@([a-zA-Z0-9._-]+)/);
+        return mediumMatch ? mediumMatch[1] : pathname.replace(/^\//, '').replace(/\/$/, '');
+      case 'spotify':
+        return pathname.replace(/^\/user\//, '').replace(/\/$/, '');
+      case 'discord':
+        return pathname.replace(/^\/gg\//, '').replace(/\/$/, '');
+      case 'email':
+        return url.replace(/^mailto:/, '');
+      case 'etsy':
+        return pathname.replace(/^\/shop\//, '').replace(/\/$/, '');
+      case 'amazon':
+        return pathname.replace(/^\/author\//, '').replace(/\/$/, '');
+      case 'shopify':
+        return pathname.replace(/^\/store\//, '').replace(/\/$/, '');
+      case 'website':
+        return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      default:
+        return '';
+    }
+  } catch (e) {
+    // If URL parsing fails, try regex extraction
+    switch (platformId) {
+      case 'instagram':
+        const instaMatch = url.match(/instagram\.com\/([a-zA-Z0-9._]+)/);
+        return instaMatch ? instaMatch[1] : '';
+      case 'youtube':
+        const ytMatch = url.match(/@([a-zA-Z0-9._-]+)/) || url.match(/youtube\.com\/(?:channel\/|c\/|user\/)?([a-zA-Z0-9._-]+)/);
+        return ytMatch ? ytMatch[1] : '';
+      case 'whatsapp':
+        const waMatch = url.match(/wa\.me\/([0-9]+)/);
+        return waMatch ? waMatch[1] : '';
+      case 'email':
+        return url.replace(/^mailto:/, '');
+      default:
+        return '';
+    }
+  }
+};
+
+// Helper function to validate input
+const validateInput = (platformId, input) => {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return { isValid: false, message: 'This field is required' };
+  }
+  
+  const cleanInput = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+  
+  switch (platformId) {
+    case 'instagram':
+    case 'twitter':
+    case 'facebook':
+    case 'snapchat':
+    case 'pinterest':
+    case 'github':
+    case 'dribbble':
+    case 'behance':
+    case 'soundcloud':
+    case 'twitch':
+    case 'telegram':
+    case 'onlyfans':
+    case 'buymeacoffee':
+    case 'patreon':
+    case 'gumroad':
+      // Username validation: alphanumeric, dots, underscores, hyphens
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid username format' };
+      }
+      if (cleanInput.length < 1) {
+        return { isValid: false, message: 'Username is too short' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'youtube':
+    case 'threads':
+    case 'tiktok':
+    case 'substack':
+      // Channel name validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid channel name format' };
+      }
+      if (cleanInput.length < 1) {
+        return { isValid: false, message: 'Channel name is too short' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'linkedin':
+      // LinkedIn username validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid LinkedIn username format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'reddit':
+      // Reddit username validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid Reddit username format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'medium':
+      // Medium username validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid Medium username format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'spotify':
+      // Spotify username validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid Spotify username format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'discord':
+      // Discord invite code validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid Discord invite code format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'whatsapp':
+      // Phone number validation (digits only, 7-15 digits)
+      const phoneNumber = trimmed.replace(/\D/g, '');
+      if (phoneNumber.length < 7 || phoneNumber.length > 15) {
+        return { isValid: false, message: 'Please enter a valid phone number (7-15 digits)' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'email':
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmed)) {
+        return { isValid: false, message: 'Please enter a valid email address' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'etsy':
+    case 'amazon':
+    case 'shopify':
+      // Shop/store name validation
+      if (!/^[a-zA-Z0-9._-]+$/.test(cleanInput)) {
+        return { isValid: false, message: 'Invalid shop/store name format' };
+      }
+      return { isValid: true, message: '' };
+    
+    case 'website':
+      // Website URL validation
+      const websiteRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+      if (!websiteRegex.test(trimmed)) {
+        return { isValid: false, message: 'Please enter a valid website URL' };
+      }
+      return { isValid: true, message: '' };
+    
+    default:
+      return { isValid: true, message: '' };
+  }
+};
+
 const socialPlatforms = [
   { 
     id: 'instagram', 
     name: 'Instagram', 
     icon: FaInstagram, 
     color: '#E4405F', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://instagram.com/username',
     validation: (url) => {
       const instagramRegex = /^https?:\/\/(www\.)?instagram\.com\/[a-zA-Z0-9._]+\/?$/;
@@ -29,6 +318,8 @@ const socialPlatforms = [
     name: 'YouTube', 
     icon: FaYoutube, 
     color: '#FF0000', 
+    inputPlaceholder: 'channel name',
+    examplePlaceholder: '@channelname or channelname',
     placeholder: 'https://youtube.com/@channelname',
     validation: (url) => {
       const youtubeRegex = /^https?:\/\/(www\.)?(youtube\.com\/(channel\/|c\/|user\/|@[a-zA-Z0-9._-]+)|youtu\.be\/[a-zA-Z0-9._-]+)$/;
@@ -40,6 +331,8 @@ const socialPlatforms = [
     name: 'Twitter', 
     icon: FaTwitter, 
     color: '#1DA1F2', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://twitter.com/username',
     validation: (url) => {
       const twitterRegex = /^https?:\/\/(www\.)?twitter\.com\/[a-zA-Z0-9._]+\/?$/;
@@ -51,6 +344,8 @@ const socialPlatforms = [
     name: 'Facebook', 
     icon: FaFacebook, 
     color: '#1877F2', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://facebook.com/username',
     validation: (url) => {
       const facebookRegex = /^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9._]+\/?$/;
@@ -62,6 +357,8 @@ const socialPlatforms = [
     name: 'LinkedIn', 
     icon: FaLinkedin, 
     color: '#0A66C2', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://linkedin.com/in/username',
     validation: (url) => {
       const linkedinRegex = /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9._-]+\/?$/;
@@ -73,6 +370,8 @@ const socialPlatforms = [
     name: 'Threads', 
     icon: SiThreads, 
     color: '#000000', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: '@johndoe or johndoe',
     placeholder: 'https://threads.net/@username',
     validation: (url) => {
       const threadsRegex = /^https?:\/\/(www\.)?threads\.net\/@[a-zA-Z0-9._]+\/?$/;
@@ -84,6 +383,8 @@ const socialPlatforms = [
     name: 'TikTok', 
     icon: FaTiktok, 
     color: '#000000', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: '@johndoe or johndoe',
     placeholder: 'https://tiktok.com/@username',
     validation: (url) => {
       const tiktokRegex = /^https?:\/\/(www\.)?tiktok\.com\/@[a-zA-Z0-9._]+\/?$/;
@@ -95,6 +396,8 @@ const socialPlatforms = [
     name: 'WhatsApp', 
     icon: FaWhatsapp, 
     color: '#25D366', 
+    inputPlaceholder: 'phone number',
+    examplePlaceholder: '1234567890',
     placeholder: 'https://wa.me/1234567890',
     validation: (url) => {
       const whatsappRegex = /^https?:\/\/(www\.)?wa\.me\/[0-9]+\/?$/;
@@ -106,6 +409,8 @@ const socialPlatforms = [
     name: 'Snapchat', 
     icon: FaSnapchatGhost, 
     color: '#FFFC00', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://snapchat.com/add/username',
     validation: (url) => {
       const snapchatRegex = /^https?:\/\/(www\.)?snapchat\.com\/add\/[a-zA-Z0-9._]+\/?$/;
@@ -117,6 +422,8 @@ const socialPlatforms = [
     name: 'Pinterest', 
     icon: FaPinterest, 
     color: '#E60023', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://pinterest.com/username',
     validation: (url) => {
       const pinterestRegex = /^https?:\/\/(www\.)?pinterest\.com\/[a-zA-Z0-9._]+\/?$/;
@@ -128,6 +435,8 @@ const socialPlatforms = [
     name: 'Reddit', 
     icon: FaReddit, 
     color: '#FF4500', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://reddit.com/user/username',
     validation: (url) => {
       const redditRegex = /^https?:\/\/(www\.)?reddit\.com\/user\/[a-zA-Z0-9._]+\/?$/;
@@ -139,6 +448,8 @@ const socialPlatforms = [
     name: 'GitHub', 
     icon: FaGithub, 
     color: '#181717', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://github.com/username',
     validation: (url) => {
       const githubRegex = /^https?:\/\/(www\.)?github\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -150,6 +461,8 @@ const socialPlatforms = [
     name: 'Dribbble', 
     icon: FaDribbble, 
     color: '#EA4C89', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://dribbble.com/username',
     validation: (url) => {
       const dribbbleRegex = /^https?:\/\/(www\.)?dribbble\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -161,6 +474,8 @@ const socialPlatforms = [
     name: 'Behance', 
     icon: FaBehance, 
     color: '#0057FF', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://behance.net/username',
     validation: (url) => {
       const behanceRegex = /^https?:\/\/(www\.)?behance\.net\/[a-zA-Z0-9._-]+\/?$/;
@@ -172,6 +487,8 @@ const socialPlatforms = [
     name: 'Medium', 
     icon: FaMedium, 
     color: '#000000', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://medium.com/@username',
     validation: (url) => {
       const mediumRegex = /^https?:\/\/(www\.)?medium\.com\/@[a-zA-Z0-9._-]+\/?$/;
@@ -183,6 +500,8 @@ const socialPlatforms = [
     name: 'Spotify', 
     icon: FaSpotify, 
     color: '#1DB954', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://open.spotify.com/user/username',
     validation: (url) => {
       const spotifyRegex = /^https?:\/\/(www\.)?open\.spotify\.com\/user\/[a-zA-Z0-9._-]+\/?$/;
@@ -194,6 +513,8 @@ const socialPlatforms = [
     name: 'SoundCloud', 
     icon: FaSoundcloud, 
     color: '#FF8800', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://soundcloud.com/username',
     validation: (url) => {
       const soundcloudRegex = /^https?:\/\/(www\.)?soundcloud\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -205,6 +526,8 @@ const socialPlatforms = [
     name: 'Twitch', 
     icon: FaTwitch, 
     color: '#9146FF', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://twitch.tv/username',
     validation: (url) => {
       const twitchRegex = /^https?:\/\/(www\.)?twitch\.tv\/[a-zA-Z0-9._-]+\/?$/;
@@ -216,6 +539,8 @@ const socialPlatforms = [
     name: 'Discord', 
     icon: FaDiscord, 
     color: '#5865F2', 
+    inputPlaceholder: 'invite code',
+    examplePlaceholder: 'abc123',
     placeholder: 'https://discord.gg/invitecode',
     validation: (url) => {
       const discordRegex = /^https?:\/\/(www\.)?discord\.gg\/[a-zA-Z0-9._-]+\/?$/;
@@ -227,6 +552,8 @@ const socialPlatforms = [
     name: 'Telegram', 
     icon: FaTelegram, 
     color: '#2CA5E0', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://t.me/username',
     validation: (url) => {
       const telegramRegex = /^https?:\/\/(www\.)?t\.me\/[a-zA-Z0-9._-]+\/?$/;
@@ -238,6 +565,8 @@ const socialPlatforms = [
     name: 'Email', 
     icon: MdEmail, 
     color: '#EA4335', 
+    inputPlaceholder: 'email address',
+    examplePlaceholder: 'your@email.com',
     placeholder: 'mailto:your@email.com',
     validation: (url) => {
       const emailRegex = /^mailto:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -249,6 +578,8 @@ const socialPlatforms = [
     name: 'OnlyFans', 
     icon: SiOnlyfans, 
     color: '#00B0FF', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://onlyfans.com/username',
     validation: (url) => {
       const onlyfansRegex = /^https?:\/\/(www\.)?onlyfans\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -260,6 +591,8 @@ const socialPlatforms = [
     name: 'Substack', 
     icon: SiSubstack, 
     color: '#FF6719', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: '@johndoe or johndoe',
     placeholder: 'https://substack.com/@username',
     validation: (url) => {
       const substackRegex = /^https?:\/\/(www\.)?substack\.com\/@[a-zA-Z0-9._-]+\/?$/;
@@ -271,6 +604,8 @@ const socialPlatforms = [
     name: 'Buy Me a Coffee', 
     icon: SiBuymeacoffee, 
     color: '#FFDD00', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://buymeacoffee.com/username',
     validation: (url) => {
       const buymeacoffeeRegex = /^https?:\/\/(www\.)?buymeacoffee\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -282,6 +617,8 @@ const socialPlatforms = [
     name: 'Patreon', 
     icon: SiPatreon, 
     color: '#FF424D', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://patreon.com/username',
     validation: (url) => {
       const patreonRegex = /^https?:\/\/(www\.)?patreon\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -293,6 +630,8 @@ const socialPlatforms = [
     name: 'Etsy', 
     icon: SiEtsy, 
     color: '#F16521', 
+    inputPlaceholder: 'shop name',
+    examplePlaceholder: 'myshop',
     placeholder: 'https://etsy.com/shop/shopname',
     validation: (url) => {
       const etsyRegex = /^https?:\/\/(www\.)?etsy\.com\/shop\/[a-zA-Z0-9._-]+\/?$/;
@@ -304,6 +643,8 @@ const socialPlatforms = [
     name: 'Amazon', 
     icon: SiAmazon, 
     color: '#FF9900', 
+    inputPlaceholder: 'author name',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://amazon.com/author/username',
     validation: (url) => {
       const amazonRegex = /^https?:\/\/(www\.)?amazon\.com\/author\/[a-zA-Z0-9._-]+\/?$/;
@@ -315,6 +656,8 @@ const socialPlatforms = [
     name: 'Shopify', 
     icon: SiShopify, 
     color: '#7AB55C', 
+    inputPlaceholder: 'store name',
+    examplePlaceholder: 'mystore',
     placeholder: 'https://shopify.com/store/storename',
     validation: (url) => {
       const shopifyRegex = /^https?:\/\/(www\.)?shopify\.com\/store\/[a-zA-Z0-9._-]+\/?$/;
@@ -326,6 +669,8 @@ const socialPlatforms = [
     name: 'Gumroad', 
     icon: SiGumroad, 
     color: '#FF9000', 
+    inputPlaceholder: 'username',
+    examplePlaceholder: 'johndoe',
     placeholder: 'https://gumroad.com/username',
     validation: (url) => {
       const gumroadRegex = /^https?:\/\/(www\.)?gumroad\.com\/[a-zA-Z0-9._-]+\/?$/;
@@ -337,6 +682,8 @@ const socialPlatforms = [
     name: 'Website', 
     icon: FaGlobe, 
     color: '#4A5568', 
+    inputPlaceholder: 'website URL',
+    examplePlaceholder: 'yourwebsite.com',
     placeholder: 'https://yourwebsite.com',
     validation: (url) => {
       const websiteRegex = /^https?:\/\/(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/;
@@ -346,7 +693,7 @@ const socialPlatforms = [
 ];
 
 export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
-  const [linkUrl, setLinkUrl] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [isValid, setIsValid] = useState(true);
   const [validationMessage, setValidationMessage] = useState('');
@@ -354,51 +701,51 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
   // Initialize form when link changes
   useEffect(() => {
     if (link) {
-      setLinkUrl(link.url);
       const platform = socialPlatforms.find(p => p.id === link.icon);
       if (platform) {
         setSelectedPlatform(platform);
-        validateUrl(link.url, platform);
+        // Extract username from existing URL
+        const extractedUsername = extractUsernameFromUrl(platform.id, link.url);
+        setInputValue(extractedUsername);
+        // Validate the extracted input
+        const validation = validateInput(platform.id, extractedUsername);
+        setIsValid(validation.isValid);
+        setValidationMessage(validation.message);
       }
     }
   }, [link]);
 
-  const validateUrl = (url, platform) => {
-    if (!url.trim()) {
-      setIsValid(false);
-      setValidationMessage('URL is required');
-      return;
-    }
-
-    if (!platform.validation(url)) {
-      setIsValid(false);
-      setValidationMessage(`Please enter a valid ${platform.name} URL`);
-      return;
-    }
-
-    setIsValid(true);
-    setValidationMessage('');
-  };
-
-  const handleUrlChange = (e) => {
-    const newUrl = e.target.value;
-    setLinkUrl(newUrl);
-    validateUrl(newUrl, selectedPlatform);
+  const handleInputChange = (e) => {
+    const newInput = e.target.value;
+    setInputValue(newInput);
+    
+    // Validate input
+    const validation = validateInput(selectedPlatform.id, newInput);
+    setIsValid(validation.isValid);
+    setValidationMessage(validation.message);
   };
 
   const handleSave = () => {
-    if (selectedPlatform && linkUrl && isValid && link) {
-      const updatedLink = {
-        ...link,
-        url: linkUrl,
-      };
-      onSave(updatedLink);
-      resetModal();
+    if (selectedPlatform && inputValue.trim() && isValid && link) {
+      // Generate URL from input
+      const generatedUrl = generateUrl(selectedPlatform.id, inputValue);
+      
+      if (generatedUrl && selectedPlatform.validation(generatedUrl)) {
+        const updatedLink = {
+          ...link,
+          url: generatedUrl,
+        };
+        onSave(updatedLink);
+        resetModal();
+      } else {
+        setIsValid(false);
+        setValidationMessage(`Invalid ${selectedPlatform.name} ${selectedPlatform.inputPlaceholder || 'input'}`);
+      }
     }
   };
 
   const resetModal = () => {
-    setLinkUrl('');
+    setInputValue('');
     setSelectedPlatform(null);
     setIsValid(true);
     setValidationMessage('');
@@ -455,27 +802,29 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
               </div>
             </div>
 
-            {/* URL Input with Validation */}
+            {/* Input Field with Validation */}
             <div className="space-y-2">
-              <label htmlFor="url" className="text-sm font-medium text-gray-700">
-                Profile URL
+              <label htmlFor="input" className="text-sm font-medium text-gray-700">
+                {selectedPlatform.inputPlaceholder ? 
+                  selectedPlatform.inputPlaceholder.charAt(0).toUpperCase() + selectedPlatform.inputPlaceholder.slice(1) 
+                  : 'Enter your information'}
               </label>
               <div className="relative">
                 <Input
-                  id="url"
-                  type="url"
-                  placeholder={selectedPlatform.placeholder}
-                  value={linkUrl}
-                  onChange={handleUrlChange}
+                  id="input"
+                  type={selectedPlatform.id === 'email' ? 'email' : selectedPlatform.id === 'whatsapp' ? 'tel' : 'text'}
+                  placeholder={selectedPlatform.inputPlaceholder || selectedPlatform.examplePlaceholder}
+                  value={inputValue}
+                  onChange={handleInputChange}
                   className={`w-full pr-10 ${
-                    linkUrl && !isValid 
+                    inputValue && !isValid 
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : linkUrl && isValid 
+                      : inputValue && isValid 
                         ? 'border-green-300 focus:border-green-500 focus:ring-green-500'
                         : ''
                   }`}
                 />
-                {linkUrl && (
+                {inputValue && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     {isValid ? (
                       <CheckCircle className="w-5 h-5 text-green-500" />
@@ -504,11 +853,13 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
                 </motion.div>
               )}
 
-              {/* Example URL */}
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <ExternalLink className="w-3 h-3" />
-                <span>Example: {selectedPlatform.placeholder}</span>
-              </div>
+              {/* Example */}
+              {selectedPlatform.examplePlaceholder && (
+                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                  <ExternalLink className="w-3 h-3" />
+                  <span>Example: {selectedPlatform.examplePlaceholder}</span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -522,7 +873,7 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={!linkUrl.trim() || !isValid}
+                disabled={!inputValue.trim() || !isValid}
                 className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Update Link

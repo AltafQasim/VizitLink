@@ -115,7 +115,7 @@ export default function ProductsTab() {
       // Save only products slice
       await saveProducts(snapshot.products);
     } catch (e) {
-      throw e; // Re-throw to let calling function handle error
+      //throw e; // Re-throw to let calling function handle error
     }
   };
 

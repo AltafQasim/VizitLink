@@ -1,12 +1,16 @@
 "use client";
 
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
+import { Switch } from '../../ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
-import { Search, X, Link, Loader2, ExternalLink } from 'lucide-react';
+import { Search, X, Link, Loader2, ExternalLink, Edit } from 'lucide-react';
+import { supabase } from '../../../lib/supabase';
+import { useDashboard } from '../../../context/DashboardContext';
+import { toast } from 'sonner';
 
 // Image component with fallback handling
 const ImageWithFallback = ({ src, alt, fill, className, sizes, priority = false }) => {
@@ -119,7 +123,7 @@ const mockProducts = [
     "url": "https://www.amazon.com/Tom-Ford-Oud-Wood-Parfum/dp/B07X5Z6Z6Z",
     "image": "https://m.media-amazon.com/images/I/61i5bJr8BmL._AC_SL1500_.jpg"
   },
-  
+
   // Mobile Phones - Flipkart
   {
     "id": "m1",
@@ -166,7 +170,7 @@ const mockProducts = [
     "url": "https://www.flipkart.com/xiaomi-14-pro-5g/p/itm123456789",
     "image": "https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/n/9/e/-original-imagtc2fvydzh6gh.jpeg"
   },
-  
+
   // Mobile Accessories - Amazon
   {
     "id": "a1",
@@ -213,7 +217,7 @@ const mockProducts = [
     "url": "https://www.amazon.com/OtterBox-Defender-Pro-iPhone-Cases/dp/B09VCS6N5Q",
     "image": "https://m.media-amazon.com/images/I/81BmjcZQ-QL._AC_SL1500_.jpg"
   },
-  
+
   // Fashion Items - Meesho
   {
     "id": "f1",
@@ -260,7 +264,7 @@ const mockProducts = [
     "url": "https://www.meesho.com/womens-handbag/p/123456789",
     "image": "https://images.meesho.com/images/products/90685102/vw2up_512.webp"
   },
-  
+
   // Other Relevant Categories - Mix of platforms
   {
     "id": "o1",
@@ -311,12 +315,29 @@ const mockProducts = [
 
 
 export default function AddProductModal({ isOpen, onClose, onSave }) {
+  const { data } = useDashboard();
+  const [activeTab, setActiveTab] = useState('custom'); // 'browse' or 'custom'
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [isLoadingLink, setIsLoadingLink] = useState(false);
   const [extractedProduct, setExtractedProduct] = useState(null);
   const [linkError, setLinkError] = useState('');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+
+  // Custom product form state
+  const [customProduct, setCustomProduct] = useState({
+    title: '',
+    brand: '',
+    price: '',
+    currency: 'USD',
+    redirectUrl: '',
+    showPrice: true,
+    image: ''
+  });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const fileInputRef = useRef(null);
 
   const filteredProducts = mockProducts.filter(product =>
     product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -359,7 +380,7 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
         const productData = {
           id: `extracted-${Date.now()}`,
           title: result.data.title || 'Untitled Product',
-          brand: result.data.brand || result.data.domain || 'Unknown',
+          brand: result.data.brand || result.data.domain || '',
           price: result.data.price || 0,
           currency: result.data.currency || 'USD',
           url: result.data.url,
@@ -449,13 +470,117 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
   };
 
   const resetModal = () => {
+    setActiveTab('custom');
     setSearchTerm('');
     setSelectedProducts([]);
     setExtractedProduct(null);
     setLinkError('');
     setIsLoadingLink(false);
     setIsAddingProduct(false);
+    setCustomProduct({
+      title: '',
+      brand: '',
+      price: '',
+      currency: 'USD',
+      redirectUrl: '',
+      showPrice: true,
+      image: ''
+    });
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl('');
+    setPendingFile(null);
     onClose();
+  };
+
+  // Handle custom product form changes
+  const handleCustomProductChange = (field, value) => {
+    setCustomProduct(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handle single image upload
+  const handleImageButtonClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPendingFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // Handle custom product save
+  const handleSaveCustomProduct = async () => {
+    if (!customProduct.title.trim()) {
+      toast.error('Please enter a product title');
+      return;
+    }
+
+    if (!customProduct.price || parseFloat(customProduct.price) <= 0) {
+      toast.error('Please enter a valid price');
+      return;
+    }
+
+    if (!pendingFile && !customProduct.image) {
+      toast.error('Please upload a product image');
+      return;
+    }
+
+    setIsAddingProduct(true);
+    const loadingToast = toast.loading('Adding product...');
+
+    try {
+      let finalImage = customProduct.image;
+
+      if (pendingFile) {
+        // Upload new image
+        const ext = pendingFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${ext}`;
+        const userId = data?.profile?.id || 'anonymous';
+        const filePath = `${userId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('productimage')
+          .upload(filePath, pendingFile);
+        if (uploadError) throw new Error(uploadError.message);
+
+        const { data: publicUrlData } = supabase.storage
+          .from('productimage')
+          .getPublicUrl(filePath);
+        finalImage = publicUrlData.publicUrl;
+      }
+
+      const payload = [{
+        title: customProduct.title,
+        brand: customProduct.brand || '',
+        price: parseFloat(customProduct.price),
+        currency: customProduct.currency,
+        url: customProduct.redirectUrl || '#',
+        image: finalImage,
+        showPrice: customProduct.showPrice,
+      }];
+
+      onSave(payload);
+      toast.dismiss(loadingToast);
+      toast.success('Product added successfully');
+
+      // Clear temp states
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl('');
+      setPendingFile(null);
+
+      setTimeout(() => {
+        resetModal();
+      }, 1000);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to add product: ' + error.message);
+    } finally {
+      setIsAddingProduct(false);
+    }
   };
 
   // Clear extracted product when user starts typing new search
@@ -487,6 +612,28 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
               <X className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setActiveTab('custom')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'custom'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+              Add Your Own
+            </button>
+            <button
+              onClick={() => setActiveTab('browse')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'browse'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+              Browse Products
+            </button>
+          </div>
         </DialogHeader>
 
         <div className="px-4 pt-4 sm:px-8 overflow-y-auto flex-1 scroll-elegant scrollbar-accent" aria-describedby="add-products-desc">
@@ -496,178 +643,320 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
             transition={{ duration: 0.2 }}
             className="space-y-6"
           >
-            {/* Main Title */}
-            <div className="text-left">
-              <h2 className="text-[22px] font-bold text-gray-900 mb-1">Add products</h2>
-              <p id="add-products-desc" className="text-gray-600">Add product links from anywhere</p>
-            </div>
-
-            {/* Search Input */}
-            <div className="sticky top-0 z-10">
-              <div className="w-full bg-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk rounded-full px-5 py-4 flex items-center">
-                {isUrl(searchTerm) ? (
-                  <Link className="w-5 h-5 text-purple-500 mr-3" />
-                ) : (
-                  <Search className="w-5 h-5 text-gray-500 mr-3" />
-                )}
-                <input
-                  type="text"
-                  placeholder="Search products or paste a link (e.g., https://amazon.com/dp/...)"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-gray-500"
-                />
-              </div>
-
-              {/* Link Error */}
-              {linkError && (
-                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">
-                    Sorry, we had trouble finding this. Please try a new URL.
-                  </p>
+            {activeTab === 'browse' ? (
+              <>
+                {/* Main Title */}
+                <div className="text-left">
+                  <h2 className="text-[22px] font-bold text-gray-900 mb-1">Add products</h2>
+                  <p id="add-products-desc" className="text-gray-600">Add product links from anywhere</p>
                 </div>
-              )}
-            </div>
 
-            {/* Loading State */}
-            {isLoadingLink && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Loader2 className="w-5 h-5 text-purple-500 mr-2 animate-spin" />
-                  Extracting Product Data...
-                </h3>
-                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
-                  {/* Loading Image Placeholder */}
-                  <div className="w-20 h-24 bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
-                    <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                  </div>
-
-                  {/* Loading Content */}
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
-                  </div>
-
-                  {/* Loading Button */}
-                  <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
-                </div>
-              </div>
-            )}
-
-            {/* Extracted Product */}
-            {extractedProduct && !isLoadingLink && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Link className="w-5 h-5 text-purple-500 mr-2" />
-                  Product from Link
-                </h3>
-                <div className="flex items-center space-x-4 p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                  {/* Product Image */}
-                  <div className="w-20 h-24 rounded-lg overflow-hidden bg-gray-50 relative flex-shrink-0">
-                    <ImageWithFallback
-                      src={extractedProduct.image || '/placeholder.svg'}
-                      alt={extractedProduct.title}
-                      className="object-cover rounded-lg"
+                {/* Search Input */}
+                <div className="sticky top-0 z-10">
+                  <div className="w-full bg-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black antialiased font-sans [&_span]:!leading-none text-center text-black !ease-in-out !duration-200 hover:!bg-white shadow-[0px_4px_8px_rgba(0,0,0,0.2)] border border-sand hover:border-chalk hover:bg-chalk active:border-chalk active:bg-chalk rounded-full px-5 py-4 flex items-center">
+                    {isUrl(searchTerm) ? (
+                      <Link className="w-5 h-5 text-purple-500 mr-3" />
+                    ) : (
+                      <Search className="w-5 h-5 text-gray-500 mr-3" />
+                    )}
+                    <input
+                      type="text"
+                      placeholder="Search products or paste a link (e.g., https://amazon.com/dp/...)"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                      className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-gray-500"
                     />
                   </div>
 
-                  {/* Product Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm text-gray-600 font-medium truncate">{extractedProduct.brand}</p>
-                      <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1 line-clamp-2">
-                      {extractedProduct.title}
-                    </h3>
-                    {extractedProduct.description && (
-                      <p className="text-xs text-gray-500 mb-1 line-clamp-1">
-                        {extractedProduct.description}
+                  {/* Link Error */}
+                  {linkError && (
+                    <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-600">
+                        Sorry, we had trouble finding this. Please try a new URL.
                       </p>
-                    )}
-                    <p className="text-sm font-semibold text-gray-900">
-                      {formatPrice(extractedProduct.price, extractedProduct.currency)}
-                    </p>
-                  </div>
-
-                  {/* Add Button */}
-                  <Button
-                    onClick={handleAddExtractedProduct}
-                    disabled={isAddingProduct}
-                    className={`w-20 h-10 text-sm font-medium transition-all duration-200 ${isAddingProduct
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-purple-600 hover:bg-purple-700'
-                      } text-white`}
-                  >
-                    {isAddingProduct ? (
-                      <div className="flex items-center">
-                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                        Adding...
-                      </div>
-                    ) : (
-                      'Add'
-                    )}
-                  </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
 
-            {/* Products Grid - Only show when not extracting from URL */}
-            {!isUrl(searchTerm) && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pr-1">
-                {filteredProducts.map((product) => {
-                  const isSelected = selectedProducts.find(p => p.id === product.id);
-                  return (
-                    <motion.div
-                      key={product.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`relative cursor-pointer rounded-2xl transition-all duration-200 shadow-sm ${isSelected
-                          ? 'ring-2 ring-purple-500 bg-purple-50 border border-purple-200'
-                          : 'border border-gray-200 hover:shadow-md bg-white'
-                        }`}
-                      onClick={() => handleProductSelect(product)}
-                    >
+                {/* Loading State */}
+                {isLoadingLink && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Loader2 className="w-5 h-5 text-purple-500 mr-2 animate-spin" />
+                      Extracting Product Data...
+                    </h3>
+                    <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                      {/* Loading Image Placeholder */}
+                      <div className="w-20 h-24 bg-gray-200 rounded-lg animate-pulse flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                      </div>
+
+                      {/* Loading Content */}
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/4"></div>
+                      </div>
+
+                      {/* Loading Button */}
+                      <div className="w-20 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Extracted Product */}
+                {extractedProduct && !isLoadingLink && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Link className="w-5 h-5 text-purple-500 mr-2" />
+                      Product from Link
+                    </h3>
+                    <div className="flex items-center space-x-4 p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                       {/* Product Image */}
-                      <div className="aspect-[14/12] rounded-t-2xl overflow-hidden bg-gray-50 relative">
+                      <div className="w-20 h-24 rounded-lg overflow-hidden bg-gray-50 relative flex-shrink-0">
                         <ImageWithFallback
-                          src={product.image || '/placeholder.svg'}
-                          alt={product.title}
-                          className="object-cover rounded-t-2xl"
-                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          src={extractedProduct.image || '/placeholder.svg'}
+                          alt={extractedProduct.title}
+                          className="object-cover rounded-lg"
                         />
                       </div>
 
                       {/* Product Details */}
-                      <div className="p-3">
-                        <p className="text-sm text-gray-600 font-medium mb-1">{product.brand}</p>
-                        <h3 className="font-semibold text-gray-900 text-[14px] leading-snug mb-1.5 line-clamp-2">
-                          {product.title}
+                      <div className="flex-1 min-w-0">
+                        {(extractedProduct.brand || extractedProduct.domain) && (
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm text-gray-600 font-medium truncate">{extractedProduct.brand || extractedProduct.domain}</p>
+                            <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          </div>
+                        )}
+                        <h3 className="font-semibold text-gray-900 text-sm leading-snug mb-1 line-clamp-2">
+                          {extractedProduct.title}
                         </h3>
-                        <p className="text-[14px] font-semibold text-gray-900">
-                          ${product.price.toFixed(2)}
+                        {extractedProduct.description && (
+                          <p className="text-xs text-gray-500 mb-1 line-clamp-1">
+                            {extractedProduct.description}
+                          </p>
+                        )}
+                        <p className="text-sm font-semibold text-gray-900">
+                          {formatPrice(extractedProduct.price, extractedProduct.currency)}
                         </p>
                       </div>
 
-                      {/* Selection Indicator */}
-                      {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center shadow">
-                          <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
-                    </motion.div>
-                  );
-                })}
+                      {/* Add Button */}
+                      <Button
+                        onClick={handleAddExtractedProduct}
+                        disabled={isAddingProduct}
+                        className={`w-20 h-10 text-sm font-medium transition-all duration-200 ${isAddingProduct
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-purple-600 hover:bg-purple-700'
+                          } text-white`}
+                      >
+                        {isAddingProduct ? (
+                          <div className="flex items-center">
+                            <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                            Adding...
+                          </div>
+                        ) : (
+                          'Add'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Products Grid - Only show when not extracting from URL */}
+                {!isUrl(searchTerm) && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pr-1">
+                    {filteredProducts.map((product) => {
+                      const isSelected = selectedProducts.find(p => p.id === product.id);
+                      return (
+                        <motion.div
+                          key={product.id}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`relative cursor-pointer rounded-2xl transition-all duration-200 shadow-sm ${isSelected
+                            ? 'ring-2 ring-purple-500 bg-purple-50 border border-purple-200'
+                            : 'border border-gray-200 hover:shadow-md bg-white'
+                            }`}
+                          onClick={() => handleProductSelect(product)}
+                        >
+                          {/* Product Image */}
+                          <div className="aspect-[14/12] rounded-t-2xl overflow-hidden bg-gray-50 relative">
+                            <ImageWithFallback
+                              src={product.image || '/placeholder.svg'}
+                              alt={product.title}
+                              className="object-cover rounded-t-2xl"
+                              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            />
+                          </div>
+
+                          {/* Product Details */}
+                          <div className="p-3">
+                            {product.brand && (
+                              <p className="text-sm text-gray-600 font-medium mb-1">{product.brand}</p>
+                            )}
+                            <h3 className="font-semibold text-gray-900 text-[14px] leading-snug mb-1.5 line-clamp-2">
+                              {product.title}
+                            </h3>
+                            <p className="text-[14px] font-semibold text-gray-900">
+                              ${product.price.toFixed(2)}
+                            </p>
+                          </div>
+
+                          {/* Selection Indicator */}
+                          {isSelected && (
+                            <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center shadow">
+                              <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Custom Product Form - Same layout as EditProductModal */
+              <div className="grid sm:grid-cols-2 gap-6">
+
+                {/* Product Image */}
+                <div className="w-full sm:w-auto flex justify-center !m-0">
+                  <div className="relative">
+                    <img
+                      src={previewUrl || customProduct.image || '/placeholder.svg'}
+                      alt={customProduct.title || 'Product'}
+                      className="sm:w-full sm:h-full w-44 h-44 rounded-lg object-cover border border-gray-200"
+                    />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={handleImageButtonClick}
+                      disabled={uploadingImage}
+                      className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${uploadingImage ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-600 hover:bg-gray-700'}`}
+                      title="Change image"
+                    >
+                      {uploadingImage ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Edit className="w-4 h-4 text-white" />}
+                    </button>
+                  </div>
+                </div>
+
+
+                {/* Form Fields */}
+                <div className="flex-1 space-y-4">
+                  {/* Title Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="title" className="text-sm font-medium text-gray-700">
+                      Title
+                    </label>
+                    <Input
+                      id="title"
+                      type="text"
+                      value={customProduct.title}
+                      onChange={(e) => handleCustomProductChange('title', e.target.value)}
+                      placeholder="Product title"
+                      className="w-full"
+                      maxLength={250}
+                    />
+                    <div className="text-xs text-gray-500 text-right">
+                      {customProduct.title.length}/250
+                    </div>
+                  </div>
+
+                  {/* Brand Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="brand" className="text-sm font-medium text-gray-700">
+                      Brand (optional)
+                    </label>
+                    <Input
+                      id="brand"
+                      type="text"
+                      value={customProduct.brand}
+                      onChange={(e) => handleCustomProductChange('brand', e.target.value)}
+                      placeholder="Brand name"
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="flex space-x-3 w-full">
+                    {/* Price Field */}
+                    <div className="space-y-2 w-full">
+                      <label htmlFor="price" className="text-sm font-medium text-gray-700">
+                        Price (optional)
+                      </label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={customProduct.price}
+                        onChange={(e) => handleCustomProductChange('price', e.target.value)}
+                        placeholder="0.00"
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* Currency Field */}
+                    <div className="space-y-2 w-full">
+                      <label htmlFor="currency" className="text-sm font-medium text-gray-700">
+                        Currency
+                      </label>
+                      <select
+                        id="currency"
+                        value={customProduct.currency}
+                        onChange={(e) => handleCustomProductChange('currency', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="CAD">CAD (C$)</option>
+                        <option value="AUD">AUD (A$)</option>
+                        <option value="INR">INR (₹)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* URL Field */}
+                  <div className="space-y-2">
+                    <label htmlFor="url" className="text-sm font-medium text-gray-700">
+                      Redirect URL
+                    </label>
+                    <Input
+                      id="url"
+                      type="url"
+                      value={customProduct.redirectUrl}
+                      onChange={(e) => handleCustomProductChange('redirectUrl', e.target.value)}
+                      placeholder="https://example.com/product"
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Show/Hide Price Switch */}
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Show Price</label>
+                      <p className="text-xs text-gray-500">Display price on product card</p>
+                    </div>
+                    <Switch
+                      checked={customProduct.showPrice}
+                      onCheckedChange={(checked) => handleCustomProductChange('showPrice', checked)}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
           </motion.div>
         </div>
-        {/* Action Buttons - Hide when loading link or when URL is being processed */}
-        {!isLoadingLink && !isUrl(searchTerm) && !extractedProduct && (
+        {/* Action Buttons */}
+        {activeTab === 'browse' && !isLoadingLink && !isUrl(searchTerm) && !extractedProduct && (
           <div className="flex justify-between items-center border-t border-gray-200 sticky bottom-0 bg-white p-4 sm:px-8">
             <div className="text-sm text-gray-600">
               {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
@@ -685,6 +974,32 @@ export default function AddProductModal({ isOpen, onClose, onSave }) {
                 className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Add {selectedProducts.length} Product{selectedProducts.length !== 1 ? 's' : ''}
+              </Button>
+            </div>
+          </div>
+        )}
+        {activeTab === 'custom' && (
+          <div className="flex justify-end items-center border-t border-gray-200 sticky bottom-0 bg-white p-4 sm:px-8">
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={resetModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveCustomProduct}
+                disabled={isAddingProduct || !customProduct.title.trim() || (!pendingFile && !customProduct.image)}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isAddingProduct ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  'Add Product'
+                )}
               </Button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../ui/dialog';
 import { X, Edit, Share2, Trash2, Loader2 } from 'lucide-react';
+import { Switch } from '../../ui/switch';
 import { supabase } from '../../../lib/supabase';
 import { useDashboard } from '../../../context/DashboardContext';
 
@@ -23,10 +24,12 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
   const [formData, setFormData] = useState({
     url: '',
     title: '',
+    brand: '',
     price: '',
     currency: 'USD',
     showInShop: true,
     showInTest: false,
+    showPrice: true,
     image: ''
   });
   const [isUploading, setIsUploading] = useState(false);
@@ -39,10 +42,12 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
       setFormData({
         url: product.url || '',
         title: product.title || '',
+        brand: product.brand || '',
         price: product.price?.toString() || '',
         currency: product.currency || 'USD',
         showInShop: product.showInShop !== false,
         showInTest: product.showInTest || false,
+        showPrice: (product.showPrice !== undefined ? product.showPrice !== false : (product.show_price !== undefined ? product.show_price !== false : true)),
         image: product.image || ''
       });
     }
@@ -140,10 +145,12 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
     setFormData({
       url: '',
       title: '',
+      brand: '',
       price: '',
       currency: 'USD',
       showInShop: true,
       showInTest: false,
+      showPrice: true,
     });
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl('');
@@ -155,7 +162,7 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
 
   return (
     <Dialog open={isOpen} onOpenChange={resetModal}>
-      <DialogContent className="p-0 overflow-hidden sm:max-w-2xl w-[100vw] sm:w-3xl h-[100dvh] sm:h-auto sm:rounded-xl rounded-none">
+      <DialogContent className="p-0 overflow-hidden sm:max-w-5xl w-[100vw] sm:w-full h-[100dvh] sm:h-[85vh] sm:rounded-xl rounded-none">
         <DialogHeader className="px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold">
@@ -179,24 +186,36 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
             transition={{ duration: 0.2 }}
             className="space-y-6"
           >
-            <div className="flex flex-col-reverse space-x-6">
+            <div className="grid sm:grid-cols-2 gap-6">
+              {/* Right Column - Product Image (same behavior as wallpaper image upload) */}
+              <div className="w-full flex justify-center !m-0">
+                <div className="relative">
+                  <img
+                    src={previewUrl || product.image}
+                    alt={product.title}
+                    className="sm:w-full sm:h-full w-44 h-44 rounded-lg object-cover border border-gray-200"
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={handleImageButtonClick}
+                    disabled={isUploading}
+                    className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-600 hover:bg-gray-700'}`}
+                    title="Change image"
+                  >
+                    {isUploading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Edit className="w-4 h-4 text-white" />}
+                  </button>
+                </div>
+              </div>
+
+
               {/* Left Column - Form Fields */}
               <div className="flex-1 space-y-4">
-                {/* URL Field */}
-                <div className="space-y-2">
-                  <label htmlFor="url" className="text-sm font-medium text-gray-700">
-                    URL
-                  </label>
-                  <Input
-                    id="url"
-                    type="url"
-                    value={formData.url}
-                    onChange={(e) => handleInputChange('url', e.target.value)}
-                    placeholder="https://example.com/product"
-                    className="w-full"
-                  />
-                </div>
-
                 {/* Title Field */}
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-medium text-gray-700">
@@ -214,6 +233,21 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                   <div className="text-xs text-gray-500 text-right">
                     {formData.title.length}/250
                   </div>
+                </div>
+
+                {/* Brand Field */}
+                <div className="space-y-2">
+                  <label htmlFor="brand" className="text-sm font-medium text-gray-700">
+                    Brand (optional)
+                  </label>
+                  <Input
+                    id="brand"
+                    type="text"
+                    value={formData.brand}
+                    onChange={(e) => handleInputChange('brand', e.target.value)}
+                    placeholder="Brand name"
+                    className="w-full"
+                  />
                 </div>
 
                 <div className="flex space-x-3 w-full">
@@ -255,32 +289,33 @@ export default function EditProductModal({ isOpen, onClose, onSave, product, onD
                   </div>
                 </div>
 
-              </div>
-
-              {/* Right Column - Product Image (same behavior as wallpaper image upload) */}
-              <div className="w-full flex justify-center !m-0">
-                <div className="relative">
-                  <img
-                    src={previewUrl || product.image}
-                    alt={product.title}
-                    className="w-36 h-36 rounded-lg object-cover border border-gray-200"
+                {/* URL Field */}
+                <div className="space-y-2">
+                  <label htmlFor="url" className="text-sm font-medium text-gray-700">
+                    Redirect URL
+                  </label>
+                  <Input
+                    id="url"
+                    type="url"
+                    value={formData.url}
+                    onChange={(e) => handleInputChange('url', e.target.value)}
+                    placeholder="https://example.com/product"
+                    className="w-full"
                   />
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp,image/heic,image/heif"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={handleImageButtonClick}
-                    disabled={isUploading}
-                    className={`absolute bottom-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isUploading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-600 hover:bg-gray-700'}`}
-                    title="Change image"
-                  >
-                    {isUploading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Edit className="w-4 h-4 text-white" />}
-                  </button>
                 </div>
+
+                {/* Show/Hide Price Switch */}
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Show Price</label>
+                    <p className="text-xs text-gray-500">Display price on product card</p>
+                  </div>
+                  <Switch
+                    checked={formData.showPrice}
+                    onCheckedChange={(checked) => handleInputChange('showPrice', checked)}
+                  />
+                </div>
+
               </div>
             </div>
 

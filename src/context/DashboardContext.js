@@ -350,6 +350,14 @@ export function DashboardProvider({ children }) {
       setOriginalData(prev => ({ ...(prev || {}), products }));
     } catch (error) {
       console.error('Error saving products:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint,
+        fullError: error
+      });
+      throw error; // Re-throw to let calling function handle error
     }
   }, [currentProfileId]);
 

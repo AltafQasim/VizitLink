@@ -397,7 +397,7 @@ export default function PublicProfilePage({ params }) {
                                                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                                                                 sizes="(max-width: 640px) 50vw, 25vw"
                                                             />
-                                                            {Number(product.price) > 0 && (
+                                                            {Number(product.price) > 0 && product.showPrice !== false && (
                                                                 <div className="absolute top-2 left-2 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-primary text-primary-foreground shadow-sm">
                                                                     {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
                                                                 </div>
@@ -417,9 +417,11 @@ export default function PublicProfilePage({ params }) {
                                                     <h4 className={`font-semibold text-sm truncate ${currentTextColor}`} style={{ fontFamily }}>
                                                         {product.title}
                                                     </h4>
-                                                    <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>
-                                                        {product.brand || 'Unknown Brand'}
-                                                    </p>
+                                                    {product.brand && (
+                                                        <p className={`text-xs mt-1 truncate ${currentTextColor === 'text-white' ? 'text-white/70' : 'text-muted-foreground'}`}>
+                                                            {product.brand}
+                                                        </p>
+                                                    )}
                                                     <div className="flex items-center justify-between mt-2">
                                                         <span />
                                                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />

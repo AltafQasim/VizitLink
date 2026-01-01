@@ -111,12 +111,8 @@ export default function ProductsTab() {
   }, [isInitialized, data, updateData, saveChanges]);
 
   const persist = async (snapshot) => {
-    try {
-      // Save only products slice
-      await saveProducts(snapshot.products);
-    } catch (e) {
-      //throw e; // Re-throw to let calling function handle error
-    }
+    // Save only products slice
+    await saveProducts(snapshot.products);
   };
 
   const handleToggleActive = async (id) => {
@@ -170,7 +166,7 @@ export default function ProductsTab() {
   const normalizeProduct = (p) => ({
     id: generateId(),
     title: p.title || 'Untitled Product',
-    brand: p.brand || 'Unknown',
+    brand: p.brand || '',
     price: Number(p.price) || 0,
     currency: p.currency || 'USD',
     url: p.url || '#',
@@ -178,6 +174,8 @@ export default function ProductsTab() {
     clicks: 0,
     ctr: 0.0,
     active: true,
+    showPrice: (p.showPrice !== undefined ? Boolean(p.showPrice) : (p.show_price !== undefined ? Boolean(p.show_price) : true)),
+    show_price: (p.showPrice !== undefined ? Boolean(p.showPrice) : (p.show_price !== undefined ? Boolean(p.show_price) : true)),
     createdAt: new Date().toISOString(),
   });
 
@@ -454,7 +452,7 @@ export default function ProductsTab() {
           </div>
         ) : (
           <div className={viewMode === 'grid' 
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-4" 
+            ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" 
             : "space-y-3 sm:space-y-4"
           }>
             <AnimatePresence>
@@ -498,20 +496,22 @@ export default function ProductsTab() {
                     </div>
 
                     {/* Product Details - Mobile Optimized */}
-                    <div className="p-4 sm:p-4">
-                      <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1.5 truncate">
-                        {product.brand}
-                      </p>
-                      <h3 className="font-semibold text-foreground text-base sm:text-base mb-3 line-clamp-2 min-h-[3rem] leading-snug">
+                    <div className="p-2 sm:p-4">
+                      {product.brand && (
+                        <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1.5 truncate">
+                          {product.brand}
+                        </p>
+                      )}
+                      <h3 className="font-semibold text-foreground text-base sm:text-base sm:mb-3 mb-2 line-clamp-2 min-h-[3rem] leading-snug">
                         {product.title}
                       </h3>
                       
                       {/* Price and Stats - Mobile Optimized */}
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between sm:mb-4 mb-2">
                         <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-3.5 py-1.5 text-base sm:text-sm font-bold">
                           {`${getCurrencySymbol(product.currency)}${Number(product.price).toFixed(2)}`}
                         </span>
-                        <div className="flex items-center gap-1.5 text-sm sm:text-xs text-muted-foreground">
+                        <div className="sm:flex hidden items-center gap-1.5 text-sm sm:text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Eye className="w-4 h-4 sm:w-3 sm:h-3" />
                             {product.clicks}
@@ -528,7 +528,7 @@ export default function ProductsTab() {
                           className="flex-1 min-h-[44px] h-11 sm:h-9 text-sm sm:text-xs font-medium"
                         >
                           <Edit className="w-4 h-4 sm:w-3 sm:h-3 mr-1.5 sm:mr-1" />
-                          Edit
+                          <span className='hidden sm:block'>Edit</span>
                         </Button>
                         <Button
                           variant="ghost"
@@ -537,7 +537,7 @@ export default function ProductsTab() {
                           className="flex-1 min-h-[44px] h-11 sm:h-9 text-sm sm:text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium"
                         >
                           <Trash2 className="w-4 h-4 sm:w-3 sm:h-3 mr-1.5 sm:mr-1" />
-                          Delete
+                          <span className='hidden sm:block'>Delete</span>
                         </Button>
                       </div>
                     </div>
@@ -576,9 +576,11 @@ export default function ProductsTab() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1">
-                              {product.brand}
-                            </p>
+                            {product.brand && (
+                              <p className="text-xs sm:text-sm text-muted-foreground font-medium mb-1">
+                                {product.brand}
+                              </p>
+                            )}
                             <h3 className="font-semibold text-foreground text-base sm:text-base line-clamp-2 leading-snug">
                               {product.title}
                             </h3>

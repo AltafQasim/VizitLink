@@ -144,7 +144,7 @@ function mapProductRowToApp(row) {
   return {
     id: row.id,
     title: row.title,
-    brand: row.brand || 'Unknown',
+    brand: row.brand || '',
     price: Number(row.price) || 0,
     currency: row.currency || 'USD',
     url: row.url,
@@ -152,6 +152,8 @@ function mapProductRowToApp(row) {
     clicks: typeof row.clicks === 'number' ? row.clicks : 0,
     ctr: typeof row.ctr === 'number' ? row.ctr : 0.0,
     active: Boolean(row.active),
+    showPrice: row.show_price !== undefined ? Boolean(row.show_price) : true,
+    show_price: row.show_price !== undefined ? Boolean(row.show_price) : true,
     createdAt: row.created_at,
   };
 }
@@ -262,7 +264,7 @@ export const saveToBackend = async (data, profileId = null) => {
     id: p.id && String(p.id).length > 0 ? p.id : undefined,
     profile_id: profileId,
     title: p.title || 'Untitled Product',
-    brand: p.brand || 'Unknown',
+    brand: p.brand || '',
     price: Number(p.price) || 0,
     currency: p.currency || 'USD',
     url: p.url || '#',
@@ -270,6 +272,7 @@ export const saveToBackend = async (data, profileId = null) => {
     clicks: typeof p.clicks === 'number' ? p.clicks : 0,
     ctr: typeof p.ctr === 'number' ? p.ctr : 0.0,
     active: Boolean(p.active),
+    show_price: (p.showPrice !== undefined ? Boolean(p.showPrice) : (p.show_price !== undefined ? Boolean(p.show_price) : true)),
     created_at: p.createdAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }));
@@ -374,13 +377,16 @@ export const saveProductsForProfile = async (products, profileId) => {
     .from('products')
     .select('id')
     .eq('profile_id', profileId);
-  if (fetchErr) throw fetchErr;
+  if (fetchErr) {
+    console.error('Error fetching existing products:', fetchErr);
+    throw new Error(fetchErr.message || 'Failed to fetch existing products');
+  }
   const existingIds = new Set((existing || []).map(r => r.id));
   const incoming = (products || []).map(p => ({
     id: p.id && String(p.id).length > 0 ? p.id : undefined,
     profile_id: profileId,
     title: p.title || 'Untitled Product',
-    brand: p.brand || 'Unknown',
+    brand: p.brand || '',
     price: Number(p.price) || 0,
     currency: p.currency || 'USD',
     url: p.url || '#',
@@ -388,6 +394,7 @@ export const saveProductsForProfile = async (products, profileId) => {
     clicks: typeof p.clicks === 'number' ? p.clicks : 0,
     ctr: typeof p.ctr === 'number' ? p.ctr : 0.0,
     active: Boolean(p.active),
+    show_price: (p.showPrice !== undefined ? Boolean(p.showPrice) : (p.show_price !== undefined ? Boolean(p.show_price) : true)),
     created_at: p.createdAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }));
@@ -395,11 +402,18 @@ export const saveProductsForProfile = async (products, profileId) => {
   const toDelete = [...existingIds].filter(id => !incomingIds.has(id));
   if (toDelete.length) {
     const { error } = await supabase.from('products').delete().in('id', toDelete);
-    if (error) throw error;
+    if (error) {
+      console.error('Error deleting products:', error);
+      throw new Error(error.message || 'Failed to delete products');
+    }
   }
   if (incoming.length) {
     const { error } = await supabase.from('products').upsert(incoming, { onConflict: 'id' });
-    if (error) throw error;
+    if (error) {
+      console.error('Error upserting products:', error);
+      console.error('Products payload:', JSON.stringify(incoming, null, 2));
+      throw new Error(error.message || 'Failed to save products');
+    }
   }
 };
 

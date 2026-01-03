@@ -5,12 +5,14 @@ import { motion } from 'framer-motion';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { 
   FaInstagram, FaYoutube, FaTwitter, FaFacebook, FaLinkedin, FaSnapchatGhost, FaPinterest, FaTiktok, FaReddit, FaGithub, FaDribbble, FaBehance, FaMedium, FaSpotify, FaSoundcloud, FaTwitch, FaDiscord, FaWhatsapp, FaTelegram, FaGlobe
 } from 'react-icons/fa';
 import { SiThreads, SiOnlyfans, SiSubstack, SiBuymeacoffee, SiPatreon, SiEtsy, SiAmazon, SiShopify, SiGumroad } from 'react-icons/si';
 import { MdEmail } from 'react-icons/md';
 import { CheckCircle, AlertCircle, ExternalLink, X } from 'lucide-react';
+import { countryCodes, getDefaultCountryFromIP, getCountryByCode } from '../../../lib/countryCodes';
 
 // Helper function to generate URL from input
 const generateUrl = (platformId, input) => {
@@ -262,10 +264,10 @@ const validateInput = (platformId, input) => {
       return { isValid: true, message: '' };
     
     case 'whatsapp':
-      // Phone number validation (digits only, 7-15 digits)
+      // Phone number validation (digits only, 4-15 digits without country code)
       const phoneNumber = trimmed.replace(/\D/g, '');
-      if (phoneNumber.length < 7 || phoneNumber.length > 15) {
-        return { isValid: false, message: 'Please enter a valid phone number (7-15 digits)' };
+      if (phoneNumber.length < 4 || phoneNumber.length > 15) {
+        return { isValid: false, message: 'Please enter a valid phone number (4-15 digits)' };
       }
       return { isValid: true, message: '' };
     
@@ -697,6 +699,8 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [isValid, setIsValid] = useState(true);
   const [validationMessage, setValidationMessage] = useState('');
+  const [selectedCountryCode, setSelectedCountryCode] = useState(null);
+  const [isLoadingCountry, setIsLoadingCountry] = useState(false);
 
   // Initialize form when link changes
   useEffect(() => {
@@ -704,13 +708,54 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
       const platform = socialPlatforms.find(p => p.id === link.icon);
       if (platform) {
         setSelectedPlatform(platform);
-        // Extract username from existing URL
-        const extractedUsername = extractUsernameFromUrl(platform.id, link.url);
-        setInputValue(extractedUsername);
-        // Validate the extracted input
-        const validation = validateInput(platform.id, extractedUsername);
-        setIsValid(validation.isValid);
-        setValidationMessage(validation.message);
+        
+        if (platform.id === 'whatsapp') {
+          // Extract phone number and country code from WhatsApp URL
+          const fullNumber = extractUsernameFromUrl(platform.id, link.url);
+          if (fullNumber) {
+            // Try to detect country code from the number
+            let detectedCountry = null;
+            let phoneNumber = fullNumber;
+            
+            // Try to match country code (check common codes first)
+            for (const country of countryCodes) {
+              const dialCode = country.dialCode.replace('+', '');
+              if (fullNumber.startsWith(dialCode)) {
+                detectedCountry = country;
+                phoneNumber = fullNumber.substring(dialCode.length);
+                break;
+              }
+            }
+            
+            // If no country detected, try to get from IP
+            if (!detectedCountry) {
+              setIsLoadingCountry(true);
+              getDefaultCountryFromIP().then(country => {
+                setSelectedCountryCode(country);
+                setIsLoadingCountry(false);
+              });
+            } else {
+              setSelectedCountryCode(detectedCountry);
+            }
+            
+            setInputValue(phoneNumber);
+          } else {
+            // Load default country from IP
+            setIsLoadingCountry(true);
+            getDefaultCountryFromIP().then(country => {
+              setSelectedCountryCode(country);
+              setIsLoadingCountry(false);
+            });
+          }
+        } else {
+          // Extract username from existing URL
+          const extractedUsername = extractUsernameFromUrl(platform.id, link.url);
+          setInputValue(extractedUsername);
+          // Validate the extracted input
+          const validation = validateInput(platform.id, extractedUsername);
+          setIsValid(validation.isValid);
+          setValidationMessage(validation.message);
+        }
       }
     }
   }, [link]);
@@ -728,7 +773,15 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
   const handleSave = () => {
     if (selectedPlatform && inputValue.trim() && isValid && link) {
       // Generate URL from input
-      const generatedUrl = generateUrl(selectedPlatform.id, inputValue);
+      let generatedUrl;
+      if (selectedPlatform.id === 'whatsapp' && selectedCountryCode) {
+        // For WhatsApp, combine country code with phone number
+        const phoneNumber = inputValue.replace(/\D/g, '');
+        const fullNumber = selectedCountryCode.dialCode.replace('+', '') + phoneNumber;
+        generatedUrl = `https://wa.me/${fullNumber}`;
+      } else {
+        generatedUrl = generateUrl(selectedPlatform.id, inputValue);
+      }
       
       if (generatedUrl && selectedPlatform.validation(generatedUrl)) {
         const updatedLink = {
@@ -749,6 +802,7 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
     setSelectedPlatform(null);
     setIsValid(true);
     setValidationMessage('');
+    setSelectedCountryCode(null);
     onClose();
   };
 
@@ -809,31 +863,91 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
                   selectedPlatform.inputPlaceholder.charAt(0).toUpperCase() + selectedPlatform.inputPlaceholder.slice(1) 
                   : 'Enter your information'}
               </label>
-              <div className="relative">
-                <Input
-                  id="input"
-                  type={selectedPlatform.id === 'email' ? 'email' : selectedPlatform.id === 'whatsapp' ? 'tel' : 'text'}
-                  placeholder={selectedPlatform.inputPlaceholder || selectedPlatform.examplePlaceholder}
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  className={`w-full pr-10 ${
-                    inputValue && !isValid 
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
-                      : inputValue && isValid 
-                        ? 'border-green-300 focus:border-green-500 focus:ring-green-500'
-                        : ''
-                  }`}
-                />
-                {inputValue && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {isValid ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <AlertCircle className="w-5 h-5 text-red-500" />
+              {selectedPlatform.id === 'whatsapp' ? (
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedCountryCode?.code || ''}
+                    onValueChange={(value) => {
+                      const country = countryCodes.find(c => c.code === value);
+                      setSelectedCountryCode(country);
+                    }}
+                    disabled={isLoadingCountry}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder={isLoadingCountry ? "Loading..." : "Select country"}>
+                        {selectedCountryCode && (
+                          <span className="flex items-center gap-2">
+                            <span>{selectedCountryCode.flag}</span>
+                            <span>{selectedCountryCode.dialCode}</span>
+                          </span>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {countryCodes.map((country,index) => (
+                        <SelectItem key={index} value={country.code}>
+                          <span className="flex items-center gap-2">
+                            <span>{country.flag}</span>
+                            <span>{country.name}</span>
+                            <span className="text-muted-foreground ml-auto">{country.dialCode}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="relative flex-1">
+                    <Input
+                      id="input"
+                      type="tel"
+                      placeholder="Phone number"
+                      value={inputValue}
+                      onChange={handleInputChange}
+                      className={`w-full pr-10 ${
+                        inputValue && !isValid 
+                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                          : inputValue && isValid 
+                            ? 'border-green-300 focus:border-green-500 focus:ring-green-500'
+                            : ''
+                      }`}
+                    />
+                    {inputValue && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        {isValid ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-red-500" />
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Input
+                    id="input"
+                    type={selectedPlatform.id === 'email' ? 'email' : 'text'}
+                    placeholder={selectedPlatform.inputPlaceholder || selectedPlatform.examplePlaceholder}
+                    value={inputValue}
+                    onChange={handleInputChange}
+                    className={`w-full pr-10 ${
+                      inputValue && !isValid 
+                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500' 
+                        : inputValue && isValid 
+                          ? 'border-green-300 focus:border-green-500 focus:ring-green-500'
+                          : ''
+                    }`}
+                  />
+                  {inputValue && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {isValid ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <AlertCircle className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
               
               {/* Validation Message */}
               {validationMessage && (
@@ -873,7 +987,7 @@ export default function EditLinkModal({ isOpen, onClose, onSave, link }) {
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={!inputValue.trim() || !isValid}
+                disabled={!inputValue.trim() || !isValid || (selectedPlatform?.id === 'whatsapp' && !selectedCountryCode)}
                 className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Update Link

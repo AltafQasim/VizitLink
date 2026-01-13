@@ -28,6 +28,9 @@ export default function MobilePreview() {
   const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
 
   const themeStyles = useMemo(() => ({
+    'Leave': { svg: '/themes/Leave@1x-10.0s-700px-1400px.svg', textColor: 'text-white', type: 'svg' },
+    'Trianglify': { svg: '/themes/Trianglify@1x-10.0s-668px-1025px.svg', textColor: 'text-white', type: 'svg' },
+    'Venetian Blinds': { svg: '/themes/Venetian Blinds@1x-1.0s-681px-1088px.svg', textColor: 'text-white', type: 'svg' },
     'Air': { background: 'bg-gray-100', textColor: 'text-black' },
     'Blocks': { background: 'bg-gradient-to-br from-purple-500 to-pink-500', textColor: 'text-white' },
     'Bloom': { background: 'bg-gradient-to-br from-red-500 to-blue-600', textColor: 'text-white' },
@@ -76,7 +79,7 @@ export default function MobilePreview() {
     'Industrial': 'bg-transparent text-black rounded border border-gray-600',
   }), []);
 
-  let currentBackground, currentTextColor;
+  let currentBackground, currentTextColor, currentThemeSvg;
   if (wallpaper === 'Image' && design.wallpaperImage) {
     currentBackground = '';
     currentTextColor = 'text-white';
@@ -87,8 +90,15 @@ export default function MobilePreview() {
     currentBackground = wallpaperStyles[wallpaper].background;
     currentTextColor = wallpaperStyles[wallpaper].textColor;
   } else if (theme && themeStyles[theme]) {
-    currentBackground = themeStyles[theme].background;
-    currentTextColor = themeStyles[theme].textColor;
+    const themeStyle = themeStyles[theme];
+    if (themeStyle.type === 'svg' && themeStyle.svg) {
+      currentThemeSvg = themeStyle.svg;
+      currentBackground = '';
+      currentTextColor = themeStyle.textColor;
+    } else {
+      currentBackground = themeStyle.background;
+      currentTextColor = themeStyle.textColor;
+    }
   } else {
     currentBackground = 'bg-gray-100';
     currentTextColor = 'text-black';
@@ -140,10 +150,19 @@ export default function MobilePreview() {
                       playsInline
                     />
                   )}
+                  {currentThemeSvg && (
+                    <img
+                      src={currentThemeSvg}
+                      alt="Theme"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
                   {(wallpaper === 'Image' || wallpaper === 'Video') && (
                     <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(Number(design.wallpaperTint || 0)) / 100})` }} />
                   )}
-
+                  {currentThemeSvg && (
+                    <div className="absolute inset-0 bg-black/20" />
+                  )}
                   <div className="relative z-10 p-4 sm:p-6 h-full overflow-y-auto">
                     {/* Top Icons - Brand and Share */}
                     <div className="flex items-center justify-between mb-4">

@@ -243,6 +243,9 @@ const DesignTab = () => {
     };
 
     const themes = [
+        { name: "Leave", svg: "/themes/Leave@1x-10.0s-700px-1400px.svg", textColor: "text-white", selected: selectedTheme === "Leave", type: "svg" },
+        { name: "Trianglify", svg: "/themes/Trianglify@1x-10.0s-668px-1025px.svg", textColor: "text-white", selected: selectedTheme === "Trianglify", type: "svg" },
+        { name: "Venetian Blinds", svg: "/themes/Venetian Blinds@1x-1.0s-681px-1088px.svg", textColor: "text-white", selected: selectedTheme === "Venetian Blinds", type: "svg" },
         { name: "Air", preview: "bg-gray-100", textColor: "text-black", selected: selectedTheme === "Air", type: "gradient" },
         { name: "Blocks", preview: "bg-gradient-to-br from-purple-500 to-pink-500", textColor: "text-white", selected: selectedTheme === "Blocks", type: "gradient" },
         { name: "Bloom", preview: "bg-gradient-to-br from-red-500 to-blue-600", textColor: "text-white", selected: selectedTheme === "Bloom", isPro: true, type: "gradient" },
@@ -570,24 +573,39 @@ const DesignTab = () => {
                                                 }`}
                                             onClick={() => handleThemeChange(theme.name)}
                                         >
-                                            <div className={`aspect-[3/4] relative ${theme.preview} ${theme.textColor}`}>
+                                            <div className={`aspect-[3/4] relative ${theme.preview || ''} ${theme.textColor}`}>
+                                                {/* SVG Background */}
+                                                {theme.type === "svg" && theme.svg && (
+                                                    <img
+                                                        src={theme.svg}
+                                                        alt={theme.name}
+                                                        className="absolute inset-0 w-full h-full object-cover"
+                                                    />
+                                                )}
                                                 {/* Overlay for readability */}
                                                 {theme.type === "gradient" && (
                                                     <div className="absolute inset-0 bg-black/10" />
                                                 )}
+                                                {theme.type === "svg" && (
+                                                    <div className="absolute inset-0 bg-black/20" />
+                                                )}
                                                 <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl">
-                                                    {theme.name === "Air" && <span>💨</span>}
-                                                    {theme.name === "Blocks" && <span>🧱</span>}
-                                                    {theme.name === "Bloom" && <span>🌸</span>}
-                                                    {theme.name === "Breeze" && <span>🌬️</span>}
-                                                    {theme.name === "Lake" && <span>🏞️</span>}
-                                                    {theme.name === "Mineral" && <span>💎</span>}
-                                                    {theme.name === "Ocean" && <span>🌊</span>}
-                                                    {theme.name === "Sunset" && <span>🌅</span>}
-                                                    {theme.name === "Winter" && <span>❄️</span>}
-                                                    {theme.name === "Spring" && <span>🌱</span>}
-                                                    {theme.name === "Summer" && <span>☀️</span>}
-                                                    {theme.name === "Autumn" && <span>🍂</span>}
+                                                    {theme.type !== "svg" && (
+                                                        <>
+                                                            {theme.name === "Air" && <span>💨</span>}
+                                                            {theme.name === "Blocks" && <span>🧱</span>}
+                                                            {theme.name === "Bloom" && <span>🌸</span>}
+                                                            {theme.name === "Breeze" && <span>🌬️</span>}
+                                                            {theme.name === "Lake" && <span>🏞️</span>}
+                                                            {theme.name === "Mineral" && <span>💎</span>}
+                                                            {theme.name === "Ocean" && <span>🌊</span>}
+                                                            {theme.name === "Sunset" && <span>🌅</span>}
+                                                            {theme.name === "Winter" && <span>❄️</span>}
+                                                            {theme.name === "Spring" && <span>🌱</span>}
+                                                            {theme.name === "Summer" && <span>☀️</span>}
+                                                            {theme.name === "Autumn" && <span>🍂</span>}
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 right-1 sm:right-2 flex items-center justify-between">
                                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
@@ -751,8 +769,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                    <DialogTitle>Choose an image</DialogTitle>
-                                    <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
+                                            <DialogTitle>Choose an image</DialogTitle>
+                                            <DialogDescription>Select how you want to add your wallpaper image.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -922,8 +940,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                    <DialogTitle>Choose a video</DialogTitle>
-                                    <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
+                                            <DialogTitle>Choose a video</DialogTitle>
+                                            <DialogDescription>Select how you want to add your wallpaper video.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -1093,8 +1111,8 @@ const DesignTab = () => {
                                 <DialogHeader>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                    <DialogTitle>Adjust Tint</DialogTitle>
-                                    <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
+                                            <DialogTitle>Adjust Tint</DialogTitle>
+                                            <DialogDescription>Improve readability by adding a subtle tint over your background.</DialogDescription>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -1208,16 +1226,16 @@ const DesignTab = () => {
                         {activeStyleTab === "Presets" && (
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">Button and font</h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                     {buttonStyles.map((style) => (
                                         <Card
                                             key={style.name}
-                                                className={`cursor-pointer transition-all hover:scale-105 min-h-[100px] sm:min-h-[120px] ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
+                                            className={`cursor-pointer transition-all hover:scale-105 min-h-[100px] sm:min-h-[120px] ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
                                                 }`}
                                             onClick={() => handleStyleChange(style.name)}
                                         >
-                                                <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
-                                                    <div className={`px-3 sm:px-4 py-2 text-sm ${style.style}`}>
+                                            <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
+                                                <div className={`px-3 sm:px-4 py-2 text-sm ${style.style}`}>
                                                     Button
                                                 </div>
                                                 <p className="text-sm font-medium text-center">{style.name}</p>

@@ -349,7 +349,7 @@ const DesignTab = () => {
     // Sample royalty-free videos from robust public sources (no API key required)
     const getCoverrSamples = (q = "") => {
         const urls = [
-            "/themes/Glass.mp4",
+            "https://hhnlsawagpxafcyplsuj.supabase.co/storage/v1/object/public/wallpapervideo/default/Glass.mp4",
             // W3Schools Big Buck Bunny (short)
             "https://www.w3schools.com/html/mov_bbb.mp4",
             // Sample-Videos
@@ -373,7 +373,7 @@ const DesignTab = () => {
 
     // Defaults for Image/Video wallpaper cards
     const defaultWallpaperImage = getUnsplashPlaceholders()[0];
-    const defaultWallpaperVideo = '/themes/Glass.mp4' || getCoverrSamples()[0];
+    const defaultWallpaperVideo = 'https://hhnlsawagpxafcyplsuj.supabase.co/storage/v1/object/public/wallpapervideo/default/Glass.mp4' || getCoverrSamples()[0];
 
     // Tint controls
     const [isTintModalOpen, setIsTintModalOpen] = useState(false);

@@ -11,6 +11,7 @@ import { Card } from "../../ui/card";
 import { useDashboard } from "../../../context/DashboardContext";
 import { toast } from 'sonner';
 import { supabase } from "../../../lib/supabase";
+import { themeStyles, wallpaperStyles, buttonStyles as buttonStylesMap } from "../../../lib/designStyles";
 
 const DesignTab = () => {
     const { data, updateData, updateDesignData, canUndo, canRedo, undo, redo, hasUnsavedChanges, saveDesign } = useDashboard();
@@ -242,64 +243,59 @@ const DesignTab = () => {
         });
     };
 
-    const themes = [
-        { name: "Leave", svg: "/themes/Leave@1x-10.0s-700px-1400px.svg", textColor: "text-white", selected: selectedTheme === "Leave", type: "svg" },
-        { name: "Trianglify", svg: "/themes/Trianglify@1x-10.0s-668px-1025px.svg", textColor: "text-white", selected: selectedTheme === "Trianglify", type: "svg" },
-        { name: "Venetian Blinds", svg: "/themes/Venetian Blinds@1x-1.0s-681px-1088px.svg", textColor: "text-white", selected: selectedTheme === "Venetian Blinds", type: "svg" },
-        { name: "Air", preview: "bg-gray-100", textColor: "text-black", selected: selectedTheme === "Air", type: "gradient" },
-        { name: "Blocks", preview: "bg-gradient-to-br from-purple-500 to-pink-500", textColor: "text-white", selected: selectedTheme === "Blocks", type: "gradient" },
-        { name: "Bloom", preview: "bg-gradient-to-br from-red-500 to-blue-600", textColor: "text-white", selected: selectedTheme === "Bloom", isPro: true, type: "gradient" },
-        { name: "Breeze", preview: "bg-gradient-to-br from-purple-400 to-pink-400", textColor: "text-white", selected: selectedTheme === "Breeze", isPro: true, type: "gradient" },
-        { name: "Lake", preview: "bg-slate-800", textColor: "text-white", selected: selectedTheme === "Lake", type: "solid" },
-        { name: "Mineral", preview: "bg-orange-100", textColor: "text-black", selected: selectedTheme === "Mineral", type: "solid" },
-        { name: "Ocean", preview: "bg-blue-100", textColor: "text-black", selected: selectedTheme === "Ocean", type: "solid" },
-        { name: "Sunset", preview: "bg-gradient-to-br from-yellow-500 to-red-500", textColor: "text-white", selected: selectedTheme === "Sunset", type: "gradient" },
-        { name: "Winter", preview: "bg-gradient-to-br from-blue-200 to-blue-400", textColor: "text-black", selected: selectedTheme === "Winter", type: "gradient" },
-        { name: "Spring", preview: "bg-gradient-to-br from-green-200 to-green-400", textColor: "text-black", selected: selectedTheme === "Spring", type: "gradient" },
-        { name: "Summer", preview: "bg-gradient-to-br from-yellow-200 to-yellow-400", textColor: "text-black", selected: selectedTheme === "Summer", type: "gradient" },
-        { name: "Autumn", preview: "bg-gradient-to-br from-orange-200 to-orange-400", textColor: "text-black", selected: selectedTheme === "Autumn", type: "gradient" },
-    ];
+    // Generate themes from common themeStyles
+    const customizableThemeNames = ["Agate", "Blocks", "Air", "Bloom", "Sunset", "Trianglify", "Lake", "Leave", "Mineral", "Ocean", "Groov", "Winter", "Venetian Blinds", "Spring", "Summer", "Autumn"];
+    const curatedThemeNames = ["Midnight", "Aurora", "Coral", "Forest", "Lavender", "Sage", "Rose", "Sky", "Amber", "Indigo", "Teal", "Ruby"];
 
-    const curatedThemes = [
-        { name: "Midnight", preview: "bg-gradient-to-br from-gray-900 to-black", textColor: "text-white", selected: selectedTheme === "Midnight", type: "gradient" },
-        { name: "Aurora", preview: "bg-gradient-to-br from-green-400 to-blue-500", textColor: "text-white", selected: selectedTheme === "Aurora", isPro: true, type: "gradient" },
-        { name: "Coral", preview: "bg-gradient-to-br from-pink-400 to-orange-400", textColor: "text-white", selected: selectedTheme === "Coral", type: "gradient" },
-        { name: "Forest", preview: "bg-gradient-to-br from-green-600 to-green-800", textColor: "text-white", selected: selectedTheme === "Forest", type: "gradient" },
-        { name: "Lavender", preview: "bg-gradient-to-br from-purple-300 to-pink-300", textColor: "text-black", selected: selectedTheme === "Lavender", type: "gradient" },
-        { name: "Sage", preview: "bg-gradient-to-br from-green-200 to-blue-200", textColor: "text-black", selected: selectedTheme === "Sage", type: "gradient" },
-        { name: "Rose", preview: "bg-gradient-to-br from-rose-400 to-pink-500", textColor: "text-white", selected: selectedTheme === "Rose", isPro: true, type: "gradient" },
-        { name: "Sky", preview: "bg-gradient-to-br from-blue-300 to-cyan-400", textColor: "text-black", selected: selectedTheme === "Sky", type: "gradient" },
-        { name: "Amber", preview: "bg-gradient-to-br from-amber-400 to-orange-500", textColor: "text-white", selected: selectedTheme === "Amber", type: "gradient" },
-        { name: "Indigo", preview: "bg-gradient-to-br from-indigo-500 to-purple-600", textColor: "text-white", selected: selectedTheme === "Indigo", type: "gradient" },
-        { name: "Teal", preview: "bg-gradient-to-br from-teal-400 to-cyan-500", textColor: "text-white", selected: selectedTheme === "Teal", type: "gradient" },
-        { name: "Ruby", preview: "bg-gradient-to-br from-red-500 to-pink-600", textColor: "text-white", selected: selectedTheme === "Ruby", isPro: true, type: "gradient" },
-    ];
+    const themes = customizableThemeNames.map(name => {
+        const themeStyle = themeStyles[name];
+        if (!themeStyle) return null;
+        const isPro = name === "Bloom" || name === "Breeze";
+        if (themeStyle.type === 'svg') {
+            return { name, svg: themeStyle.svg, textColor: themeStyle.textColor, selected: selectedTheme === name, type: "svg" };
+        } else {
+            return { name, preview: themeStyle.background, textColor: themeStyle.textColor, selected: selectedTheme === name, isPro, type: themeStyle.background.includes('gradient') ? "gradient" : "solid" };
+        }
+    }).filter(Boolean);
 
-    const wallpapers = [
-        { name: "Hero", preview: "bg-gradient-to-br from-blue-900 to-teal-400", icon: true, type: "gradient" },
-        { name: "Fill", preview: "bg-gray-100", icon: true, type: "solid" },
-        { name: "Gradient", preview: "bg-gradient-to-br from-gray-400 to-gray-600", icon: true, type: "gradient" },
-        { name: "Blur", preview: "bg-gradient-to-br from-blue-200 to-purple-200", icon: true, type: "blur" },
-        { name: "Pattern", preview: "bg-gradient-to-br from-blue-200 to-gray-300", icon: true, type: "pattern" },
-        { name: "Image", preview: selectedWallpaper === "Image" && data?.design?.wallpaperImage ? "" : "bg-gradient-to-br from-orange-500 via-red-500 to-black", icon: true, type: "image" },
-        { name: "Video", preview: "bg-gradient-to-br from-gray-600 to-gray-800", icon: true, isPro: true, type: "video" },
-    ];
+    const curatedThemes = curatedThemeNames.map(name => {
+        const themeStyle = themeStyles[name];
+        if (!themeStyle) return null;
+        const isPro = name === "Aurora" || name === "Rose" || name === "Ruby";
+        return { name, preview: themeStyle.background, textColor: themeStyle.textColor, selected: selectedTheme === name, isPro, type: "gradient" };
+    }).filter(Boolean);
+
+    // Generate wallpapers from common wallpaperStyles
+    const wallpapers = Object.keys(wallpaperStyles).map(name => {
+        const wallpaperStyle = wallpaperStyles[name];
+        const isPro = name === "Video";
+        const typeMap = {
+            'Hero': 'gradient',
+            'Fill': 'solid',
+            'Gradient': 'gradient',
+            'Blur': 'blur',
+            'Pattern': 'pattern',
+            'Image': 'image',
+            'Video': 'video'
+        };
+        return {
+            name,
+            preview: name === "Image" && selectedWallpaper === "Image" && data?.design?.wallpaperImage ? "" : wallpaperStyle.background,
+            icon: true,
+            isPro,
+            type: typeMap[name] || 'gradient'
+        };
+    });
 
     const colorOptions = [
         "bg-teal-500", "bg-blue-600", "bg-cyan-500", "bg-gray-100", "bg-black"
     ];
 
-    const buttonStyles = [
-        { name: "Minimal", style: "border border-gray-400 bg-transparent text-black rounded-lg" },
-        { name: "Classic", style: "bg-gray-100 text-black rounded-lg shadow-sm" },
-        { name: "Unique", style: "bg-blue-50 text-gray-700 rounded-lg border border-blue-200" },
-        { name: "Zen", style: "bg-white text-black rounded-full shadow-sm" },
-        { name: "Simple", style: "bg-gray-50 text-black rounded-lg" },
-        { name: "Precise", style: "bg-transparent text-black rounded border border-gray-400" },
-        { name: "Retro", style: "bg-black text-white rounded-full border-2 border-black" },
-        { name: "Modern", style: "bg-gray-100 text-black rounded-lg" },
-        { name: "Industrial", style: "bg-transparent text-black rounded border border-gray-600" },
-    ];
+    // Generate buttonStyles from common buttonStylesMap
+    const buttonStyles = Object.keys(buttonStylesMap).map(name => ({
+        name,
+        style: buttonStylesMap[name]
+    }));
 
     const fonts = [
         { name: "Inter", family: "Inter", weight: "400", selected: selectedFont === "Inter" },
@@ -353,6 +349,7 @@ const DesignTab = () => {
     // Sample royalty-free videos from robust public sources (no API key required)
     const getCoverrSamples = (q = "") => {
         const urls = [
+            "/themes/Glass.mp4",
             // W3Schools Big Buck Bunny (short)
             "https://www.w3schools.com/html/mov_bbb.mp4",
             // Sample-Videos
@@ -376,7 +373,7 @@ const DesignTab = () => {
 
     // Defaults for Image/Video wallpaper cards
     const defaultWallpaperImage = getUnsplashPlaceholders()[0];
-    const defaultWallpaperVideo = getCoverrSamples()[0];
+    const defaultWallpaperVideo = '/themes/Glass.mp4' || getCoverrSamples()[0];
 
     // Tint controls
     const [isTintModalOpen, setIsTintModalOpen] = useState(false);
@@ -589,24 +586,6 @@ const DesignTab = () => {
                                                 {theme.type === "svg" && (
                                                     <div className="absolute inset-0 bg-black/20" />
                                                 )}
-                                                <div className="absolute inset-0 flex items-center justify-center text-3xl sm:text-4xl">
-                                                    {theme.type !== "svg" && (
-                                                        <>
-                                                            {theme.name === "Air" && <span>💨</span>}
-                                                            {theme.name === "Blocks" && <span>🧱</span>}
-                                                            {theme.name === "Bloom" && <span>🌸</span>}
-                                                            {theme.name === "Breeze" && <span>🌬️</span>}
-                                                            {theme.name === "Lake" && <span>🏞️</span>}
-                                                            {theme.name === "Mineral" && <span>💎</span>}
-                                                            {theme.name === "Ocean" && <span>🌊</span>}
-                                                            {theme.name === "Sunset" && <span>🌅</span>}
-                                                            {theme.name === "Winter" && <span>❄️</span>}
-                                                            {theme.name === "Spring" && <span>🌱</span>}
-                                                            {theme.name === "Summer" && <span>☀️</span>}
-                                                            {theme.name === "Autumn" && <span>🍂</span>}
-                                                        </>
-                                                    )}
-                                                </div>
                                                 <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 right-1 sm:right-2 flex items-center justify-between">
                                                     <span className="text-xs font-semibold px-2 py-1 rounded bg-black/30 text-white">{theme.name}</span>
                                                 </div>
@@ -1181,7 +1160,7 @@ const DesignTab = () => {
                                 </Button>
                             ) : (
                                 <>
-                                    <h3 className="text-lg font-semibold mb-4">Color</h3>
+                                    {/* <h3 className="text-lg font-semibold mb-4">Color</h3>
                                     <div className="flex gap-3 mb-4">
                                         <div className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center cursor-pointer">
                                             <div className="w-6 h-6 bg-gradient-to-br from-gray-300 to-gray-400 rounded"></div>
@@ -1193,7 +1172,7 @@ const DesignTab = () => {
                                             ></div>
                                         ))}
                                     </div>
-                                    <p className="text-sm text-gray-500">Suggested colors are based on your profile image</p>
+                                    <p className="text-sm text-gray-500">Suggested colors are based on your profile image</p> */}
                                 </>
                             )}
                         </div>

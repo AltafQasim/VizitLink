@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { socialIconsMap, socialColorsMap } from '../../lib/social';
 import BrandLogo from '../BrandLogo';
+import { getCurrentStyles, getButtonStyle } from '../../lib/designStyles';
 
 export default function MobilePreview() {
   const { data, customLinks } = useDashboard();
@@ -27,83 +28,9 @@ export default function MobilePreview() {
   const fontFamily = design.fontFamily || 'Inter';
   const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
 
-  const themeStyles = useMemo(() => ({
-    'Leave': { svg: '/themes/Leave@1x-10.0s-700px-1400px.svg', textColor: 'text-white', type: 'svg' },
-    'Trianglify': { svg: '/themes/Trianglify@1x-10.0s-668px-1025px.svg', textColor: 'text-white', type: 'svg' },
-    'Venetian Blinds': { svg: '/themes/Venetian Blinds@1x-1.0s-681px-1088px.svg', textColor: 'text-white', type: 'svg' },
-    'Air': { background: 'bg-gray-100', textColor: 'text-black' },
-    'Blocks': { background: 'bg-gradient-to-br from-purple-500 to-pink-500', textColor: 'text-white' },
-    'Bloom': { background: 'bg-gradient-to-br from-red-500 to-blue-600', textColor: 'text-white' },
-    'Breeze': { background: 'bg-gradient-to-br from-purple-400 to-pink-400', textColor: 'text-white' },
-    'Lake': { background: 'bg-slate-800', textColor: 'text-white' },
-    'Mineral': { background: 'bg-orange-100', textColor: 'text-black' },
-    'Ocean': { background: 'bg-blue-100', textColor: 'text-black' },
-    'Sunset': { background: 'bg-gradient-to-br from-yellow-500 to-red-500', textColor: 'text-white' },
-    'Winter': { background: 'bg-gradient-to-br from-blue-200 to-blue-400', textColor: 'text-black' },
-    'Spring': { background: 'bg-gradient-to-br from-green-200 to-green-400', textColor: 'text-black' },
-    'Summer': { background: 'bg-gradient-to-br from-yellow-200 to-yellow-400', textColor: 'text-black' },
-    'Autumn': { background: 'bg-gradient-to-br from-orange-200 to-orange-400', textColor: 'text-black' },
-    'Midnight': { background: 'bg-gradient-to-br from-gray-900 to-black', textColor: 'text-white' },
-    'Aurora': { background: 'bg-gradient-to-br from-green-400 to-blue-500', textColor: 'text-white' },
-    'Coral': { background: 'bg-gradient-to-br from-pink-400 to-orange-400', textColor: 'text-white' },
-    'Forest': { background: 'bg-gradient-to-br from-green-600 to-green-800', textColor: 'text-white' },
-    'Lavender': { background: 'bg-gradient-to-br from-purple-300 to-pink-300', textColor: 'text-black' },
-    'Sage': { background: 'bg-gradient-to-br from-green-200 to-blue-200', textColor: 'text-black' },
-    'Rose': { background: 'bg-gradient-to-br from-rose-400 to-pink-500', textColor: 'text-white' },
-    'Sky': { background: 'bg-gradient-to-br from-blue-300 to-cyan-400', textColor: 'text-black' },
-    'Amber': { background: 'bg-gradient-to-br from-amber-400 to-orange-500', textColor: 'text-white' },
-    'Indigo': { background: 'bg-gradient-to-br from-indigo-500 to-purple-600', textColor: 'text-white' },
-    'Teal': { background: 'bg-gradient-to-br from-teal-400 to-cyan-500', textColor: 'text-white' },
-    'Ruby': { background: 'bg-gradient-to-br from-red-500 to-pink-600', textColor: 'text-white' },
-  }), []);
-
-  const wallpaperStyles = useMemo(() => ({
-    'Hero': { background: 'bg-gradient-to-br from-blue-900 to-teal-400', textColor: 'text-white' },
-    'Fill': { background: 'bg-gray-100', textColor: 'text-black' },
-    'Gradient': { background: 'bg-gradient-to-br from-gray-400 to-gray-600', textColor: 'text-white' },
-    'Blur': { background: 'bg-gradient-to-br from-blue-200 to-purple-200', textColor: 'text-black' },
-    'Pattern': { background: 'bg-gradient-to-br from-blue-200 to-gray-300', textColor: 'text-black' },
-    'Image': { background: 'bg-gradient-to-br from-orange-500 via-red-500 to-black', textColor: 'text-white' },
-    'Video': { background: 'bg-gradient-to-br from-gray-600 to-gray-800', textColor: 'text-white' },
-  }), []);
-
-  const buttonStyles = useMemo(() => ({
-    'Minimal': 'border border-gray-400 bg-transparent text-black rounded-lg',
-    'Classic': 'bg-gray-100 text-black rounded-lg shadow-sm',
-    'Unique': 'bg-blue-50 text-gray-700 rounded-lg border border-blue-200',
-    'Zen': 'bg-white text-black rounded-full shadow-sm',
-    'Simple': 'bg-gray-50 text-black rounded-lg',
-    'Precise': 'bg-transparent text-black rounded border border-gray-400',
-    'Retro': 'bg-black text-white rounded-full border-2 border-black',
-    'Modern': 'bg-gray-100 text-black rounded-lg',
-    'Industrial': 'bg-transparent text-black rounded border border-gray-600',
-  }), []);
-
-  let currentBackground, currentTextColor, currentThemeSvg;
-  if (wallpaper === 'Image' && design.wallpaperImage) {
-    currentBackground = '';
-    currentTextColor = 'text-white';
-  } else if (wallpaper === 'Video' && design.wallpaperVideo) {
-    currentBackground = '';
-    currentTextColor = 'text-white';
-  } else if (wallpaper && wallpaperStyles[wallpaper]) {
-    currentBackground = wallpaperStyles[wallpaper].background;
-    currentTextColor = wallpaperStyles[wallpaper].textColor;
-  } else if (theme && themeStyles[theme]) {
-    const themeStyle = themeStyles[theme];
-    if (themeStyle.type === 'svg' && themeStyle.svg) {
-      currentThemeSvg = themeStyle.svg;
-      currentBackground = '';
-      currentTextColor = themeStyle.textColor;
-    } else {
-      currentBackground = themeStyle.background;
-      currentTextColor = themeStyle.textColor;
-    }
-  } else {
-    currentBackground = 'bg-gray-100';
-    currentTextColor = 'text-black';
-  }
-  const currentButtonStyle = buttonStyles[buttonStyle] || buttonStyles['Minimal'];
+  // Get current styles using common helper function
+  const { currentBackground, currentTextColor, currentThemeSvg } = getCurrentStyles(wallpaper, theme, design);
+  const currentButtonStyle = getButtonStyle(buttonStyle);
 
   return (
     <div className="lg:hidden">

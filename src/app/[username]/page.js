@@ -79,7 +79,6 @@ export default function PublicProfilePage({ params }) {
             }
         };
         run();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unwrappedParams?.username]);
 
     const design = data?.design || {};

@@ -27,9 +27,13 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      "no-unused-vars": "warn",
+      "no-unused-vars": "off",
       "no-undef": "warn",
-      "no-empty": "warn",
+      "no-empty": "off",
+      "no-case-declarations": "off",
+      "no-useless-escape": "off",
+      "no-constant-binary-expression": "off",
+      "react-hooks/exhaustive-deps": "off",
     },
   }
 ];

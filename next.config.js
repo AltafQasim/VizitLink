@@ -3,7 +3,7 @@ const nextConfig = {
   // Performance optimizations
   compress: true,
   poweredByHeader: false,
-  
+
   // Image optimization
   images: {
     domains: [
@@ -57,7 +57,7 @@ const nextConfig = {
       'loremflickr.com',
       'source.unsplash.com',
     ],
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/avif', 'image/webp', 'video/mp4'],
     deviceSizes: [320, 420, 640, 768, 1024, 1280, 1536],
     imageSizes: [16, 24, 32, 48, 64, 96, 128, 256, 384],
     unoptimized: false, // Enable optimization for production
@@ -111,7 +111,7 @@ const nextConfig = {
 
   // Output configuration
   output: 'standalone', // For better deployment optimization
-  
+
   // Webpack optimizations
   webpack: (config, { isServer }) => {
     if (!isServer) {

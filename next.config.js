@@ -57,7 +57,7 @@ const nextConfig = {
       'loremflickr.com',
       'source.unsplash.com',
     ],
-    formats: ['image/avif', 'image/webp', 'video/mp4'],
+    formats: ['image/avif', 'image/webp',],
     deviceSizes: [320, 420, 640, 768, 1024, 1280, 1536],
     imageSizes: [16, 24, 32, 48, 64, 96, 128, 256, 384],
     unoptimized: false, // Enable optimization for production
@@ -100,6 +100,16 @@ const nextConfig = {
           }
         ],
       },
+      // Video optimization headers
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Accept-Ranges',
+            value: 'bytes'
+          },
+        ],
+      },
     ]
   },
 
@@ -108,6 +118,12 @@ const nextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
+
+  // Video optimization notes:
+  // - Videos are served from Supabase storage (hhnlsawagpxafcyplsuj.supabase.co)
+  // - Client-side optimization is handled via video element attributes (preload="metadata")
+  // - Accept-Ranges header enables byte-range requests for efficient video streaming
+  // - Compression is enabled globally for all assets including video metadata
 
   // Output configuration
   output: 'standalone', // For better deployment optimization

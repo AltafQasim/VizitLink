@@ -34,19 +34,19 @@ function uniq(arr) {
 }
 
 export async function POST(request) {
+  // Add CORS headers - defined outside try-catch for access in catch block
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
   try {
     const { url } = await request.json();
     
     if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+      return NextResponse.json({ error: 'URL is required' }, { status: 400, headers });
     }
-
-    // Add CORS headers
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
 
     // Validate URL
     let validUrl;

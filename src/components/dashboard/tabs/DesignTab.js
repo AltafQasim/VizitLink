@@ -728,8 +728,15 @@ const DesignTab = () => {
                                                     playsInline
                                                     autoPlay
                                                     loop
+                                                    preload="metadata"
+                                                    disablePictureInPicture
+                                                    disableRemotePlayback
                                                     onLoadedData={() => setIsWallpaperVideoLoading(false)}
                                                     onCanPlay={() => setIsWallpaperVideoLoading(false)}
+                                                    onError={(e) => {
+                                                        console.error('Video loading error:', e);
+                                                        setIsWallpaperVideoLoading(false);
+                                                    }}
                                                 />
                                             </>
                                         )}
@@ -1101,7 +1108,15 @@ const DesignTab = () => {
                                                         setIsVideoModalOpen(false);
                                                     }}
                                                 >
-                                                    <video src={src} className="w-full h-28 object-cover" muted playsInline />
+                                                    <video 
+                                                        src={src} 
+                                                        className="w-full h-28 object-cover" 
+                                                        muted 
+                                                        playsInline 
+                                                        preload="metadata"
+                                                        disablePictureInPicture
+                                                        disableRemotePlayback
+                                                    />
                                                     <span className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
                                                 </button>
                                             ))}
@@ -1138,7 +1153,20 @@ const DesignTab = () => {
                                             <img src={data?.design?.wallpaperImage || defaultWallpaperImage} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
                                         )}
                                         {(selectedWallpaper === 'Video') && (
-                                            <video src={data?.design?.wallpaperVideo || defaultWallpaperVideo} className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline />
+                                            <video 
+                                                src={data?.design?.wallpaperVideo || defaultWallpaperVideo} 
+                                                className="absolute inset-0 w-full h-full object-cover" 
+                                                autoPlay 
+                                                loop 
+                                                muted 
+                                                playsInline 
+                                                preload="metadata"
+                                                disablePictureInPicture
+                                                disableRemotePlayback
+                                                onError={(e) => {
+                                                    console.error('Video loading error:', e);
+                                                }}
+                                            />
                                         )}
                                         <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${(tintValue || 0) / 100})` }} />
                                     </div>

@@ -84,6 +84,12 @@ export default function MobilePreview() {
                       loop
                       muted
                       playsInline
+                      preload="metadata"
+                      disablePictureInPicture
+                      disableRemotePlayback
+                      onError={(e) => {
+                        console.error('Video loading error:', e);
+                      }}
                     />
                   )}
                   {currentThemeSvg && (

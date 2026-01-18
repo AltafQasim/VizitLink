@@ -185,8 +185,15 @@ export default function PublicProfilePage({ params }) {
                                 loop
                                 muted
                                 playsInline
+                                preload="metadata"
+                                disablePictureInPicture
+                                disableRemotePlayback
                                 onLoadedData={() => setIsVideoLoading(false)}
                                 onCanPlay={() => setIsVideoLoading(false)}
+                                onError={(e) => {
+                                    console.error('Video loading error:', e);
+                                    setIsVideoLoading(false);
+                                }}
                             />
                             {isVideoLoading && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

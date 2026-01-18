@@ -43,17 +43,20 @@ export const wallpaperStyles = {
   'Video': { background: 'bg-gradient-to-br from-gray-600 to-gray-800', textColor: 'text-white' },
 };
 
-// Button styles mapping
+// Button styles mapping - base styles without border radius
 export const buttonStyles = {
-  'Minimal': 'border border-gray-400 bg-transparent text-black rounded-lg',
-  'Classic': 'bg-gray-100 text-black rounded-lg shadow-sm',
-  'Unique': 'bg-blue-50 text-gray-700 rounded-lg border border-blue-200',
-  'Zen': 'bg-white text-black rounded-full shadow-sm',
-  'Simple': 'bg-gray-50 text-black rounded-lg',
-  'Precise': 'bg-transparent text-black rounded border border-gray-400',
-  'Retro': 'bg-black text-white rounded-full border-2 border-black',
-  'Modern': 'bg-gray-100 text-black rounded-lg',
-  'Industrial': 'bg-transparent text-black rounded border border-gray-600',
+  'Solid': {
+    base: 'bg-white text-black border border-transparent',
+    description: 'Solid background with white color'
+  },
+  'Glass': {
+    base: 'bg-white/10 backdrop-blur-xl backdrop-saturate-150 text-white border border-white/20 shadow-lg shadow-black/10',
+    description: 'Glass morphism effect with blur'
+  },
+  'Outline': {
+    base: 'bg-transparent text-black border-2 border-gray-400',
+    description: 'Transparent with border outline'
+  },
 };
 
 /**
@@ -99,6 +102,13 @@ export function getCurrentStyles(wallpaper, theme, design = {}) {
  * @returns {string} - CSS classes for the button style
  */
 export function getButtonStyle(buttonStyleName) {
-  return buttonStyles[buttonStyleName] || buttonStyles['Minimal'];
+  const style = buttonStyles[buttonStyleName];
+  if (!style) {
+    // Fallback to Solid if style not found
+    return buttonStyles['Solid'].base;
+  }
+  
+  const baseStyle = typeof style === 'string' ? style : style.base;
+  return baseStyle;
 }
 

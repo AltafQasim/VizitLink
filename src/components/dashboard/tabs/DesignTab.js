@@ -18,7 +18,8 @@ const DesignTab = () => {
     const fileInputRef = useRef(null);
 
     const [activeTab, setActiveTab] = useState("Customizable");
-    const [activeStyleTab, setActiveStyleTab] = useState("Presets");
+    const [activeStyleTab, setActiveStyleTab] = useState("Buttons");
+    const [activeFontCategory, setActiveFontCategory] = useState("sans");
     const [isSaving, setIsSaving] = useState(false);
 
     // Wallpaper Image modal state
@@ -297,20 +298,54 @@ const DesignTab = () => {
         style: buttonStylesMap[name]
     }));
 
-    const fonts = [
-        { name: "Inter", family: "Inter", weight: "400", selected: selectedFont === "Inter" },
-        { name: "Roboto", family: "Roboto", weight: "400", selected: selectedFont === "Roboto" },
-        { name: "Open Sans", family: "Open Sans", weight: "400", selected: selectedFont === "Open Sans" },
-        { name: "Lato", family: "Lato", weight: "400", selected: selectedFont === "Lato" },
-        { name: "Poppins", family: "Poppins", weight: "500", selected: selectedFont === "Poppins" },
-        { name: "Montserrat", family: "Montserrat", weight: "500", selected: selectedFont === "Montserrat" },
-        { name: "Raleway", family: "Raleway", weight: "400", selected: selectedFont === "Raleway" },
-        { name: "Nunito", family: "Nunito", weight: "400", selected: selectedFont === "Nunito" },
-        { name: "Ubuntu", family: "Ubuntu", weight: "400", selected: selectedFont === "Ubuntu" },
-        { name: "Playfair Display", family: "Playfair Display", weight: "400", selected: selectedFont === "Playfair Display" },
-        { name: "Merriweather", family: "Merriweather", weight: "400", selected: selectedFont === "Merriweather" },
-        { name: "Source Sans Pro", family: "Source Sans Pro", weight: "400", selected: selectedFont === "Source Sans Pro" },
+    // Fonts organized by category - using quoted family names for CSS compatibility
+    const sansFonts = [
+        { name: "Albert Sans", family: '"Albert Sans", sans-serif', weight: "400", selected: selectedFont === "Albert Sans" },
+        { name: "Belanosima", family: '"Belanosima", sans-serif', weight: "400", selected: selectedFont === "Belanosima" },
+        { name: "Bricolage Grotesque", family: '"Bricolage Grotesque", sans-serif', weight: "400", selected: selectedFont === "Bricolage Grotesque" },
+        { name: "DM Sans", family: '"DM Sans", sans-serif', weight: "400", selected: selectedFont === "DM Sans" },
+        { name: "Epilogue", family: '"Epilogue", sans-serif', weight: "400", selected: selectedFont === "Epilogue" },
+        { name: "IBM Plex Sans", family: '"IBM Plex Sans", sans-serif', weight: "400", selected: selectedFont === "IBM Plex Sans" },
+        { name: "Inter", family: '"Inter", sans-serif', weight: "400", selected: selectedFont === "Inter" },
+        { name: "Lato", family: '"Lato", sans-serif', weight: "400", selected: selectedFont === "Lato" },
+        { name: "Link Sans", family: '"Link Sans", sans-serif', weight: "400", selected: selectedFont === "Link Sans" },
+        { name: "M Plus Rounded", family: '"M Plus Rounded", sans-serif', weight: "400", selected: selectedFont === "M Plus Rounded" },
+        { name: "Manrope", family: '"Manrope", sans-serif', weight: "400", selected: selectedFont === "Manrope" },
+        { name: "Oxanium", family: '"Oxanium", sans-serif', weight: "400", selected: selectedFont === "Oxanium" },
+        { name: "Poppins", family: '"Poppins", sans-serif', weight: "500", selected: selectedFont === "Poppins" },
+        { name: "Red Hat Display", family: '"Red Hat Display", sans-serif', weight: "400", selected: selectedFont === "Red Hat Display" },
+        { name: "Roboto", family: '"Roboto", sans-serif', weight: "400", selected: selectedFont === "Roboto" },
+        { name: "Rubik", family: '"Rubik", sans-serif', weight: "400", selected: selectedFont === "Rubik" },
+        { name: "Space Grotesk", family: '"Space Grotesk", sans-serif', weight: "400", selected: selectedFont === "Space Grotesk" },
+        { name: "Syne", family: '"Syne", sans-serif', weight: "400", selected: selectedFont === "Syne" },
+        { name: "Shantell Sans", family: '"Shantell Sans", sans-serif', weight: "400", selected: selectedFont === "Shantell Sans" },
     ];
+
+    const serifFonts = [
+        { name: "BioRhyme", family: '"BioRhyme", serif', weight: "400", selected: selectedFont === "BioRhyme" },
+        { name: "Bitter", family: '"Bitter", serif', weight: "400", selected: selectedFont === "Bitter" },
+        { name: "Caudex", family: '"Caudex", serif', weight: "400", selected: selectedFont === "Caudex" },
+        { name: "Corben", family: '"Corben", serif', weight: "400", selected: selectedFont === "Corben" },
+        { name: "Domine", family: '"Domine", serif', weight: "400", selected: selectedFont === "Domine" },
+        { name: "Hahmlet", family: '"Hahmlet", serif', weight: "400", selected: selectedFont === "Hahmlet" },
+        { name: "IBM Plex Serif", family: '"IBM Plex Serif", serif', weight: "400", selected: selectedFont === "IBM Plex Serif" },
+        { name: "Lora", family: '"Lora", serif', weight: "400", selected: selectedFont === "Lora" },
+        { name: "Merriweather", family: '"Merriweather", serif', weight: "400", selected: selectedFont === "Merriweather" },
+        { name: "Noto Serif", family: '"Noto Serif", serif', weight: "400", selected: selectedFont === "Noto Serif" },
+        { name: "Old Standard TT", family: '"Old Standard TT", serif', weight: "400", selected: selectedFont === "Old Standard TT" },
+        { name: "PT Serif", family: '"PT Serif", serif', weight: "400", selected: selectedFont === "PT Serif" },
+        { name: "Playfair Display", family: '"Playfair Display", serif', weight: "400", selected: selectedFont === "Playfair Display" },
+        { name: "Roboto Serif", family: '"Roboto Serif", serif', weight: "400", selected: selectedFont === "Roboto Serif" },
+        { name: "Roboto Slab", family: '"Roboto Slab", serif', weight: "400", selected: selectedFont === "Roboto Slab" },
+        { name: "Source Serif Pro", family: '"Source Serif Pro", serif', weight: "400", selected: selectedFont === "Source Serif Pro" },
+    ];
+
+    const monoFonts = [
+        { name: "IBM Plex Mono", family: '"IBM Plex Mono", monospace', weight: "400", selected: selectedFont === "IBM Plex Mono" },
+        { name: "Space Mono", family: '"Space Mono", monospace', weight: "400", selected: selectedFont === "Space Mono" },
+    ];
+
+    const fonts = [...sansFonts, ...serifFonts, ...monoFonts];
 
     // Simple Unsplash placeholders (50 images). In future, can be replaced by API.
     const getUnsplashPlaceholders = (q = "") => {
@@ -501,7 +536,7 @@ const DesignTab = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                     <textarea
                                         value={data?.profile?.bio || ''}
                                         onChange={(e) => updateData({ profile: { ...data.profile, bio: e.target.value } })}
@@ -525,13 +560,6 @@ const DesignTab = () => {
                                 </div>
                             </div>
 
-                            <button className="flex items-center justify-between w-full py-3 px-4 bg-gray-50 rounded-lg text-left hover:bg-gray-100 transition-colors">
-                                <div className="flex items-center gap-2">
-                                    <Share className="h-4 w-4 text-gray-500" />
-                                    <span className="text-sm text-gray-700">Sharing preview</span>
-                                </div>
-                                <ChevronRight className="h-4 w-4 text-gray-400" />
-                            </button>
                         </div>
                     </div>
                 </section>
@@ -1188,7 +1216,7 @@ const DesignTab = () => {
 
                     <div className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="flex gap-6 border-b border-gray-200 mb-6">
-                            {["Presets", "Text", "Buttons"].map((tab) => (
+                            {["Buttons", "Text",].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveStyleTab(tab)}
@@ -1201,29 +1229,6 @@ const DesignTab = () => {
                                 </button>
                             ))}
                         </div>
-
-                        {activeStyleTab === "Presets" && (
-                            <div>
-                                <h3 className="text-lg font-semibold mb-4">Button and font</h3>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                                    {buttonStyles.map((style) => (
-                                        <Card
-                                            key={style.name}
-                                            className={`cursor-pointer transition-all hover:scale-105 min-h-[100px] sm:min-h-[120px] ${selectedStyle === style.name ? "ring-2 ring-purple-500" : ""
-                                                }`}
-                                            onClick={() => handleStyleChange(style.name)}
-                                        >
-                                            <div className="p-3 sm:p-4 flex flex-col items-center gap-2 sm:gap-3">
-                                                <div className={`px-3 sm:px-4 py-2 text-sm ${style.style}`}>
-                                                    Button
-                                                </div>
-                                                <p className="text-sm font-medium text-center">{style.name}</p>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {activeStyleTab === "Text" && (
                             <div className="space-y-8">
@@ -1271,7 +1276,7 @@ const DesignTab = () => {
                                 </div>
 
                                 {/* Font Weight Options */}
-                                <div>
+                                {/* <div>
                                     <h3 className="text-lg font-semibold mb-4">Font Weight</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         {[
@@ -1301,10 +1306,10 @@ const DesignTab = () => {
                                             </Card>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Font Size Options */}
-                                <div>
+                                {/* <div>
                                     <h3 className="text-lg font-semibold mb-4">Font Size</h3>
                                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         {[
@@ -1334,10 +1339,10 @@ const DesignTab = () => {
                                             </Card>
                                         ))}
                                     </div>
-                                </div>
+                                </div> */}
 
                                 {/* Live Preview */}
-                                <div>
+                                {/* <div>
                                     <h3 className="text-lg font-semibold mb-4">Preview</h3>
                                     <Card className="p-6 bg-gray-50">
                                         <div className="space-y-4">
@@ -1363,13 +1368,72 @@ const DesignTab = () => {
                                             </div>
                                         </div>
                                     </Card>
-                                </div>
+                                </div> */}
                             </div>
                         )}
 
                         {activeStyleTab === "Buttons" && (
-                            <div>
-                                <p className="text-gray-500">Button customization options coming soon...</p>
+                            <div className="space-y-6">
+                                {/* Button Style Selection */}
+                                <div>
+                                    <div className="mb-6">
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">Button Style</h3>
+                                        <p className="text-sm text-gray-500">Choose a style that matches your profile design</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        {[
+                                            {
+                                                name: 'Solid',
+                                                description: 'Solid background with clean look'
+                                            },
+                                            {
+                                                name: 'Glass',
+                                                description: 'Glass morphism with blur effect'
+                                            },
+                                            {
+                                                name: 'Outline',
+                                                description: 'Transparent with border outline'
+                                            }
+                                        ].map((style) => {
+                                            const isSelected = selectedStyle === style.name;
+                                            return (
+                                                <Card
+                                                    key={style.name}
+                                                    className={`cursor-pointer transition-all duration-300 p-6 hover:shadow-xl hover:-translate-y-1 border-2 ${isSelected
+                                                            ? 'ring-2 ring-purple-500 ring-offset-2 shadow-lg border-[#7d23cc] bg-purple-50/50'
+                                                            : 'border-gray-200 hover:border-purple-300 !bg-gray-100'
+                                                        }`}
+                                                    onClick={() => handleStyleChange(style.name)}
+                                                >
+                                                    <div className="flex flex-col items-center gap-4">
+                                                        {/* Preview Button */}
+                                                        <div className={`w-full h-16 flex items-center justify-center rounded-lg transition-all ${style.name === 'Solid' ? 'bg-[#7d23cc] !text-white border border-gray-200 shadow-sm' :
+                                                                style.name === 'Glass' ? 'bg-white/10 !text-[#7d23cc] backdrop-blur-xl backdrop-saturate-150 border border-white/20 shadow-lg shadow-black/10' :
+                                                                    'bg-transparent !text-[#7d23cc] border-2 border-[#7d23cc]'
+                                                            } ${isSelected ? 'ring-2 ring-purple-400 ring-offset-1' : ''}`}>
+                                                            <span className={`font-medium text-sm`}>
+                                                                Button Preview
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Style Info */}
+                                                        <div className="text-center w-full">
+                                                            <div className="flex items-center justify-center gap-2 mb-2">
+                                                                <p className="font-bold text-gray-900 text-lg">{style.name}</p>
+                                                                {isSelected && (
+                                                                    <svg className="w-5 h-5 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-gray-500 leading-relaxed">{style.description}</p>
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

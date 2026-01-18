@@ -41,7 +41,16 @@ export default function LivePreview() {
   const theme = design.theme || '';
   const wallpaper = design.wallpaper || '';
   const buttonStyle = design.buttonStyle || 'Minimal';
-  const fontFamily = design.fontFamily || 'Inter';
+  // Get font family with fallback - handle font names with spaces
+  const getFontFamily = (fontName) => {
+    if (!fontName) return '"Inter", sans-serif';
+    // If font name has spaces, wrap in quotes
+    if (fontName.includes(' ')) {
+      return `"${fontName}", sans-serif`;
+    }
+    return `"${fontName}", sans-serif`;
+  };
+  const fontFamily = getFontFamily(design.fontFamily || 'Inter');
   const hideVizitlinkFooter = design.hideVizitlinkFooter || false;
 
   useEffect(() => {
@@ -239,7 +248,7 @@ export default function LivePreview() {
                           href={link.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`w-full p-3 flex items-center justify-between transition-colors ${currentButtonStyle} !rounded-3xl`}
+                          className={`w-full p-3 flex items-center justify-between transition-colors rounded-lg ${currentButtonStyle}`}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
@@ -281,7 +290,7 @@ export default function LivePreview() {
                           href={product.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`group block rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentTextColor === 'text-white' ? 'bg-white/10 backdrop-blur-sm border border-white/20' : 'bg-card shadow-sm border border-border'}`}
+                          className={`group block rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 ${currentButtonStyle}`}
                           whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
                         >

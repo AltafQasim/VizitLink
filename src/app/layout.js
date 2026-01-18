@@ -80,8 +80,56 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+  // Google Fonts for all available fonts
+  const fontFamilies = [
+    'Albert+Sans',
+    'Belanosima',
+    'Bricolage+Grotesque',
+    'DM+Sans',
+    'Epilogue',
+    'IBM+Plex+Sans',
+    'Inter',
+    'Lato',
+    'Link+Sans',
+    'M+Plus+Rounded',
+    'Manrope',
+    'Oxanium',
+    'Poppins',
+    'Red+Hat+Display',
+    'Roboto',
+    'Rubik',
+    'Space+Grotesk',
+    'Syne',
+    'Shantell+Sans',
+    'BioRhyme',
+    'Bitter',
+    'Caudex',
+    'Corben',
+    'Domine',
+    'Hahmlet',
+    'IBM+Plex+Serif',
+    'Lora',
+    'Merriweather',
+    'Noto+Serif',
+    'Old+Standard+TT',
+    'PT+Serif',
+    'Playfair+Display',
+    'Roboto+Serif',
+    'Roboto+Slab',
+    'Source+Serif+Pro',
+    'IBM+Plex+Mono',
+    'Space+Mono'
+  ].join('&family=');
+
+  const googleFontsUrl = `https://fonts.googleapis.com/css2?family=${fontFamilies}:wght@300;400;500;600;700;800&display=swap`;
+
   return (
     <html lang="en" className={roboto.variable}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href={googleFontsUrl} rel="stylesheet" />
+      </head>
       <body className={roboto.className}>
         <Providers>{children}</Providers>
       </body>

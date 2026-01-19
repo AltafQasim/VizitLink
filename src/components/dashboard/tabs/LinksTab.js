@@ -197,7 +197,6 @@ function LayoutFrame({ layoutLink, onUpdate, onCancel, onSave }) {
       // Handle abort separately from other errors
       if (error.name === 'AbortError') {
         toast.dismiss(loadingToast);
-        console.log('Metadata fetch aborted');
         return;
       }
       

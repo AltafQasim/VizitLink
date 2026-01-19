@@ -14,9 +14,6 @@ export async function generateMetadata({ params }) {
       .eq('is_live', true)
       .maybeSingle();
 
-    // Log for debugging
-    console.log('Profile query result:', { profile, error, username });
-
     if (error) {
       console.error('Error fetching profile:', error);
     }

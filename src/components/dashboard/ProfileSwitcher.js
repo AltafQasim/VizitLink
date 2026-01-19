@@ -112,7 +112,6 @@ export default function ProfileSwitcher() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [showDropdown]);
-console.log(currentProfile)
   return (
     <>
       {/* Profile Switcher Button */}
